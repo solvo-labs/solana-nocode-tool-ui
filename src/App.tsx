@@ -1,7 +1,12 @@
 import React from "react";
+import Router from "./router/Router";
 
 const App = () => {
-  return <>Solana Nocode Tool UI</>;
+  return (
+    <>
+      <Router />
+    </>
+  );
 };
 
 export default App;
