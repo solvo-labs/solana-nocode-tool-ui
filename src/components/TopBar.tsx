@@ -3,6 +3,8 @@ import { makeStyles } from "@mui/styles";
 import { useNavigate } from "react-router-dom";
 import { AppBar, Avatar, Box, Button, Container, IconButton, Menu, MenuItem, Theme, Toolbar, Tooltip, Typography } from "@mui/material";
 import { APP_NAME, PAGES_NAME } from "../utils/enum";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletDisconnectButton } from "@solana/wallet-adapter-react-ui";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -35,6 +37,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     "&:hover": {
       color: "#2FD9BB !important",
     },
+    justifyContent: "center !important",
   },
 }));
 
@@ -54,6 +57,8 @@ const TopBar: React.FC = () => {
   const handleClickForProfile = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElForProfile(event.currentTarget);
   };
+
+  const { publicKey } = useWallet();
 
   return (
     <div>
@@ -132,14 +137,18 @@ const TopBar: React.FC = () => {
                     className={classes.menuItem}
                     onClick={(event: React.MouseEvent) => {
                       event.stopPropagation();
-                      navigator.clipboard.writeText("publicKey");
+                      navigator.clipboard.writeText(publicKey ? publicKey.toBase58() : "There is nothing!");
                     }}
                   >
-                    <Typography>publicKey</Typography>
+                    <Typography>{publicKey?.toBase58().slice(0, 10) + "..." + publicKey?.toBase58().slice(-6)}</Typography>
                   </MenuItem>
                 </Tooltip>
                 <MenuItem className={classes.menuItem}>
-                  <Typography>Logout</Typography>
+                  <WalletDisconnectButton
+                    onClick={() => {
+                      navigate("/login");
+                    }}
+                  />
                 </MenuItem>
               </Menu>
             </Box>
