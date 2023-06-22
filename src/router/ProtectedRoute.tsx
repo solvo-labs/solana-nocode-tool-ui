@@ -4,7 +4,8 @@ import { makeStyles } from "@mui/styles";
 import { Grid, Theme } from "@mui/material";
 import TopBar from "../components/TopBar";
 
-const useStyles = makeStyles((theme: Theme) => ({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const useStyles = makeStyles((_theme: Theme) => ({
   container: {
     color: "#FFFFFF",
     justifyContent: "center",
