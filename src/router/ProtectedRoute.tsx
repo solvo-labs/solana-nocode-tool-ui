@@ -1,8 +1,9 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
-import { Grid, Theme } from "@mui/material";
+import { Grid, LinearProgress, Theme } from "@mui/material";
 import TopBar from "../components/TopBar";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
@@ -15,7 +16,24 @@ const useStyles = makeStyles((_theme: Theme) => ({
 const ProtectedRoute: React.FC = () => {
   const classes = useStyles();
 
-  return (
+  const { connected, connecting } = useWallet();
+
+  if (connecting) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <LinearProgress color="inherit" style={{ width: "80%" }} />
+      </div>
+    );
+  }
+
+  return connected ? (
     <Grid container spacing={2} className={classes.container}>
       <TopBar />
       <Grid item lg={10} md={12} xs={12}>
@@ -24,6 +42,8 @@ const ProtectedRoute: React.FC = () => {
         </Grid>
       </Grid>
     </Grid>
+  ) : (
+    <Navigate to="/login" />
   );
 };
 

@@ -7,6 +7,7 @@ import { makeStyles } from "@mui/styles";
 import solanaLogoPng from "../assets/solana-logo.png";
 import { APP_NAME } from "../utils/enum";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
   outerContainer: {
     padding: "1rem",
