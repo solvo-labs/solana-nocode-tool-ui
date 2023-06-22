@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -27,9 +27,11 @@ const Login: React.FC = () => {
   const { connected } = useWallet();
   const navigate = useNavigate();
 
-  if (connected) {
-    navigate("/");
-  }
+  useEffect(() => {
+    if (connected) {
+      navigate("/");
+    }
+  }, [connected, navigate]);
 
   return (
     <Grid container className={classes.outerContainer}>
