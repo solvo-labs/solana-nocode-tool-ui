@@ -42,23 +42,22 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const TopBar: React.FC = () => {
-  const [anchorElForToken, setAnchorElForToken] = React.useState<null | HTMLElement>(null);
-  const openForToken = Boolean(anchorElForToken);
+  const [anchorElForSolana, setAnchorElForSolana] = React.useState<null | HTMLElement>(null);
+  const openForSolana = Boolean(anchorElForSolana);
   const [anchorElForProfile, setAnchorElForProfile] = React.useState<null | HTMLElement>(null);
   const openForProfile = Boolean(anchorElForProfile);
 
   const classes = useStyles();
   const navigate = useNavigate();
+  const { publicKey } = useWallet();
 
-  const handleClickForToken = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElForToken(event.currentTarget);
+  const handleClickForSolana = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElForSolana(event.currentTarget);
   };
 
   const handleClickForProfile = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElForProfile(event.currentTarget);
   };
-
-  const { publicKey } = useWallet();
 
   return (
     <div>
@@ -78,15 +77,15 @@ const TopBar: React.FC = () => {
               <Button>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.NFT}</Typography>
               </Button>
-              <Button onClick={handleClickForToken} onMouseOver={handleClickForToken}>
+              <Button onClick={handleClickForSolana} onMouseOver={handleClickForSolana}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.TOKEN}</Typography>
               </Button>
               <Menu
                 id="demo-positioned-menu"
                 aria-labelledby="demo-positioned-button"
-                anchorEl={anchorElForToken}
-                open={openForToken}
-                onClose={() => setAnchorElForToken(null)}
+                anchorEl={anchorElForSolana}
+                open={openForSolana}
+                onClose={() => setAnchorElForSolana(null)}
                 anchorOrigin={{
                   vertical: "bottom",
                   horizontal: "left",
