@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import { Grid, LinearProgress, Theme } from "@mui/material";
@@ -15,10 +15,21 @@ const useStyles = makeStyles((_theme: Theme) => ({
 
 const ProtectedRoute: React.FC = () => {
   const classes = useStyles();
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const { connected, connecting } = useWallet();
+  const { connected, publicKey } = useWallet();
 
-  if (connecting) {
+  useEffect(() => {
+    if (publicKey === undefined) {
+      setLoading(false);
+    }
+
+    if (publicKey) {
+      setLoading(false);
+    }
+  }, [publicKey]);
+
+  if (loading) {
     return (
       <div
         style={{
