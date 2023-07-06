@@ -1,5 +1,6 @@
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
+  AccountLayout,
   MINT_SIZE,
   TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
@@ -34,4 +35,16 @@ export const getOrCreateAssociatedTokenAccount = (mint: PublicKey, owner: Public
   const transaction = new Transaction().add(createAssociatedTokenAccountInstruction(owner, associatedToken, owner, mint, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID));
 
   return { transaction, associatedToken };
+};
+
+export const getTokensWithAccount = async (connection: Connection, payer: PublicKey) => {
+  const tokenAccounts = await connection.getTokenAccountsByOwner(payer, {
+    programId: TOKEN_PROGRAM_ID,
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tokenAccounts.value.forEach((tokenAccount: { account: { data: any } }) => {
+    const accountData = AccountLayout.decode(tokenAccount.account.data);
+    console.log(`${new PublicKey(accountData.mint)}   ${accountData.amount}`);
+  });
 };
