@@ -3,6 +3,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { createMint, getOrCreateAssociatedTokenAccount } from "../../lib/token";
 import { Transaction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, createMintToInstruction, getAccount } from "@solana/spl-token";
+import { register } from "../../lib/tokenRegister";
 
 const TokenMint: React.FC = () => {
   const { connection } = useConnection();
@@ -30,6 +31,10 @@ const TokenMint: React.FC = () => {
         const transaction3 = new Transaction().add(createMintToInstruction(toAccount.publicKey, account.address, publicKey, 100000000000, [], TOKEN_PROGRAM_ID));
         const signature3 = await sendTransaction(transaction3, connection, { minContextSlot });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature3 });
+
+        const transaction4 = register(toAccount.publicKey.toBase58(), publicKey, { name: "test", symbol: "123" });
+        const signature4 = await sendTransaction(transaction4, connection, { minContextSlot });
+        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature4 });
       } catch (error) {
         console.log(error);
       }
