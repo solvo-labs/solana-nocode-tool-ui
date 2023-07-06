@@ -11,7 +11,7 @@ const TokenMint: React.FC = () => {
 
   const createTransaction = async () => {
     if (publicKey) {
-      const { transaction, toAccount } = await createMint(connection, publicKey);
+      const { transaction, toAccount } = await createMint(connection, publicKey, 9);
 
       const {
         context: { slot: minContextSlot },
@@ -28,6 +28,7 @@ const TokenMint: React.FC = () => {
 
         const account = await getAccount(connection, associatedToken, undefined, TOKEN_PROGRAM_ID);
 
+        // supply
         const transaction3 = new Transaction().add(createMintToInstruction(toAccount.publicKey, account.address, publicKey, 100000000000, [], TOKEN_PROGRAM_ID));
         const signature3 = await sendTransaction(transaction3, connection, { minContextSlot });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature3 });
