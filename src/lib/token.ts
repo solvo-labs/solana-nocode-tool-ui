@@ -43,8 +43,11 @@ export const getTokensWithAccount = async (connection: Connection, payer: Public
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tokenAccounts.value.forEach((tokenAccount: { account: { data: any } }) => {
+  const data = tokenAccounts.value.map((tokenAccount: { account: { data: any } }) => {
     const accountData = AccountLayout.decode(tokenAccount.account.data);
-    console.log(`${new PublicKey(accountData.mint)}   ${accountData.amount}`);
+
+    return { token: accountData.mint, amount: accountData.amount };
   });
+
+  return data;
 };

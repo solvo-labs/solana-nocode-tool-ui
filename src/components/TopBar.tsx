@@ -64,6 +64,11 @@ const TopBar: React.FC = () => {
     setAnchorElForSolana(null);
   };
 
+  const myTokens = () => {
+    navigate("/my-tokens");
+    setAnchorElForSolana(null);
+  };
+
   return (
     <div>
       <AppBar className={classes.appBar}>
@@ -103,7 +108,7 @@ const TopBar: React.FC = () => {
                   "& .MuiPaper-root": { background: "#000000", color: "#FFFFFF", border: "1px solid #AA66FE" },
                 }}
               >
-                <MenuItem className={classes.menuItem}>
+                <MenuItem className={classes.menuItem} onClick={myTokens}>
                   <Typography>My Tokens</Typography>
                 </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={tokenMint}>

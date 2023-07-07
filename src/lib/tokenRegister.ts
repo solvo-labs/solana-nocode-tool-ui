@@ -1,6 +1,6 @@
-import { PROGRAM_ID, createCreateMetadataAccountV3Instruction } from "@metaplex-foundation/mpl-token-metadata";
+import { Metadata, PROGRAM_ID, createCreateMetadataAccountV3Instruction } from "@metaplex-foundation/mpl-token-metadata";
 import { utils } from "@project-serum/anchor";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 
 // ref https://github.com/loopcreativeandy/video-tutorial-resources/blob/main/mpl/mpl_tutorial.ts
 export const register = (mintPublickey: string, publicKey: PublicKey, metadata: { name: string; symbol: string }) => {
@@ -46,4 +46,17 @@ export const register = (mintPublickey: string, publicKey: PublicKey, metadata: 
   tx.add(ix);
 
   return tx;
+};
+
+// https://stackoverflow.com/questions/69900783/how-to-get-metadata-from-a-token-adress-using-web3-js-on-solana
+export const getMetadataPDA = async (mint: PublicKey, connection: Connection) => {
+  try {
+    const [publicKey] = await PublicKey.findProgramAddress([Buffer.from("metadata"), PROGRAM_ID.toBuffer(), mint.toBuffer()], PROGRAM_ID);
+
+    const res = await Metadata.fromAccountAddress(connection, publicKey);
+
+    return res;
+  } catch {
+    return {};
+  }
 };
