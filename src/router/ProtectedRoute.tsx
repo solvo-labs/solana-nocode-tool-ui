@@ -45,10 +45,10 @@ const ProtectedRoute: React.FC = () => {
   }
 
   return connected ? (
-    <Grid container spacing={2} className={classes.container}>
+    <Grid container spacing={0} className={classes.container}>
       <TopBar />
-      <Grid item lg={10} md={12} xs={12}>
-        <Grid container direction={"column"} spacing={2}>
+      <Grid item lg={12} md={12} xs={12}>
+        <Grid container direction={"column"} spacing={0}>
           <Outlet />
         </Grid>
       </Grid>
