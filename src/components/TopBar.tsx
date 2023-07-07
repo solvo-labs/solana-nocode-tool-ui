@@ -103,11 +103,11 @@ const TopBar: React.FC = () => {
                   "& .MuiPaper-root": { background: "#000000", color: "#FFFFFF", border: "1px solid #AA66FE" },
                 }}
               >
+                <MenuItem className={classes.menuItem}>
+                  <Typography>My Tokens</Typography>
+                </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={tokenMint}>
                   <Typography>Token Mint</Typography>
-                </MenuItem>
-                <MenuItem className={classes.menuItem}>
-                  <Typography>Token Mint 2</Typography>
                 </MenuItem>
               </Menu>
             </Box>

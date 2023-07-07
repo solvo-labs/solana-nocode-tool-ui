@@ -52,7 +52,9 @@ const TokenMint: React.FC = () => {
         const account = await getAccount(connection, associatedToken, undefined, TOKEN_PROGRAM_ID);
 
         // supply
-        const transaction3 = new Transaction().add(createMintToInstruction(toAccount.publicKey, account.address, publicKey, tokenData.amount, [], TOKEN_PROGRAM_ID));
+        const transaction3 = new Transaction().add(
+          createMintToInstruction(toAccount.publicKey, account.address, publicKey, tokenData.amount * Math.pow(10, tokenData.decimal), [], TOKEN_PROGRAM_ID)
+        );
         const signature3 = await sendTransaction(transaction3, connection, { minContextSlot });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature3 });
 
@@ -65,12 +67,7 @@ const TokenMint: React.FC = () => {
     }
   };
 
-  const disable = !(
-    tokenData.name &&
-    tokenData.symbol &&
-    tokenData.amount &&
-    tokenData.decimal
-  );
+  const disable = !(tokenData.name && tokenData.symbol && tokenData.amount && tokenData.decimal);
 
   return (
     <div>
@@ -88,9 +85,7 @@ const TokenMint: React.FC = () => {
               name="name"
               type="text"
               value={tokenData.name}
-              onChange={(e: any) =>
-                setTokenData({ ...tokenData, name: e.target.value })
-              }
+              onChange={(e: any) => setTokenData({ ...tokenData, name: e.target.value })}
             ></CustomInput>
             <CustomInput
               placeHolder="Symbol"
@@ -99,9 +94,7 @@ const TokenMint: React.FC = () => {
               name="symbol"
               type="text"
               value={tokenData.symbol}
-              onChange={(e: any) =>
-                setTokenData({ ...tokenData, symbol: e.target.value })
-              }
+              onChange={(e: any) => setTokenData({ ...tokenData, symbol: e.target.value })}
             ></CustomInput>
             <CustomInput
               placeHolder="Amount"
@@ -110,9 +103,7 @@ const TokenMint: React.FC = () => {
               name="amount"
               type="text"
               value={tokenData.amount}
-              onChange={(e: any) =>
-                setTokenData({ ...tokenData, amount: e.target.value })
-              }
+              onChange={(e: any) => setTokenData({ ...tokenData, amount: e.target.value })}
             ></CustomInput>
             <CustomInput
               placeHolder="Decimal"
@@ -121,18 +112,12 @@ const TokenMint: React.FC = () => {
               name="decimal"
               type="text"
               value={tokenData.decimal}
-              onChange={(e: any) =>
-                setTokenData({ ...tokenData, decimal: e.target.value })
-              }
+              onChange={(e: any) => setTokenData({ ...tokenData, decimal: e.target.value })}
             ></CustomInput>
           </Stack>
         </Grid>
         <Grid item>
-          <CustomButton
-            label="create token"
-            disable={disable}
-            onClick={createTransaction}
-          ></CustomButton>
+          <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
         </Grid>
       </Grid>
     </div>
