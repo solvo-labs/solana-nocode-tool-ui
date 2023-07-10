@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
@@ -39,9 +40,9 @@ export const MyTokens = () => {
     const init = async () => {
       if (publicKey) {
         const data = await fetchUserTokens(connection, publicKey);
-        console.log(data);
+        const filteredData = data.filter((dt) => dt.metadata);
 
-        setAllToken(data);
+        setAllToken(filteredData as any);
         setActionLoader(false);
       }
     };

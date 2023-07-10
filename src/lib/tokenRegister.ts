@@ -57,6 +57,6 @@ export const getMetadataPDA = async (mint: PublicKey, connection: Connection) =>
 
     return res;
   } catch {
-    return {};
+    return undefined;
   }
 };
