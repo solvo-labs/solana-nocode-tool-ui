@@ -1,21 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
-import {
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableFooter,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { CircularProgress, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
 import { Theme } from "@emotion/react";
 import { makeStyles } from "@mui/styles";
 import { TokenData } from "../../utils/types";
@@ -49,9 +37,7 @@ export const MyTokens = () => {
   const [actionLoader, setActionLoader] = useState<boolean>(false);
 
   const [page, setPage] = useState(0);
-  const [page2, setPage2] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [rowsPerPage2, setRowsPerPage2] = useState(5);
 
   useEffect(() => {
     setActionLoader(true);
@@ -99,22 +85,9 @@ export const MyTokens = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
-  };
-
-  const handleChangePage2 = (_event: unknown, newPage: number) => {
-    setPage2(newPage);
-  };
-
-  const handleChangeRowsPerPage2 = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage2(+event.target.value);
-    setPage2(0);
   };
 
   if (actionLoader) {
