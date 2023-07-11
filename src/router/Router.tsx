@@ -4,6 +4,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Main from "../pages/Main";
 import Login from "../pages/Login";
 import TokenMint from "../pages/Token/TokenMint";
+import { MyTokens } from "../pages/Token/MyTokens";
 
 const Router: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const Router: React.FC = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/" index element={<Main />} />
             <Route path="/token" index element={<TokenMint />} />
+            <Route path="/my-tokens" index element={<MyTokens />} />
           </Route>
           <Route path="/login" index element={<Login />} />
         </Routes>

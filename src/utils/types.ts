@@ -4,3 +4,9 @@ export type Token = {
   amount: number;
   decimal: number;
 };
+
+export type TokenData = {
+  hex: string;
+  amount: number;
+  metadata: {};
+}
