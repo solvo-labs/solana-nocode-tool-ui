@@ -56,6 +56,7 @@ export const TokenTransfer = () => {
       const selectedTokenPubkey = new PublicKey(selectedToken);
 
       const { associatedToken } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey);
+
       const account = await getAccount(connection, associatedToken, undefined, TOKEN_PROGRAM_ID);
 
       const transaction = new Transaction().add(createTransferInstruction(account.address, destination, publicKey, 500000));
