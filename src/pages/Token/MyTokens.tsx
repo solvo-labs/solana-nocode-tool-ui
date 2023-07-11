@@ -55,7 +55,7 @@ export const MyTokens = () => {
 
   const listToken = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return allToken.map((a: any) => (
+    return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any) => (
       <TableRow className={classes.tableRow}>
         <TableCell>{a.metadata.data.name}</TableCell>
         <TableCell>{a.metadata.data.symbol}</TableCell>
