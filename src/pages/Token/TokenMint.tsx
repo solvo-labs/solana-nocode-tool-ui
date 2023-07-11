@@ -73,7 +73,9 @@ const TokenMint: React.FC = () => {
     <div>
       <Grid container className={classes.container} direction={"column"}>
         <Grid item marginBottom={"2rem"}>
-          <Typography variant="h5">Token Mint</Typography>
+          <Typography variant="h5" marginTop="3rem">
+            Token Mint
+          </Typography>
           <Divider sx={{ marginTop: "1rem", background: "white" }} />
         </Grid>
         <Grid item justifyContent={"center"} marginBottom={"2rem"}>

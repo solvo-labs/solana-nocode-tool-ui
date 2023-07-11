@@ -69,6 +69,11 @@ const TopBar: React.FC = () => {
     setAnchorElForSolana(null);
   };
 
+  const transfer = () => {
+    navigate("/token-transfer");
+    setAnchorElForSolana(null);
+  };
+
   return (
     <div>
       <AppBar className={classes.appBar}>
@@ -113,6 +118,9 @@ const TopBar: React.FC = () => {
                 </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={tokenMint}>
                   <Typography>Token Mint</Typography>
+                </MenuItem>
+                <MenuItem className={classes.menuItem} onClick={transfer}>
+                  <Typography>Transfer</Typography>
                 </MenuItem>
               </Menu>
             </Box>
