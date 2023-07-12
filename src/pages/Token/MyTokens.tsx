@@ -94,7 +94,9 @@ export const MyTokens = () => {
     return (
       <Grid container className={classes.container}>
         <Grid item marginBottom={"3rem"}>
-          <Typography variant="h5">List of My Tokens</Typography>
+          <Typography variant="h5" marginBottom={"1rem"}>
+            List of My Tokens
+          </Typography>
         </Grid>
         <Grid item>
           <TableContainer>
