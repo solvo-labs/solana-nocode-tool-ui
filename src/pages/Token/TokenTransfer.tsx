@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { TOKEN_PROGRAM_ID, createTransferInstruction, getAccount } from "@solana/spl-token";
+import { useEffect, useState } from "react";
+import { createTransferInstruction, getAccount } from "@solana/spl-token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { Grid, Typography, Divider, Stack, Theme, CircularProgress, Select, MenuItem, SelectChangeEvent } from "@mui/material";
