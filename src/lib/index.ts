@@ -12,7 +12,7 @@ export const fetchUserTokens = async (connection: Connection, payer: PublicKey) 
   const metaDatas = await Promise.all(getTokensMetadataPromises);
 
   const finalData = tokensFromWallet.map((tf, index) => {
-    return { hex: tf.token.toBase58(), amount: parseInt(tf.amount.toString()), metadata: metaDatas[index] };
+    return { hex: tf.token.toBase58(), amount: parseInt(tf.amount.toString()), metadata: metaDatas[index], supply: tf.supply };
   });
 
   return finalData;

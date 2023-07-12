@@ -45,7 +45,7 @@ export const MyTokens = () => {
       if (publicKey) {
         const data = await fetchUserTokens(connection, publicKey);
         const filteredData = data.filter((dt) => dt.metadata);
-
+        console.log(filteredData);
         setAllToken(filteredData as any);
         setActionLoader(false);
       }
@@ -59,7 +59,8 @@ export const MyTokens = () => {
       <TableRow className={classes.tableRow}>
         <TableCell>{a.metadata.data.name}</TableCell>
         <TableCell>{a.metadata.data.symbol}</TableCell>
-        <TableCell>{a.amount}</TableCell>
+        <TableCell>{a.supply.value.uiAmount}</TableCell>
+        <TableCell>{a.amount / Math.pow(10, a.supply.value.decimals)}</TableCell>
         <TableCell>{a.hex.slice(0, 8) + "..." + a.hex.slice(-5)}</TableCell>
       </TableRow>
     ));
@@ -105,7 +106,8 @@ export const MyTokens = () => {
                 <TableRow>
                   <TableCell className={classes.tableTitle}>Name</TableCell>
                   <TableCell className={classes.tableTitle}>Symbol</TableCell>
-                  <TableCell className={classes.tableTitle}>Amount</TableCell>
+                  <TableCell className={classes.tableTitle}>Supply</TableCell>
+                  <TableCell className={classes.tableTitle}>Balance</TableCell>
                   <TableCell className={classes.tableTitle}>Hex</TableCell>
                 </TableRow>
               </TableHead>
@@ -129,7 +131,8 @@ export const MyTokens = () => {
               <TableRow>
                 <TableCell className={classes.tableTitle}>Name</TableCell>
                 <TableCell className={classes.tableTitle}>Symbol</TableCell>
-                <TableCell className={classes.tableTitle}>Amount</TableCell>
+                <TableCell className={classes.tableTitle}>Supply</TableCell>
+                <TableCell className={classes.tableTitle}>Balance</TableCell>
                 <TableCell className={classes.tableTitle}>Hex</TableCell>
               </TableRow>
             </TableHead>

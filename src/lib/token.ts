@@ -5,6 +5,7 @@ import {
   TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
   createInitializeMint2Instruction,
+  getAccount,
   getAssociatedTokenAddressSync,
   getMinimumBalanceForRentExemptMint,
 } from "@solana/spl-token";
@@ -37,16 +38,32 @@ export const getOrCreateAssociatedTokenAccount = (mint: PublicKey, payer: Public
   return { transaction, associatedToken };
 };
 
+const getTokenBalance = async (connection: Connection, payer: PublicKey, mint: PublicKey) => {
+  const { associatedToken } = getOrCreateAssociatedTokenAccount(mint, payer, payer);
+  const tokenAccount = await getAccount(connection, associatedToken);
+  const balance = await connection.getTokenAccountBalance(tokenAccount.address);
+
+  return balance;
+};
+
 export const getTokensWithAccount = async (connection: Connection, payer: PublicKey) => {
   const tokenAccounts = await connection.getTokenAccountsByOwner(payer, {
     programId: TOKEN_PROGRAM_ID,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = tokenAccounts.value.map((tokenAccount: { account: { data: any } }) => {
+  const promises = tokenAccounts.value.map((tokenAccount: { account: { data: any } }) => {
     const accountData = AccountLayout.decode(tokenAccount.account.data);
 
-    return { token: accountData.mint, amount: accountData.amount };
+    return connection.getTokenSupply(accountData.mint);
+  });
+
+  const supplyData = await Promise.all(promises);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = tokenAccounts.value.map((tokenAccount: { account: { data: any } }, index) => {
+    const accountData = AccountLayout.decode(tokenAccount.account.data);
+
+    return { token: accountData.mint, amount: accountData.amount, supply: supplyData[index] };
   });
 
   return data;
