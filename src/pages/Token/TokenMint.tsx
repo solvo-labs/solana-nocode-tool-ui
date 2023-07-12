@@ -45,7 +45,7 @@ const TokenMint: React.FC = () => {
         const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [toAccount] });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
 
-        const { transaction: transaction2, associatedToken } = getOrCreateAssociatedTokenAccount(toAccount.publicKey, publicKey);
+        const { transaction: transaction2, associatedToken } = getOrCreateAssociatedTokenAccount(toAccount.publicKey, publicKey, publicKey);
         const signature2 = await sendTransaction(transaction2, connection, { minContextSlot });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature2 });
 

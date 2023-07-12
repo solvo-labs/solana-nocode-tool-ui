@@ -55,11 +55,17 @@ export const TokenTransfer = () => {
       const destination = new PublicKey(destinationPubkey);
       const selectedTokenPubkey = new PublicKey(selectedToken);
 
-      const { associatedToken } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey);
+      const { associatedToken } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, publicKey);
+      const { associatedToken: toAssociatedToken, transaction: tx2 } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, destination);
 
-      const account = await getAccount(connection, associatedToken, undefined, TOKEN_PROGRAM_ID);
+      const signature2 = await sendTransaction(tx2, connection, { minContextSlot });
+      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature2 });
 
-      const transaction = new Transaction().add(createTransferInstruction(account.address, destination, publicKey, 500000));
+      const account = await getAccount(connection, associatedToken);
+
+      const toAccount = await getAccount(connection, toAssociatedToken);
+
+      const transaction = new Transaction().add(createTransferInstruction(account.address, toAccount.address, publicKey, 500000));
 
       const signature = await sendTransaction(transaction, connection, { minContextSlot });
       await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });

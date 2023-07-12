@@ -29,10 +29,10 @@ export const createMint = async (connection: Connection, publicKey: PublicKey, d
   return { transaction, toAccount };
 };
 
-export const getOrCreateAssociatedTokenAccount = (mint: PublicKey, owner: PublicKey) => {
+export const getOrCreateAssociatedTokenAccount = (mint: PublicKey, payer: PublicKey, owner: PublicKey) => {
   const associatedToken = getAssociatedTokenAddressSync(mint, owner, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
 
-  const transaction = new Transaction().add(createAssociatedTokenAccountInstruction(owner, associatedToken, owner, mint, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID));
+  const transaction = new Transaction().add(createAssociatedTokenAccountInstruction(payer, associatedToken, owner, mint, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID));
 
   return { transaction, associatedToken };
 };
