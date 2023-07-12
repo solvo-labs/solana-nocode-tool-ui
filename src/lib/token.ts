@@ -38,7 +38,7 @@ export const getOrCreateAssociatedTokenAccount = (mint: PublicKey, payer: Public
   return { transaction, associatedToken };
 };
 
-const getTokenBalance = async (connection: Connection, payer: PublicKey, mint: PublicKey) => {
+export const getTokenBalance = async (connection: Connection, payer: PublicKey, mint: PublicKey) => {
   const { associatedToken } = getOrCreateAssociatedTokenAccount(mint, payer, payer);
   const tokenAccount = await getAccount(connection, associatedToken);
   const balance = await connection.getTokenAccountBalance(tokenAccount.address);
