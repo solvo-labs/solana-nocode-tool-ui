@@ -24,7 +24,7 @@ export const TokenTransfer = () => {
   const [amount, setAmount] = useState<number>(0);
   const [tokens, setTokens] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedToken, setSelectedToken] = useState<string>("");
+  const [selectedToken, setSelectedToken] = useState<any>();
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const classes = useStyles();
@@ -65,13 +65,15 @@ export const TokenTransfer = () => {
 
       const toAccount = await getAccount(connection, toAssociatedToken);
 
-      const transaction = new Transaction().add(createTransferInstruction(account.address, toAccount.address, publicKey, 500000));
+      const transaction = new Transaction().add(
+        createTransferInstruction(account.address, toAccount.address, publicKey, amount * Math.pow(10, selectedToken.supply.value.decimals))
+      );
 
       const signature = await sendTransaction(transaction, connection, { minContextSlot });
       await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
     }
   };
-
+  console.log(selectedToken);
   if (loading) {
     return (
       <div
@@ -99,12 +101,13 @@ export const TokenTransfer = () => {
         </Grid>
         <Grid item justifyContent={"center"} marginBottom={"2rem"}>
           <Select
-            value={selectedToken || "default"}
+            value={selectedToken ? selectedToken.hex : "default"}
             label="ERC-20 Token"
             onChange={(event: SelectChangeEvent) => {
-              setSelectedToken(event.target.value);
+              const selectedData = tokens.find((tk: any) => tk.hex === event.target.value);
+              setSelectedToken(selectedData);
             }}
-            style={{ maxWidth: "18rem", marginBottom: "1rem" }}
+            style={{ maxWidth: "18rem", marginBottom: "1rem", width: "100%" }}
             id={"custom-select"}
           >
             <MenuItem value="default">
