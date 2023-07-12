@@ -104,6 +104,7 @@ export const TokenTransfer = () => {
             onChange={(event: SelectChangeEvent) => {
               setSelectedToken(event.target.value);
             }}
+            style={{ maxWidth: "18rem", marginBottom: "1rem" }}
             id={"custom-select"}
           >
             <MenuItem value="default">
@@ -132,7 +133,7 @@ export const TokenTransfer = () => {
           </Stack>
         </Grid>
         <Grid item>
-          <CustomButton label="Send Token" disable={amount <= 0 || destinationPubkey === ""} onClick={transfer}></CustomButton>
+          <CustomButton label="Send Token" disable={amount <= 0 || destinationPubkey === "" || selectedToken === ""} onClick={transfer}></CustomButton>
         </Grid>
       </Grid>
     </div>
