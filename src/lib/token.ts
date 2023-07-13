@@ -14,7 +14,7 @@ import {
 } from "@solana/spl-token";
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 
-export const createMint = async (connection: Connection, publicKey: PublicKey, decimal: number) => {
+export const createMint = async (connection: Connection, publicKey: PublicKey, freezeAuthority: PublicKey, decimal: number) => {
   const toAccount = Keypair.generate();
   const lamports = await getMinimumBalanceForRentExemptMint(connection);
 
@@ -27,7 +27,7 @@ export const createMint = async (connection: Connection, publicKey: PublicKey, d
       programId: TOKEN_PROGRAM_ID,
     }),
 
-    createInitializeMint2Instruction(toAccount.publicKey, decimal, publicKey, publicKey, TOKEN_PROGRAM_ID)
+    createInitializeMint2Instruction(toAccount.publicKey, decimal, publicKey, freezeAuthority, TOKEN_PROGRAM_ID)
   );
 
   return { transaction, toAccount };
