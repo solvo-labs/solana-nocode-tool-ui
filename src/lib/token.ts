@@ -4,6 +4,9 @@ import {
   MINT_SIZE,
   TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
+  createBurnInstruction,
+  createCloseAccountInstruction,
+  createFreezeAccountInstruction,
   createInitializeMint2Instruction,
   getAccount,
   getAssociatedTokenAddressSync,
@@ -67,4 +70,22 @@ export const getTokensWithAccount = async (connection: Connection, payer: Public
   });
 
   return data;
+};
+
+export const burnToken = async (owner: PublicKey, mint: PublicKey, burnAccount: PublicKey, amount: number) => {
+  const ix = createBurnInstruction(burnAccount, mint, owner, amount);
+
+  return ix;
+};
+
+export const freezeAccount = async (tokenAccount: PublicKey, mint: PublicKey, owner: PublicKey) => {
+  const ix = createFreezeAccountInstruction(tokenAccount, mint, owner);
+
+  return ix;
+};
+
+export const closeAccount = async (closeaccount: PublicKey, destination: PublicKey, authority: PublicKey) => {
+  const ix = createCloseAccountInstruction(closeaccount, destination, authority);
+
+  return ix;
 };
