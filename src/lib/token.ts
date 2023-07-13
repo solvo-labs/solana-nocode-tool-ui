@@ -89,3 +89,7 @@ export const closeAccount = async (closeaccount: PublicKey, destination: PublicK
 
   return ix;
 };
+
+export const getLargestAccounts = async (connection: Connection, mint: PublicKey) => {
+  return await connection.getTokenLargestAccounts(mint);
+};
