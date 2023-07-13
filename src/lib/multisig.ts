@@ -1,4 +1,4 @@
-import { MULTISIG_SIZE, TOKEN_PROGRAM_ID, createInitializeMultisigInstruction, createMultisig, getMinimumBalanceForRentExemptMultisig } from "@solana/spl-token";
+import { MULTISIG_SIZE, TOKEN_PROGRAM_ID, createInitializeMultisigInstruction, getMinimumBalanceForRentExemptMultisig } from "@solana/spl-token";
 import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 
 export const createMultiSig = async (connection: Connection, owner: PublicKey, signatureCount: number, signers: PublicKey[]) => {
