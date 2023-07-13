@@ -55,8 +55,9 @@ export const getMetadataPDA = async (mint: PublicKey, connection: Connection) =>
 
     const res = await Metadata.fromAccountAddress(connection, publicKey);
 
-    return res;
+    return { name: res.data.name, symbol: res.data.symbol };
   } catch {
-    return undefined;
+    const mintHex = mint.toBase58();
+    return { name: mintHex.substring(0, 3) + "..." + mintHex.slice(-3), symbol: mintHex.substring(0, 3) };
   }
 };

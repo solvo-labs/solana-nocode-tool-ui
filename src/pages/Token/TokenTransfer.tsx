@@ -34,9 +34,7 @@ export const TokenTransfer = () => {
       if (publicKey) {
         const tokenData = await fetchUserTokens(connection, publicKey);
 
-        const filteredData = tokenData.filter((dt) => dt.metadata);
-
-        setTokens(filteredData);
+        setTokens(tokenData);
 
         setLoading(false);
       }
