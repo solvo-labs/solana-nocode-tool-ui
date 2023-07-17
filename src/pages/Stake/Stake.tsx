@@ -1,9 +1,34 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { LAMPORTS_PER_SOL, PublicKey, Transaction, VoteAccountInfo } from "@solana/web3.js";
-import { Button, Card, CircularProgress, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Theme, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CircularProgress,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Theme,
+  Typography,
+} from "@mui/material";
 import StakeClass from "../../lib/stakeClass";
 import { makeStyles } from "@mui/styles";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { CustomInput } from "../../components/CustomInput";
 
 const useStyles = makeStyles((theme: Theme) => ({
   cardContainer: {
@@ -56,6 +81,23 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: "#2C6495 !important",
     fontWeight: "bold !important",
   },
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2),
+    position: "relative", // Modal içeriği için göreceli konumlandırma
+  },
+  backButton: {
+    top: theme.spacing(1),
+    left: theme.spacing(1),
+    color: "black",
+    cursor: "pointer",
+  },
 }));
 export const Stake = () => {
   const classes = useStyles();
@@ -66,6 +108,8 @@ export const Stake = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [showStakeModal, setShowStakeModal] = useState<boolean>(false);
+  const [selectedValidator, setSelectedValidator] = useState<VoteAccountInfo>();
+  const [stakeAmount, setStakeAmount] = useState<number>(0);
 
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
@@ -87,7 +131,6 @@ export const Stake = () => {
 
         const validatorsData = await stakeClass.getValidators();
         setValidators(validatorsData);
-        console.log(validatorsData[3]);
 
         const allStakes = await stakeClass.fetchAllStakes();
         setStakes(allStakes);
@@ -104,9 +147,9 @@ export const Stake = () => {
   }, [connection, publicKey]);
 
   const startStake = async () => {
-    if (publicKey && stakeClassInstance) {
-      const transaction1 = await stakeClassInstance.createStakeAccount(0.04);
-      const transaction2 = stakeClassInstance.delegateStake(validators[3]);
+    if (publicKey && stakeClassInstance && selectedValidator) {
+      const transaction1 = await stakeClassInstance.createStakeAccount(stakeAmount);
+      const transaction2 = stakeClassInstance.delegateStake(selectedValidator);
 
       if (transaction2) {
         const transaction = new Transaction();
@@ -122,6 +165,10 @@ export const Stake = () => {
         if (stakeClassInstance.stakeAccount) {
           const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [stakeClassInstance.stakeAccount] });
           await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+
+          setShowStakeModal(false);
+          setSelectedValidator(undefined);
+          setStakeAmount(0);
         }
       }
     }
@@ -184,7 +231,7 @@ export const Stake = () => {
     >
       <Grid container className={classes.tableContainer}>
         <Grid item className={classes.buttonItem}>
-          <Button variant="contained" color="primary" size="small" onClick={startStake}>
+          <Button variant="contained" color="primary" size="small" onClick={() => setShowStakeModal(true)}>
             STAKE SOL
           </Button>
         </Grid>
@@ -368,6 +415,93 @@ export const Stake = () => {
             </Grid>
           )}
         </Grid>
+
+        <Modal
+          className={classes.modal}
+          open={showStakeModal}
+          onClose={() => {
+            setShowStakeModal(false);
+            setSelectedValidator(undefined);
+            setStakeAmount(0);
+          }}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              borderRadius: "8px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              p: 1,
+            }}
+          >
+            <div className={classes.modalContent}>
+              <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center">
+                Stake SOL
+              </Typography>
+              {selectedValidator && (
+                <ArrowBackIcon
+                  className={classes.backButton}
+                  onClick={() => {
+                    setSelectedValidator(undefined);
+                  }}
+                />
+              )}
+
+              <List sx={{ width: "100%", maxWidth: 400, maxHeight: 500, color: "black", margin: 0, padding: 0, cursor: "pointer", overflowY: "auto" }}>
+                {selectedValidator && (
+                  <div>
+                    <span>Validator : {selectedValidator.votePubkey.slice(0, 16)} </span>
+                    <Divider sx={{ margin: 1 }} />
+                    <span>Activated SOL : {(selectedValidator.activatedStake / LAMPORTS_PER_SOL).toFixed(2)}SOL </span>
+                    <Divider sx={{ margin: 1 }} />
+                    <span>Commision : {selectedValidator.commission}% </span>
+                    <Divider sx={{ margin: 1 }} />
+                    <CustomInput
+                      placeHolder="Sol Amount"
+                      label="Sol Amount"
+                      id="amount"
+                      name="amount"
+                      type="text"
+                      value={stakeAmount}
+                      onChange={(e: any) => setStakeAmount(e.target.value)}
+                    ></CustomInput>
+                    <Divider sx={{ margin: 1 }} />
+                    <div style={{ textAlign: "center" }}>
+                      <Button variant="contained" color="primary" size="small" onClick={() => startStake()}>
+                        STAKE SOL
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {selectedValidator === undefined &&
+                  validators.map((vl) => {
+                    return (
+                      <>
+                        <ListItem onClick={() => setSelectedValidator(vl)}>
+                          <ListItemAvatar>
+                            <Avatar>{vl.votePubkey.slice(0, 2)}</Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={vl.votePubkey.slice(0, 10) + "..." + vl.votePubkey.slice(-3)}
+                            secondary={(vl.activatedStake / LAMPORTS_PER_SOL).toFixed(2) + " SOL"}
+                          />
+                        </ListItem>
+                        <Divider />
+                      </>
+                    );
+                  })}
+              </List>
+            </div>
+          </Box>
+        </Modal>
       </Grid>
     </div>
   );
