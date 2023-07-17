@@ -43,25 +43,30 @@ const TokenMint: React.FC = () => {
       } = await connection.getLatestBlockhashAndContext();
 
       try {
-        const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [toAccount] });
-        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
-
         const { transaction: transaction2, associatedToken } = getOrCreateAssociatedTokenAccount(toAccount.publicKey, publicKey, publicKey);
-        const signature2 = await sendTransaction(transaction2, connection, { minContextSlot });
-        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature2 });
+
+        const mintTransactions = new Transaction();
+        mintTransactions.add(transaction);
+        mintTransactions.add(transaction2);
+
+        const mintSignature = await sendTransaction(mintTransactions, connection, { minContextSlot, signers: [toAccount] });
+        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: mintSignature });
 
         const account = await getAccount(connection, associatedToken, undefined, TOKEN_PROGRAM_ID);
-
+        console.log("account", account);
         // supply
         const transaction3 = new Transaction().add(
           createMintToInstruction(toAccount.publicKey, account.address, publicKey, tokenData.amount * Math.pow(10, tokenData.decimal), [], TOKEN_PROGRAM_ID)
         );
-        const signature3 = await sendTransaction(transaction3, connection, { minContextSlot });
-        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature3 });
 
         const transaction4 = register(toAccount.publicKey.toBase58(), publicKey, { name: tokenData.name, symbol: tokenData.symbol });
-        const signature4 = await sendTransaction(transaction4, connection, { minContextSlot });
-        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature4 });
+
+        const finalTransactions = new Transaction();
+        finalTransactions.add(transaction3);
+        finalTransactions.add(transaction4);
+
+        const signature = await sendTransaction(finalTransactions, connection, { minContextSlot });
+        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
       } catch (error) {
         console.log(error);
       }
