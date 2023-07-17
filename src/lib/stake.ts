@@ -1,9 +1,9 @@
-import { Authorized, Connection, GetProgramAccountsFilter, Keypair, LAMPORTS_PER_SOL, Lockup, PublicKey, StakeProgram } from "@solana/web3.js";
+import { Authorized, Connection, GetProgramAccountsFilter, Keypair, LAMPORTS_PER_SOL, Lockup, PublicKey, StakeProgram, VoteAccountInfo } from "@solana/web3.js";
 
-export const createStakeAccount = async (connection: Connection, owner: PublicKey) => {
+export const createStakeAccount = async (connection: Connection, owner: PublicKey, balance: number) => {
   const stakeAccount = Keypair.generate();
 
-  const amountUserWantsToStake = LAMPORTS_PER_SOL * 0.01;
+  const amountUserWantsToStake = LAMPORTS_PER_SOL * balance;
   // Calculate how much we want to stake
   const minimumRent = await connection.getMinimumBalanceForRentExemption(StakeProgram.space);
   const amountToStake = minimumRent + amountUserWantsToStake;
@@ -16,7 +16,7 @@ export const createStakeAccount = async (connection: Connection, owner: PublicKe
     stakePubkey: stakeAccount.publicKey,
   });
 
-  return createStakeAccountTx;
+  return { stakeAccount, createStakeAccountTx };
 
   // const createStakeAccountTxId = await sendAndConfirmTransaction(connection, createStakeAccountTx, [
   //   payer,
@@ -32,7 +32,9 @@ export const getStakeStatus = async (connection: Connection, stakeAccountPubkey:
   return connection.getStakeActivation(stakeAccountPubkey);
 };
 
-export const delegateStake = (stakeAccount: PublicKey, owner: PublicKey, selectedValidatorPubkey: PublicKey) => {
+export const delegateStake = (stakeAccount: PublicKey, owner: PublicKey, voteAccount: VoteAccountInfo) => {
+  const selectedValidatorPubkey = new PublicKey(voteAccount.votePubkey);
+
   const delegateTx = StakeProgram.delegate({
     stakePubkey: stakeAccount,
     authorizedPubkey: owner,
