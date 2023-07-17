@@ -74,6 +74,11 @@ const TopBar: React.FC = () => {
     setAnchorElForSolana(null);
   };
 
+  const burn = () => {
+    navigate("/burn-token");
+    setAnchorElForSolana(null);
+  };
+
   return (
     <div>
       <AppBar className={classes.appBar}>
@@ -121,6 +126,9 @@ const TopBar: React.FC = () => {
                 </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={transfer}>
                   <Typography>Transfer</Typography>
+                </MenuItem>
+                <MenuItem className={classes.menuItem} onClick={burn}>
+                  <Typography>Burn</Typography>
                 </MenuItem>
               </Menu>
             </Box>
