@@ -65,6 +65,7 @@ export const Stake = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [showStakeModal, setShowStakeModal] = useState<boolean>(false);
 
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
@@ -86,10 +87,10 @@ export const Stake = () => {
 
         const validatorsData = await stakeClass.getValidators();
         setValidators(validatorsData);
+        console.log(validatorsData[3]);
 
         const allStakes = await stakeClass.fetchAllStakes();
         setStakes(allStakes);
-        console.log(allStakes);
         setLoading(false);
 
         // const demoAccount = allStakes[0];
@@ -105,7 +106,7 @@ export const Stake = () => {
   const startStake = async () => {
     if (publicKey && stakeClassInstance) {
       const transaction1 = await stakeClassInstance.createStakeAccount(0.04);
-      const transaction2 = stakeClassInstance.delegateStake(validators[2]);
+      const transaction2 = stakeClassInstance.delegateStake(validators[3]);
 
       if (transaction2) {
         const transaction = new Transaction();
@@ -125,27 +126,6 @@ export const Stake = () => {
       }
     }
   };
-
-  // const startStake = async () => {
-  //   if (publicKey) {
-  //     const { stakeAccount, createStakeAccountTx } = await createStakeAccount(connection, publicKey, 0.03);
-
-  //     const delegateTx = delegateStake(stakeAccount.publicKey, publicKey, validators[1]);
-
-  //     const transaction = new Transaction();
-
-  //     transaction.add(createStakeAccountTx);
-  //     transaction.add(delegateTx);
-
-  //     const {
-  //       context: { slot: minContextSlot },
-  //       value: { blockhash, lastValidBlockHeight },
-  //     } = await connection.getLatestBlockhashAndContext();
-
-  //     const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [stakeAccount] });
-  //     await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
-  //   }
-  // };
 
   const deactivateStake = async (targetPubkey: PublicKey) => {
     if (stakeClassInstance) {
@@ -204,7 +184,7 @@ export const Stake = () => {
     >
       <Grid container className={classes.tableContainer}>
         <Grid item className={classes.buttonItem}>
-          <Button variant="contained" color="primary" size="small">
+          <Button variant="contained" color="primary" size="small" onClick={startStake}>
             STAKE SOL
           </Button>
         </Grid>
@@ -234,7 +214,18 @@ export const Stake = () => {
                         }}
                       >
                         <Typography className={classes.tableHeader} variant="subtitle1">
-                          Validator Address
+                          Voter Address
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        style={{
+                          paddingRight: "8px",
+                          borderBottom: "1px solid #2C6495",
+                        }}
+                      >
+                        <Typography className={classes.tableHeader} variant="subtitle1">
+                          Stake Address
                         </Typography>
                       </TableCell>
                       <TableCell
@@ -306,7 +297,20 @@ export const Stake = () => {
                           </div>
                         </TableCell>
 
-                        <TableCell align="right">{stake.pubkey.toBase58().slice(0, 12) + "..." + stake.pubkey.toBase58().slice(-3)}</TableCell>
+                        <TableCell
+                          align="right"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => window.open("https://explorer.solana.com/address/" + stake.account.data.parsed.info.stake.delegation.voter + "?cluster=devnet", "_blank")}
+                        >
+                          {stake.account.data.parsed.info.stake.delegation.voter.slice(0, 6) + "..." + stake.account.data.parsed.info.stake.delegation.voter.slice(-3)}
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => window.open("https://explorer.solana.com/address/" + stake.pubkey.toBase58() + "?cluster=devnet", "_blank")}
+                        >
+                          {stake.pubkey.toBase58().slice(0, 12) + "..." + stake.pubkey.toBase58().slice(-3)}
+                        </TableCell>
                         <TableCell align="right">{stake.account.lamports / LAMPORTS_PER_SOL} SOL</TableCell>
                         <TableCell align="right">{stake.account.data.parsed.info.meta.rentExemptReserve / LAMPORTS_PER_SOL} SOL</TableCell>
                         <TableCell align="right">{stake.account.data.parsed.info.stake.delegation.stake / LAMPORTS_PER_SOL} SOL</TableCell>
