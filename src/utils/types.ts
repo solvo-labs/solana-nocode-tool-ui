@@ -8,5 +8,8 @@ export type Token = {
 export type TokenData = {
   hex: string;
   amount: number;
-  metadata: {};
+  metadata: {
+    name: string;
+    symbol: string;
+  };
 }
