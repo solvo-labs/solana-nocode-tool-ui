@@ -1,9 +1,7 @@
-import { Authorized, Connection, Keypair, LAMPORTS_PER_SOL, Lockup, PublicKey, StakeProgram } from "@solana/web3.js";
+import { Authorized, Connection, GetProgramAccountsFilter, Keypair, LAMPORTS_PER_SOL, Lockup, PublicKey, StakeProgram } from "@solana/web3.js";
 
 export const createStakeAccount = async (connection: Connection, owner: PublicKey) => {
   const stakeAccount = Keypair.generate();
-
-  console.log(stakeAccount.publicKey.toBase58());
 
   const amountUserWantsToStake = LAMPORTS_PER_SOL * 0.01;
   // Calculate how much we want to stake
@@ -66,6 +64,23 @@ export const withdrawStake = async (connection: Connection, stakeAccount: Public
   return withdrawTx;
 };
 
-export const getValidators = (connection: Connection) => {
-  return connection.getVoteAccounts();
+export const getValidators = async (connection: Connection) => {
+  const validators = await connection.getVoteAccounts();
+
+  return validators.current;
+};
+
+export const fetchAllStakes = async (connection: Connection, owner: PublicKey) => {
+  const filters: GetProgramAccountsFilter[] = [
+    {
+      memcmp: {
+        offset: 12, //location of our query in the account (bytes)
+        bytes: owner.toBase58(), //our search criteria, a base58 encoded string
+      },
+    },
+  ];
+
+  const accounts = await connection.getParsedProgramAccounts(StakeProgram.programId, { filters: filters });
+
+  return accounts;
 };
