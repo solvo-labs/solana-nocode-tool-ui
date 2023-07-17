@@ -17,6 +17,11 @@ class StakeClass {
     return validators.current;
   };
 
+  getStakeStatus = async (pubkey: PublicKey) => {
+    this.stakeAccountPubkey = pubkey || this.stakeAccountPubkey || new PublicKey("");
+    return this.connection.getStakeActivation(this.stakeAccountPubkey);
+  };
+
   fetchAllStakes = async () => {
     const filters: GetProgramAccountsFilter[] = [
       {
@@ -28,8 +33,14 @@ class StakeClass {
     ];
 
     const accounts = await this.connection.getParsedProgramAccounts(StakeProgram.programId, { filters: filters });
+    const statusPromises = accounts.map((ac) => this.getStakeStatus(ac.pubkey));
+    const statuses = await Promise.all(statusPromises);
 
-    return accounts;
+    const finalData = accounts.map((ac, index) => {
+      return { ...ac, state: statuses[index].state };
+    });
+    console.log(finalData);
+    return finalData;
   };
 
   createStakeAccount = async (balance: number) => {
@@ -56,11 +67,6 @@ class StakeClass {
   getStakeBalance = async (pubkey?: PublicKey) => {
     this.stakeAccountPubkey = pubkey || this.stakeAccountPubkey || new PublicKey("");
     return this.connection.getBalance(this.stakeAccountPubkey);
-  };
-
-  getStakeStatus = async (pubkey: PublicKey) => {
-    this.stakeAccountPubkey = pubkey || this.stakeAccountPubkey || new PublicKey("");
-    return this.connection.getStakeActivation(this.stakeAccountPubkey);
   };
 
   delegateStake = (voteAccount: VoteAccountInfo, pubkey?: PublicKey) => {
