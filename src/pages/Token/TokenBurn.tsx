@@ -14,7 +14,6 @@ import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
-import { CustomInputWithLimit } from "../../components/CustomInput";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
