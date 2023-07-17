@@ -33,10 +33,8 @@ export const TokenTransfer = () => {
     const init = async () => {
       if (publicKey) {
         const tokenData = await fetchUserTokens(connection, publicKey);
-
-        const filteredData = tokenData.filter((dt) => dt.metadata);
-
-        setTokens(filteredData);
+        console.log(tokenData);
+        setTokens(tokenData);
 
         setLoading(false);
       }
@@ -116,7 +114,7 @@ export const TokenTransfer = () => {
             {tokens.map((tk: any) => {
               return (
                 <MenuItem key={tk.hex} value={tk.hex}>
-                  {tk.metadata.data.name + "(" + tk.metadata.data.symbol + ")"}
+                  {tk.metadata.name + "(" + tk.metadata.symbol + ")"}
                 </MenuItem>
               );
             })}
