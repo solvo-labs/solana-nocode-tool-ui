@@ -1,12 +1,13 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
-import { createStakeAccount, delegateStake, fetchAllStakes, getValidators } from "../../lib/stake";
-import { AccountInfo, ParsedAccountData, PublicKey, Transaction, VoteAccountInfo } from "@solana/web3.js";
+import { Transaction, VoteAccountInfo } from "@solana/web3.js";
 import { Button } from "@mui/material";
+import StakeClass from "../../lib/stakeClass";
 
 export const Stake = () => {
   const [validators, setValidators] = useState<VoteAccountInfo[]>([]);
   const [stakes, setStakes] = useState<any[]>([]);
+  const [stakeClassInstance, setStakeClassInstance] = useState<StakeClass>();
 
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
@@ -14,11 +15,16 @@ export const Stake = () => {
   useEffect(() => {
     const init = async () => {
       if (publicKey) {
-        const validatorsData = await getValidators(connection);
+        const stakeClass = new StakeClass(connection, publicKey);
+        setStakeClassInstance(stakeClass);
+
+        const validatorsData = await stakeClass.getValidators();
         setValidators(validatorsData);
 
-        const allStakes = await fetchAllStakes(connection, publicKey);
+        const allStakes = await stakeClass.fetchAllStakes();
         setStakes(allStakes);
+
+        console.log(allStakes);
 
         // const demoAccount = allStakes[0];
         // console.log(demoAccount.account.lamports, "all");
@@ -31,25 +37,49 @@ export const Stake = () => {
   }, [connection, publicKey]);
 
   const startStake = async () => {
-    if (publicKey) {
-      const { stakeAccount, createStakeAccountTx } = await createStakeAccount(connection, publicKey, 0.03);
+    if (publicKey && stakeClassInstance) {
+      const transaction1 = await stakeClassInstance.createStakeAccount(0.04);
+      const transaction2 = stakeClassInstance.delegateStake(validators[2]);
 
-      const delegateTx = delegateStake(stakeAccount.publicKey, publicKey, validators[1]);
+      if (transaction2) {
+        const transaction = new Transaction();
 
-      const transaction = new Transaction();
+        transaction.add(transaction1);
+        transaction.add(transaction2);
 
-      transaction.add(createStakeAccountTx);
-      transaction.add(delegateTx);
+        const {
+          context: { slot: minContextSlot },
+          value: { blockhash, lastValidBlockHeight },
+        } = await connection.getLatestBlockhashAndContext();
 
-      const {
-        context: { slot: minContextSlot },
-        value: { blockhash, lastValidBlockHeight },
-      } = await connection.getLatestBlockhashAndContext();
-
-      const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [stakeAccount] });
-      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        if (stakeClassInstance.stakeAccount) {
+          const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [stakeClassInstance.stakeAccount] });
+          await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        }
+      }
     }
   };
+
+  // const startStake = async () => {
+  //   if (publicKey) {
+  //     const { stakeAccount, createStakeAccountTx } = await createStakeAccount(connection, publicKey, 0.03);
+
+  //     const delegateTx = delegateStake(stakeAccount.publicKey, publicKey, validators[1]);
+
+  //     const transaction = new Transaction();
+
+  //     transaction.add(createStakeAccountTx);
+  //     transaction.add(delegateTx);
+
+  //     const {
+  //       context: { slot: minContextSlot },
+  //       value: { blockhash, lastValidBlockHeight },
+  //     } = await connection.getLatestBlockhashAndContext();
+
+  //     const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [stakeAccount] });
+  //     await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+  //   }
+  // };
 
   return <Button onClick={startStake}>TRY</Button>;
 };

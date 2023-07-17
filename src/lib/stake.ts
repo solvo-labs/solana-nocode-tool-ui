@@ -44,9 +44,9 @@ export const delegateStake = (stakeAccount: PublicKey, owner: PublicKey, voteAcc
   return delegateTx;
 };
 
-export const deactivateStake = (stakeAccount: PublicKey, owner: PublicKey) => {
+export const deactivateStake = (stakeAccountPubkey: PublicKey, owner: PublicKey) => {
   const deactivateTx = StakeProgram.deactivate({
-    stakePubkey: stakeAccount,
+    stakePubkey: stakeAccountPubkey,
     authorizedPubkey: owner,
   });
 
