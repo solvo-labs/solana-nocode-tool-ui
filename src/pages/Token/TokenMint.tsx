@@ -34,7 +34,8 @@ const TokenMint: React.FC = () => {
 
   const createTransaction = async () => {
     if (publicKey) {
-      const { transaction, toAccount } = await createMint(connection, publicKey, tokenData.decimal);
+      // @To-do set freeze authority with input
+      const { transaction, toAccount } = await createMint(connection, publicKey, publicKey, tokenData.decimal);
 
       const {
         context: { slot: minContextSlot },

@@ -44,9 +44,8 @@ export const MyTokens = () => {
     const init = async () => {
       if (publicKey) {
         const data = await fetchUserTokens(connection, publicKey);
-        const filteredData = data.filter((dt) => dt.metadata);
-        console.log(filteredData);
-        setAllToken(filteredData as any);
+
+        setAllToken(data);
         setActionLoader(false);
       }
     };
@@ -57,8 +56,8 @@ export const MyTokens = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any) => (
       <TableRow className={classes.tableRow}>
-        <TableCell>{a.metadata.data.name}</TableCell>
-        <TableCell>{a.metadata.data.symbol}</TableCell>
+        <TableCell>{a.metadata.name}</TableCell>
+        <TableCell>{a.metadata.symbol}</TableCell>
         <TableCell>{a.supply.value.uiAmount}</TableCell>
         <TableCell>{a.amount / Math.pow(10, a.supply.value.decimals)}</TableCell>
         <TableCell>{a.hex.slice(0, 8) + "..." + a.hex.slice(-5)}</TableCell>

@@ -4,6 +4,9 @@ import {
   MINT_SIZE,
   TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
+  createBurnInstruction,
+  createCloseAccountInstruction,
+  createFreezeAccountInstruction,
   createInitializeMint2Instruction,
   getAccount,
   getAssociatedTokenAddressSync,
@@ -11,7 +14,7 @@ import {
 } from "@solana/spl-token";
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 
-export const createMint = async (connection: Connection, publicKey: PublicKey, decimal: number) => {
+export const createMint = async (connection: Connection, publicKey: PublicKey, freezeAuthority: PublicKey, decimal: number) => {
   const toAccount = Keypair.generate();
   const lamports = await getMinimumBalanceForRentExemptMint(connection);
 
@@ -24,7 +27,7 @@ export const createMint = async (connection: Connection, publicKey: PublicKey, d
       programId: TOKEN_PROGRAM_ID,
     }),
 
-    createInitializeMint2Instruction(toAccount.publicKey, decimal, publicKey, publicKey, TOKEN_PROGRAM_ID)
+    createInitializeMint2Instruction(toAccount.publicKey, decimal, publicKey, freezeAuthority, TOKEN_PROGRAM_ID)
   );
 
   return { transaction, toAccount };
@@ -67,4 +70,26 @@ export const getTokensWithAccount = async (connection: Connection, payer: Public
   });
 
   return data;
+};
+
+export const burnToken = async (owner: PublicKey, mint: PublicKey, burnAccount: PublicKey, amount: number) => {
+  const ix = createBurnInstruction(burnAccount, mint, owner, amount);
+
+  return ix;
+};
+
+export const freezeAccount = async (tokenAccount: PublicKey, mint: PublicKey, owner: PublicKey) => {
+  const ix = createFreezeAccountInstruction(tokenAccount, mint, owner);
+
+  return ix;
+};
+
+export const closeAccount = async (closeaccount: PublicKey, destination: PublicKey, authority: PublicKey) => {
+  const ix = createCloseAccountInstruction(closeaccount, destination, authority);
+
+  return ix;
+};
+
+export const getLargestAccounts = async (connection: Connection, mint: PublicKey) => {
+  return await connection.getTokenLargestAccounts(mint);
 };
