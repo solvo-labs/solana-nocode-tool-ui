@@ -2,7 +2,17 @@ import { useEffect, useState } from "react";
 import { createTransferInstruction, getAccount } from "@solana/spl-token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Grid, Typography, Divider, Stack, Theme, CircularProgress, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import {
+  Grid,
+  Typography,
+  Divider,
+  Stack,
+  Theme,
+  CircularProgress,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+} from "@mui/material";
 import { CustomButton } from "../../components/CustomButton";
 import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
@@ -53,22 +63,48 @@ export const TokenTransfer = () => {
       const destination = new PublicKey(destinationPubkey);
       const selectedTokenPubkey = new PublicKey(selectedToken);
 
-      const { associatedToken } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, publicKey);
-      const { associatedToken: toAssociatedToken, transaction: tx2 } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, destination);
+      const { associatedToken } = getOrCreateAssociatedTokenAccount(
+        selectedTokenPubkey,
+        publicKey,
+        publicKey
+      );
+      const { associatedToken: toAssociatedToken, transaction: tx2 } =
+        getOrCreateAssociatedTokenAccount(
+          selectedTokenPubkey,
+          publicKey,
+          destination
+        );
 
-      const signature2 = await sendTransaction(tx2, connection, { minContextSlot });
-      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature2 });
+      const signature2 = await sendTransaction(tx2, connection, {
+        minContextSlot,
+      });
+      await connection.confirmTransaction({
+        blockhash,
+        lastValidBlockHeight,
+        signature: signature2,
+      });
 
       const account = await getAccount(connection, associatedToken);
 
       const toAccount = await getAccount(connection, toAssociatedToken);
 
       const transaction = new Transaction().add(
-        createTransferInstruction(account.address, toAccount.address, publicKey, amount * Math.pow(10, selectedToken.supply.value.decimals))
+        createTransferInstruction(
+          account.address,
+          toAccount.address,
+          publicKey,
+          amount * Math.pow(10, selectedToken.supply.value.decimals)
+        )
       );
 
-      const signature = await sendTransaction(transaction, connection, { minContextSlot });
-      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
+      const signature = await sendTransaction(transaction, connection, {
+        minContextSlot,
+      });
+      await connection.confirmTransaction({
+        blockhash,
+        lastValidBlockHeight,
+        signature,
+      });
     }
   };
   console.log(selectedToken);
@@ -102,7 +138,9 @@ export const TokenTransfer = () => {
             value={selectedToken ? selectedToken.hex : "default"}
             label="ERC-20 Token"
             onChange={(event: SelectChangeEvent) => {
-              const selectedData = tokens.find((tk: any) => tk.hex === event.target.value);
+              const selectedData = tokens.find(
+                (tk: any) => tk.hex === event.target.value
+              );
               setSelectedToken(selectedData);
             }}
             style={{ maxWidth: "18rem", marginBottom: "1rem", width: "100%" }}
@@ -128,13 +166,28 @@ export const TokenTransfer = () => {
               type="text"
               value={destinationPubkey}
               onChange={(e: any) => setDestinationPubkey(e.target.value)}
+              disable={false}
             ></CustomInput>
-
-            <CustomInput placeHolder="Amount" label="Amount" id="amount" name="amount" type="text" value={amount} onChange={(e: any) => setAmount(e.target.value)}></CustomInput>
+            <CustomInput
+              placeHolder="Amount"
+              label="Amount"
+              id="amount"
+              name="amount"
+              type="text"
+              value={amount}
+              onChange={(e: any) => setAmount(e.target.value)}
+              disable={false}
+            ></CustomInput>
           </Stack>
         </Grid>
         <Grid item>
-          <CustomButton label="Send Token" disable={amount <= 0 || destinationPubkey === "" || selectedToken === ""} onClick={transfer}></CustomButton>
+          <CustomButton
+            label="Send Token"
+            disable={
+              amount <= 0 || destinationPubkey === "" || selectedToken === ""
+            }
+            onClick={transfer}
+          ></CustomButton>
         </Grid>
       </Grid>
     </div>
