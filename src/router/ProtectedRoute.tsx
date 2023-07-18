@@ -25,7 +25,7 @@ const ProtectedRoute: React.FC = () => {
     if (publicKey) {
       setLoading(false);
     }
-  }, [publicKey]);
+  }, [publicKey, connected]);
 
   if (loading) {
     return (
