@@ -93,10 +93,8 @@ export const MyTokens = () => {
   if (actionLoader) {
     return (
       <Grid container className={classes.container}>
-        <Grid item marginBottom={"3rem"}>
-          <Typography variant="h5" marginBottom={"1rem"}>
-            List of My Tokens
-          </Typography>
+        <Grid item marginBottom={"1rem"} marginTop={"1rem"}>
+          <Typography variant="h5">List of My Tokens</Typography>
         </Grid>
         <Grid item>
           <TableContainer>
@@ -120,7 +118,7 @@ export const MyTokens = () => {
 
   return (
     <Grid container className={classes.container}>
-      <Grid item marginBottom={"3rem"}>
+      <Grid item marginBottom={"1rem"} marginTop={"1rem"}>
         <Typography variant="h5">List of My Tokens</Typography>
       </Grid>
       <Grid item>

@@ -43,7 +43,7 @@ export const TokenTransfer = () => {
     const init = async () => {
       if (publicKey) {
         const tokenData = await fetchUserTokens(connection, publicKey);
-        console.log(tokenData);
+
         setTokens(tokenData);
 
         setLoading(false);
@@ -107,7 +107,7 @@ export const TokenTransfer = () => {
       });
     }
   };
-  console.log(selectedToken);
+
   if (loading) {
     return (
       <div

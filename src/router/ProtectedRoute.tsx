@@ -17,7 +17,7 @@ const ProtectedRoute: React.FC = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, connecting } = useWallet();
 
   useEffect(() => {
     if (publicKey === undefined) {
@@ -29,7 +29,7 @@ const ProtectedRoute: React.FC = () => {
     }
   }, [publicKey]);
 
-  if (loading) {
+  if (loading || connecting) {
     return (
       <div
         style={{
@@ -37,6 +37,7 @@ const ProtectedRoute: React.FC = () => {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
+          width: "50vw",
         }}
       >
         <LinearProgress color="inherit" style={{ width: "80%" }} />
