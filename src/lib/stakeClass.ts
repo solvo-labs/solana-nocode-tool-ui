@@ -39,7 +39,7 @@ class StakeClass {
     const finalData = accounts.map((ac, index) => {
       return { ...ac, state: statuses[index].state };
     });
-    console.log(finalData);
+
     return finalData;
   };
 

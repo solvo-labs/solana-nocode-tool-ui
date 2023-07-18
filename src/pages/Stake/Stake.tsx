@@ -135,15 +135,15 @@ export const Stake = () => {
         const allStakes = await stakeClass.fetchAllStakes();
         setStakes(allStakes);
         setLoading(false);
-
-        // const demoAccount = allStakes[0];
-        // console.log(demoAccount.account.lamports, "all");
-        // console.log(demoAccount.account.data.parsed.info.meta.rentExemptReserve, "rent");
-        // console.log(demoAccount.account.data.parsed.info.stake.delegation.stake, "active stake");
       }
     };
 
     init();
+    const interval = setInterval(() => init(), 15000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [connection, publicKey]);
 
   const startStake = async () => {
