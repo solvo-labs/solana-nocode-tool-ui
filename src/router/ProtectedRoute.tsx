@@ -37,6 +37,7 @@ const ProtectedRoute: React.FC = () => {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
+          width: "50vw",
         }}
       >
         <LinearProgress color="inherit" style={{ width: "80%" }} />
