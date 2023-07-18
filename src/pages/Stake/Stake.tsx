@@ -29,6 +29,7 @@ import StakeClass from "../../lib/stakeClass";
 import { makeStyles } from "@mui/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CustomInput } from "../../components/CustomInput";
+import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
   cardContainer: {
@@ -99,6 +100,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     cursor: "pointer",
   },
 }));
+
 export const Stake = () => {
   const classes = useStyles();
   const [validators, setValidators] = useState<VoteAccountInfo[]>([]);
@@ -145,7 +147,7 @@ export const Stake = () => {
     };
 
     init();
-    const interval = setInterval(() => init(), 15000);
+    const interval = setInterval(() => init(), 10000);
 
     return () => {
       clearInterval(interval);
@@ -153,54 +155,68 @@ export const Stake = () => {
   }, [connection, publicKey]);
 
   const startStake = async () => {
-    if (publicKey && stakeClassInstance && selectedValidator) {
-      const transaction1 = await stakeClassInstance.createStakeAccount(stakeAmount);
-      const transaction2 = stakeClassInstance.delegateStake(selectedValidator);
+    try {
+      if (publicKey && stakeClassInstance && selectedValidator) {
+        const transaction1 = await stakeClassInstance.createStakeAccount(stakeAmount);
+        const transaction2 = stakeClassInstance.delegateStake(selectedValidator);
 
-      if (transaction2) {
-        const transaction = new Transaction();
+        if (transaction2) {
+          const transaction = new Transaction();
 
-        transaction.add(transaction1);
-        transaction.add(transaction2);
+          transaction.add(transaction1);
+          transaction.add(transaction2);
 
-        const {
-          context: { slot: minContextSlot },
-          value: { blockhash, lastValidBlockHeight },
-        } = await connection.getLatestBlockhashAndContext();
+          const {
+            context: { slot: minContextSlot },
+            value: { blockhash, lastValidBlockHeight },
+          } = await connection.getLatestBlockhashAndContext();
 
-        if (stakeClassInstance.stakeAccount) {
-          const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [stakeClassInstance.stakeAccount] });
-          await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
-
-          clearmModalState();
+          if (stakeClassInstance.stakeAccount) {
+            const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [stakeClassInstance.stakeAccount] });
+            await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+            toastr.success("Delegation completed successfully.");
+            clearmModalState();
+          }
         }
       }
+    } catch {
+      toastr.error("Something went wrong.");
     }
   };
 
   const deactivateStake = async (targetPubkey: PublicKey) => {
     if (stakeClassInstance) {
-      const transaction = stakeClassInstance.deactivateStake(targetPubkey);
-      const {
-        context: { slot: minContextSlot },
-        value: { blockhash, lastValidBlockHeight },
-      } = await connection.getLatestBlockhashAndContext();
+      try {
+        const transaction = stakeClassInstance.deactivateStake(targetPubkey);
+        const {
+          context: { slot: minContextSlot },
+          value: { blockhash, lastValidBlockHeight },
+        } = await connection.getLatestBlockhashAndContext();
 
-      const signature = await sendTransaction(transaction, connection, { minContextSlot });
-      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        const signature = await sendTransaction(transaction, connection, { minContextSlot });
+        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        toastr.success("Deactive stake completed successfully.");
+      } catch {
+        toastr.error("Something went wrong.");
+      }
     }
   };
 
   const withdrawStake = async (targetPubkey: PublicKey) => {
-    if (stakeClassInstance) {
-      const transaction = await stakeClassInstance.withdrawStake(targetPubkey);
-      const {
-        context: { slot: minContextSlot },
-        value: { blockhash, lastValidBlockHeight },
-      } = await connection.getLatestBlockhashAndContext();
+    try {
+      if (stakeClassInstance) {
+        const transaction = await stakeClassInstance.withdrawStake(targetPubkey);
+        const {
+          context: { slot: minContextSlot },
+          value: { blockhash, lastValidBlockHeight },
+        } = await connection.getLatestBlockhashAndContext();
 
-      const signature = await sendTransaction(transaction, connection, { minContextSlot });
-      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        const signature = await sendTransaction(transaction, connection, { minContextSlot });
+        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        toastr.success("Withdraw stake completed successfully.");
+      }
+    } catch {
+      toastr.error("Something went wrong.");
     }
   };
 
