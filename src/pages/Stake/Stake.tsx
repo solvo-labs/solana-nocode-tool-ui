@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   tableContainer: {
     justifyContent: "center",
-    padding: "0 1rem 2rem 1rem;",
+    padding: "1rem 1rem 2rem 1rem;",
     [theme.breakpoints.down("sm")]: {
       padding: "1rem",
     },
@@ -106,7 +106,7 @@ export const Stake = () => {
   const [stakeClassInstance, setStakeClassInstance] = useState<StakeClass>();
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(5);
   const [showStakeModal, setShowStakeModal] = useState<boolean>(false);
   const [selectedValidator, setSelectedValidator] = useState<VoteAccountInfo>();
   const [stakeAmount, setStakeAmount] = useState<number>(0);
@@ -372,7 +372,7 @@ export const Stake = () => {
                 </Table>
               </TableContainer>
               <TablePagination
-                rowsPerPageOptions={[10, 25, 100]}
+                rowsPerPageOptions={[5, 10, 25]}
                 component="div"
                 count={stakes.length}
                 rowsPerPage={rowsPerPage}
@@ -451,7 +451,8 @@ export const Stake = () => {
                 <ArrowBackIcon
                   className={classes.backButton}
                   onClick={() => {
-                    clearmModalState();
+                    setSelectedValidator(undefined);
+                    setStakeAmount(0);
                   }}
                 />
               )}
