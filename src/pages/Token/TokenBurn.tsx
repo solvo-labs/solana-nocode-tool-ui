@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Box,
   Divider,
   FormControl,
   Grid,
@@ -14,25 +15,30 @@ import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
+import { CustomInput } from "../../components/CustomInput";
+import { CustomButton } from "../../components/CustomButton";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
-    minWidth: "25rem",
+    minWidth: "30vw",
     [theme.breakpoints.down("sm")]: {
-      minWidth: "10rem",
+      minWidth: "80vw",
     },
   },
   title: {
     textAlign: "center",
   },
-  select: {
+  subTitle: {
+    textAlign: "start",
+  },
+  input: {
     width: "100%",
     // maxHeight: "44px !important",
     [theme.breakpoints.up("sm")]: {
-      maxWidth: "18rem !important",
+      // minWidth: "18rem !important",
     },
     [theme.breakpoints.down("sm")]: {
-      maxWidth: "20rem !important",
+      // minWidth: "12rem !important",
     },
   },
 }));
@@ -49,8 +55,7 @@ export const TokenBurn = () => {
       symbol: "",
     },
   });
-
-  const [bok, setbok] = useState("");
+  const [amountToBeBurn, setAmountToBeBurn] = useState<number>(0);
 
   const classes = useStyles();
 
@@ -66,72 +71,105 @@ export const TokenBurn = () => {
     init();
   }, [connection, publicKey]);
 
+  console.log(selectedToken);
+  let lastValue: number = amountToBeBurn;
+  const valueControl = (): number => {
+    if (amountToBeBurn > selectedToken.amount) {
+      lastValue = selectedToken.amount;
+    }
+    if (amountToBeBurn < 0) {
+      lastValue = 0;
+    }
+    return lastValue;
+  };
+  console.log(valueControl());
+
+  const disable = !selectedToken.amount;
+
   return (
     <Grid container className={classes.container} direction={"column"}>
       <Grid item className={classes.title}>
         <Typography variant="h5">Burn token</Typography>
         <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
-      <Grid item justifyContent={"center"} marginTop={"2rem"}>
-        <Stack
-          direction={"column"}
-          spacing={2}
-          alignItems={"center"}
-          justifyContent={"center"}
-        >
-          <FormControl className={classes.select}>
-            <InputLabel id="demo-simple-select-label">
-              Select an CEP-48 Token
-            </InputLabel>
-            <Select
-              value={bok}
-              //   label="ERC-20 Token"
-              onChange={(e: any) => {
-                // console.log(e.target.value);
-                setbok(e.target.value);
-
-                const buldum = myTokens.find(
-                  (ara: any) => ara.hex === e.target.value
-                );
-                console.log(buldum?.hex);
-                if (buldum != undefined) {
-                  setSelectedToken({
-                    ...selectedToken,
-                    hex: buldum.hex,
-                    amount: buldum.amount,
-                    metadata: {
-                      ...selectedToken.metadata,
-                      name: buldum.metadata.name,
-                      symbol: buldum.metadata.symbol,
-                    },
-                  });
-                }
-
-                // const neeeyy = myTokens.find(
-                //   (e: any) => e.hex == event.target.value
-                // );
-                // console.log(neeeyy);
-                // setSelectedToken({
-                //   ...selectedToken,
-                //   hex: myTokens[e.target.value].hex,
-                //   metadata: {
-                //     ...selectedToken.metadata,
-                //     name: myTokens[e.target.value].metadata.name,
-                //   },
-                // });
+      <Grid item marginTop={"2rem"}>
+        <Stack direction={"column"} width={"100%"} spacing={4}>
+          <Grid item display={"flex"} justifyContent={"center"}>
+            <FormControl fullWidth>
+              <InputLabel id="selectLabel">Select an CEP-48 Token</InputLabel>
+              <Select
+                value={selectedToken.hex}
+                label="CEP-48 Token"
+                onChange={(e: any) => {
+                  const token = myTokens.find(
+                    (tkn: any) => tkn.hex === e.target.value
+                  );
+                  if (token != undefined) {
+                    setSelectedToken({
+                      ...selectedToken,
+                      hex: token.hex,
+                      amount: token.amount,
+                      metadata: {
+                        ...selectedToken.metadata,
+                        name: token.metadata.name,
+                        symbol: token.metadata.symbol,
+                      },
+                    });
+                  }
+                }}
+                className={classes.input}
+                id={"custom-select"}
+              >
+                {myTokens.map((tk: any) => {
+                  return (
+                    <MenuItem key={tk.hex} value={tk.hex}>
+                      {tk.metadata.name + "(" + tk.metadata.symbol + ")"}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid
+            container
+            display={"flex"}
+            justifyContent={"center"}
+            direction={"column"}
+          >
+            <Grid item display={"flex"} justifyContent={"center"}>
+              <CustomInput
+                id=""
+                label="Amount"
+                name="amount"
+                onChange={(e: any) => {
+                  setAmountToBeBurn(e.target.value);
+                }}
+                placeHolder="Amount"
+                type="number"
+                disable={disable}
+                value={valueControl()}
+              ></CustomInput>
+            </Grid>
+            <Grid item paddingX={"0.25rem"}>
+              <Typography
+                marginTop={"0.25rem"}
+                variant="caption"
+                display={"flex"}
+                justifyContent={"start"}
+              >
+                Burnable token amount: {selectedToken.amount}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid item display={"flex"} justifyContent={"center"}>
+            <CustomButton
+              label="Burn Token"
+              disable={disable}
+              onClick={() => {
+                console.log(amountToBeBurn);
               }}
-              style={{ maxWidth: "18rem", marginBottom: "1rem", width: "100%" }}
-              id={"custom-select"}
-            >
-              {myTokens.map((tk: any, index: number) => {
-                return (
-                  <MenuItem key={tk.hex} value={tk.hex}>
-                    {tk.metadata.name + "(" + tk.metadata.symbol + ")"}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
+            ></CustomButton>
+          </Grid>
         </Stack>
       </Grid>
     </Grid>
