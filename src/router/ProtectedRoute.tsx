@@ -18,11 +18,9 @@ const ProtectedRoute: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const { connected, publicKey } = useWallet();
-  console.log("connected", connected);
-  console.log("publicKey", publicKey);
 
   useEffect(() => {
-    if (publicKey === undefined) {
+    if (publicKey === undefined || publicKey === null) {
       setLoading(false);
     }
 
