@@ -53,7 +53,7 @@ const TokenMint: React.FC = () => {
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: mintSignature });
 
         const account = await getAccount(connection, associatedToken, undefined, TOKEN_PROGRAM_ID);
-        console.log("account", account);
+
         // supply
         const transaction3 = new Transaction().add(
           createMintToInstruction(toAccount.publicKey, account.address, publicKey, tokenData.amount * Math.pow(10, tokenData.decimal), [], TOKEN_PROGRAM_ID)

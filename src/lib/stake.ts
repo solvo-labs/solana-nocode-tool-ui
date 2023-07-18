@@ -1,11 +1,9 @@
-import { Authorized, Connection, Keypair, LAMPORTS_PER_SOL, Lockup, PublicKey, StakeProgram } from "@solana/web3.js";
+import { Authorized, Connection, GetProgramAccountsFilter, Keypair, LAMPORTS_PER_SOL, Lockup, PublicKey, StakeProgram, VoteAccountInfo } from "@solana/web3.js";
 
-export const createStakeAccount = async (connection: Connection, owner: PublicKey) => {
+export const createStakeAccount = async (connection: Connection, owner: PublicKey, balance: number) => {
   const stakeAccount = Keypair.generate();
 
-  console.log(stakeAccount.publicKey.toBase58());
-
-  const amountUserWantsToStake = LAMPORTS_PER_SOL * 0.01;
+  const amountUserWantsToStake = LAMPORTS_PER_SOL * balance;
   // Calculate how much we want to stake
   const minimumRent = await connection.getMinimumBalanceForRentExemption(StakeProgram.space);
   const amountToStake = minimumRent + amountUserWantsToStake;
@@ -18,7 +16,7 @@ export const createStakeAccount = async (connection: Connection, owner: PublicKe
     stakePubkey: stakeAccount.publicKey,
   });
 
-  return createStakeAccountTx;
+  return { stakeAccount, createStakeAccountTx };
 
   // const createStakeAccountTxId = await sendAndConfirmTransaction(connection, createStakeAccountTx, [
   //   payer,
@@ -34,7 +32,9 @@ export const getStakeStatus = async (connection: Connection, stakeAccountPubkey:
   return connection.getStakeActivation(stakeAccountPubkey);
 };
 
-export const delegateStake = (stakeAccount: PublicKey, owner: PublicKey, selectedValidatorPubkey: PublicKey) => {
+export const delegateStake = (stakeAccount: PublicKey, owner: PublicKey, voteAccount: VoteAccountInfo) => {
+  const selectedValidatorPubkey = new PublicKey(voteAccount.votePubkey);
+
   const delegateTx = StakeProgram.delegate({
     stakePubkey: stakeAccount,
     authorizedPubkey: owner,
@@ -44,9 +44,9 @@ export const delegateStake = (stakeAccount: PublicKey, owner: PublicKey, selecte
   return delegateTx;
 };
 
-export const deactivateStake = (stakeAccount: PublicKey, owner: PublicKey) => {
+export const deactivateStake = (stakeAccountPubkey: PublicKey, owner: PublicKey) => {
   const deactivateTx = StakeProgram.deactivate({
-    stakePubkey: stakeAccount,
+    stakePubkey: stakeAccountPubkey,
     authorizedPubkey: owner,
   });
 
@@ -66,6 +66,23 @@ export const withdrawStake = async (connection: Connection, stakeAccount: Public
   return withdrawTx;
 };
 
-export const getValidators = (connection: Connection) => {
-  return connection.getVoteAccounts();
+export const getValidators = async (connection: Connection) => {
+  const validators = await connection.getVoteAccounts();
+
+  return validators.current;
+};
+
+export const fetchAllStakes = async (connection: Connection, owner: PublicKey) => {
+  const filters: GetProgramAccountsFilter[] = [
+    {
+      memcmp: {
+        offset: 12, //location of our query in the account (bytes)
+        bytes: owner.toBase58(), //our search criteria, a base58 encoded string
+      },
+    },
+  ];
+
+  const accounts = await connection.getParsedProgramAccounts(StakeProgram.programId, { filters: filters });
+
+  return accounts;
 };

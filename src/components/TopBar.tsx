@@ -83,8 +83,8 @@ const TopBar: React.FC = () => {
               {APP_NAME.SOLANA}
             </Typography>
             <Box sx={{ flexGrow: 1, display: "flex" }}>
-              <Button>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.STAKING}</Typography>
+              <Button onClick={() => navigate("/stake")}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.STAKE}</Typography>
               </Button>
               <Button>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.DAO}</Typography>
