@@ -123,6 +123,12 @@ export const Stake = () => {
     setPage(0);
   };
 
+  const clearmModalState = () => {
+    setShowStakeModal(false);
+    setSelectedValidator(undefined);
+    setStakeAmount(0);
+  };
+
   useEffect(() => {
     const init = async () => {
       if (publicKey) {
@@ -166,9 +172,7 @@ export const Stake = () => {
           const signature = await sendTransaction(transaction, connection, { minContextSlot, signers: [stakeClassInstance.stakeAccount] });
           await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
 
-          setShowStakeModal(false);
-          setSelectedValidator(undefined);
-          setStakeAmount(0);
+          clearmModalState();
         }
       }
     }
@@ -420,9 +424,7 @@ export const Stake = () => {
           className={classes.modal}
           open={showStakeModal}
           onClose={() => {
-            setShowStakeModal(false);
-            setSelectedValidator(undefined);
-            setStakeAmount(0);
+            clearmModalState();
           }}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
@@ -449,7 +451,7 @@ export const Stake = () => {
                 <ArrowBackIcon
                   className={classes.backButton}
                   onClick={() => {
-                    setSelectedValidator(undefined);
+                    clearmModalState();
                   }}
                 />
               )}
