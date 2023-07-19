@@ -1,4 +1,4 @@
-import { Connection, PublicKey } from "@solana/web3.js";
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { getTokensWithAccount } from "./token";
 import { getMetadataPDA } from "./tokenRegister";
 
@@ -16,4 +16,10 @@ export const fetchUserTokens = async (connection: Connection, payer: PublicKey) 
   });
 
   return finalData;
+};
+
+export const getAccountBalance = async (connection: Connection, publicKey: PublicKey) => {
+  const balance = await connection.getBalance(publicKey);
+
+  return { balance, ui: balance / LAMPORTS_PER_SOL };
 };
