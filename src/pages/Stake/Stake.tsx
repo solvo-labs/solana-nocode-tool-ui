@@ -490,10 +490,11 @@ export const Stake = () => {
                       type="text"
                       value={stakeAmount}
                       onChange={(e: any) => setStakeAmount(e.target.value)}
+                      disable={false}
                     ></CustomInput>
                     <Divider sx={{ margin: 1 }} />
                     <div style={{ textAlign: "center" }}>
-                      <Button variant="contained" color="primary" size="small" onClick={() => startStake()}>
+                      <Button disabled={stakeAmount <= 0} variant="contained" color="primary" size="small" onClick={() => startStake()}>
                         STAKE SOL
                       </Button>
                     </div>

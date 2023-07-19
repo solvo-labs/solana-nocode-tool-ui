@@ -7,6 +7,7 @@ import TokenMint from "../pages/Token/TokenMint";
 import { MyTokens } from "../pages/Token/MyTokens";
 import { TokenTransfer } from "../pages/Token/TokenTransfer";
 import { Stake } from "../pages/Stake/Stake";
+import { TokenBurn } from "../pages/Token/TokenBurn";
 
 const Router: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const Router: React.FC = () => {
             <Route path="/my-tokens" index element={<MyTokens />} />
             <Route path="/token-transfer" index element={<TokenTransfer />} />
             <Route path="/stake" index element={<Stake />} />
+            <Route path="/burn-token" index element={<TokenBurn />} />
           </Route>
           <Route path="/login" index element={<Login />} />
         </Routes>
