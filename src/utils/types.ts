@@ -1,3 +1,5 @@
+import { RpcResponseAndContext, TokenAmount } from "@solana/web3.js";
+
 export type Token = {
   name: string;
   symbol: string;
@@ -8,5 +10,10 @@ export type Token = {
 export type TokenData = {
   hex: string;
   amount: number;
-  metadata: {};
-}
+  metadata: {
+    name: string;
+    symbol: string;
+  };
+  decimal: number;
+  supply: RpcResponseAndContext<TokenAmount>;
+};

@@ -7,10 +7,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     width: "100%",
     // maxHeight: "44px !important",
     [theme.breakpoints.up("sm")]: {
-      maxWidth: "18rem !important",
+      // maxWidth: "24rem !important",
     },
     [theme.breakpoints.down("sm")]: {
-      maxWidth: "20rem !important",
+      // maxWidth: "12rem !important",
     },
   },
 }));
@@ -23,6 +23,7 @@ type Props = {
   type: string;
   value: string | number;
   onChange: any;
+  disable: boolean;
 };
 
 export const CustomInput: React.FC<Props> = ({
@@ -33,6 +34,7 @@ export const CustomInput: React.FC<Props> = ({
   type,
   value,
   onChange,
+  disable
 }) => {
   const classes = useStyles();
 
@@ -47,6 +49,7 @@ export const CustomInput: React.FC<Props> = ({
       onChange={onChange}
       required
       type={type}
+      disabled={disable}
     ></TextField>
   );
 };
