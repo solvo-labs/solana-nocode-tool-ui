@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { fetchUserTokens, isAccountActive } from "../../lib";
+import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { CustomButton } from "../../components/CustomButton";
-import { freezeAccount, getLargestAccounts } from "../../lib/token";
+import { closeAccount, getLargestAccounts } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export const FreezeAccount = () => {
+export const CloseAccount = () => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [myTokens, setMyTokens] = useState<TokenData[]>([]);
@@ -42,9 +42,9 @@ export const FreezeAccount = () => {
   const [selectedHolder, setSelectedHolder] = useState<string>("");
   const classes = useStyles();
 
-  const freezeTransaction = async () => {
+  const closeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
-      const ix = await freezeAccount(new PublicKey(selectedHolder), new PublicKey(selectedToken.hex), publicKey);
+      const ix = await closeAccount(new PublicKey(selectedHolder), new PublicKey(selectedToken.hex), publicKey);
 
       const {
         context: { slot: minContextSlot },
@@ -53,10 +53,10 @@ export const FreezeAccount = () => {
       } = await connection.getLatestBlockhashAndContext();
 
       try {
-        const freezeTransaction = new Transaction();
-        freezeTransaction.add(ix);
+        const closeTransaction = new Transaction();
+        closeTransaction.add(ix);
 
-        const freezeSignature = await sendTransaction(freezeTransaction, connection, {
+        const closeSignature = await sendTransaction(closeTransaction, connection, {
           minContextSlot,
           signers: [],
         });
@@ -64,7 +64,7 @@ export const FreezeAccount = () => {
         await connection.confirmTransaction({
           blockhash,
           lastValidBlockHeight,
-          signature: freezeSignature,
+          signature: closeSignature,
         });
       } catch (error) {
         console.log(error);
@@ -88,17 +88,7 @@ export const FreezeAccount = () => {
     const fetch = async () => {
       if (selectedToken) {
         const getLargest = await getLargestAccounts(connection, new PublicKey(selectedToken.hex));
-        const activeAccounts = getLargest.value.map((gt) => isAccountActive(connection, gt.address));
-        const activeStatus = await Promise.all(activeAccounts);
-        console.log(activeStatus);
-        const filteredData = getLargest.value.filter((gl, index) => {
-          if (activeStatus[index]) {
-            return gl;
-          }
-        });
-
-        // console.log(filteredData);
-
+        // setActionLoader(false);
         setHolders(getLargest.value);
       }
     };
@@ -109,7 +99,7 @@ export const FreezeAccount = () => {
   return (
     <Grid container className={classes.container} direction={"column"}>
       <Grid item className={classes.title}>
-        <Typography variant="h5">Freeze Account</Typography>
+        <Typography variant="h5">close Account</Typography>
         <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
       <Grid item marginTop={"2rem"}>
@@ -167,10 +157,10 @@ export const FreezeAccount = () => {
       </Grid>
       <Grid item display={"flex"} justifyContent={"center"} marginTop={"2rem"}>
         <CustomButton
-          label="Freeze Account"
+          label="close Account"
           disable={selectedHolder === undefined || selectedToken === undefined}
           onClick={() => {
-            freezeTransaction();
+            closeTransaction();
           }}
         ></CustomButton>
       </Grid>

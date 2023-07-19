@@ -23,3 +23,11 @@ export const getAccountBalance = async (connection: Connection, publicKey: Publi
 
   return { balance, ui: balance / LAMPORTS_PER_SOL };
 };
+
+export const isAccountActive = async (connection: Connection, publicKey: PublicKey): Promise<boolean> => {
+  const account = await connection.getAccountInfo(publicKey);
+
+  if (account) return account?.executable;
+
+  return false;
+};
