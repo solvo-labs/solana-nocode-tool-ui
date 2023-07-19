@@ -23,7 +23,7 @@ type Props = {
   type: string;
   value: string | number;
   onChange: any;
-  disable: boolean;
+  disable?: boolean;
 };
 
 export const CustomInput: React.FC<Props> = ({
@@ -34,7 +34,7 @@ export const CustomInput: React.FC<Props> = ({
   type,
   value,
   onChange,
-  disable
+  disable = false,
 }) => {
   const classes = useStyles();
 
