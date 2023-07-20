@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { accountState, fetchUserTokens, isAccountActive } from "../../lib";
+import { accountState, fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { CustomButton } from "../../components/CustomButton";
 import { freezeAccount, getLargestAccounts } from "../../lib/token";
-import { ParsedAccountData, PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { ACCOUNT_STATE } from "../../utils/enum";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -41,7 +41,6 @@ export const FreezeAccount = () => {
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [holders, setHolders] = useState<any>([]);
   const [selectedHolder, setSelectedHolder] = useState<string>("");
-  const [holderState, setHolderState] = useState<string[]>([])
   const classes = useStyles();
 
   const freezeTransaction = async () => {
@@ -102,7 +101,7 @@ export const FreezeAccount = () => {
     };
 
     fetch();
-  }, [connection, holderState, selectedToken]);
+  }, [connection, selectedToken]);
 
   return (
     <Grid container className={classes.container} direction={"column"}>
