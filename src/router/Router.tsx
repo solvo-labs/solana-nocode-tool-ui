@@ -9,6 +9,7 @@ import { TokenTransfer } from "../pages/Token/TokenTransfer";
 import { Stake } from "../pages/Stake/Stake";
 import { TokenBurn } from "../pages/Token/TokenBurn";
 import { FreezeAccount } from "../pages/Token/FreezeAccount";
+import { CloseAccount } from "../pages/Token/CloseAccount";
 
 const Router: React.FC = () => {
   return (
@@ -23,7 +24,7 @@ const Router: React.FC = () => {
             <Route path="/stake" index element={<Stake />} />
             <Route path="/burn-token" index element={<TokenBurn />} />
             <Route path="/freeze-account" index element={<FreezeAccount />} />
-            <Route path="/close-account" index element={<TokenBurn />} />
+            <Route path="/close-account" index element={<CloseAccount />} />
           </Route>
           <Route path="/login" index element={<Login />} />
         </Routes>

@@ -83,6 +83,10 @@ const TopBar: React.FC = () => {
     navigate("/freeze-account");
     setAnchorElForSolana(null);
   };
+  const closeAccount = () => {
+    navigate("/close-account");
+    setAnchorElForSolana(null);
+  };
 
   return (
     <div>
@@ -137,6 +141,9 @@ const TopBar: React.FC = () => {
                 </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={freezeAccount}>
                   <Typography>Freeze Account</Typography>
+                </MenuItem>
+                <MenuItem className={classes.menuItem} onClick={closeAccount}>
+                  <Typography>Close Account</Typography>
                 </MenuItem>
               </Menu>
             </Box>
