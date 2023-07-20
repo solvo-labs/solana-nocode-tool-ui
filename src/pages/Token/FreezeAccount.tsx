@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { fetchUserTokens, isAccountActive } from "../../lib";
+import { accountState, fetchUserTokens, isAccountActive } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { CustomButton } from "../../components/CustomButton";
 import { freezeAccount, getLargestAccounts } from "../../lib/token";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { ParsedAccountData, PublicKey, Transaction } from "@solana/web3.js";
+import { ACCOUNT_STATE } from "../../utils/enum";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -40,6 +41,7 @@ export const FreezeAccount = () => {
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [holders, setHolders] = useState<any>([]);
   const [selectedHolder, setSelectedHolder] = useState<string>("");
+  const [holderState, setHolderState] = useState<string[]>([])
   const classes = useStyles();
 
   const freezeTransaction = async () => {
@@ -88,23 +90,19 @@ export const FreezeAccount = () => {
     const fetch = async () => {
       if (selectedToken) {
         const getLargest = await getLargestAccounts(connection, new PublicKey(selectedToken.hex));
-        const activeAccounts = getLargest.value.map((gt) => isAccountActive(connection, gt.address));
-        const activeStatus = await Promise.all(activeAccounts);
-        console.log(activeStatus);
+        const activeStatus = getLargest.value.map((gt) => accountState(connection, gt.address));
+        const activeAccounts = await Promise.all(activeStatus);
         const filteredData = getLargest.value.filter((gl, index) => {
-          if (activeStatus[index]) {
+          if (activeAccounts[index]?.toString() != ACCOUNT_STATE.FROZEN) {
             return gl;
-          }
+          } 
         });
-
-        // console.log(filteredData);
-
-        setHolders(getLargest.value);
+        setHolders(filteredData);
       }
     };
 
     fetch();
-  }, [connection, selectedToken]);
+  }, [connection, holderState, selectedToken]);
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -155,7 +153,7 @@ export const FreezeAccount = () => {
                   {holders.map((holder: any) => {
                     return (
                       <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
-                        {holder.address.toBase58()}
+                        {holder.address.toBase58() + " "}
                       </MenuItem>
                     );
                   })}

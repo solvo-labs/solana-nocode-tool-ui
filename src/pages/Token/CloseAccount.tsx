@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
-import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
+import {
+  Divider,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Theme,
+  Typography,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { fetchUserTokens } from "../../lib";
+import { accountState, fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { CustomButton } from "../../components/CustomButton";
 import { closeAccount, getLargestAccounts } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
+import { ACCOUNT_STATE } from "../../utils/enum";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -44,7 +55,11 @@ export const CloseAccount = () => {
 
   const closeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
-      const ix = await closeAccount(new PublicKey(selectedHolder), new PublicKey(selectedToken.hex), publicKey);
+      const ix = await closeAccount(
+        new PublicKey(selectedHolder),
+        new PublicKey(selectedToken.hex),
+        publicKey
+      );
 
       const {
         context: { slot: minContextSlot },
@@ -56,10 +71,14 @@ export const CloseAccount = () => {
         const closeTransaction = new Transaction();
         closeTransaction.add(ix);
 
-        const closeSignature = await sendTransaction(closeTransaction, connection, {
-          minContextSlot,
-          signers: [],
-        });
+        const closeSignature = await sendTransaction(
+          closeTransaction,
+          connection,
+          {
+            minContextSlot,
+            signers: [],
+          }
+        );
 
         await connection.confirmTransaction({
           blockhash,
@@ -87,9 +106,21 @@ export const CloseAccount = () => {
   useEffect(() => {
     const fetch = async () => {
       if (selectedToken) {
-        const getLargest = await getLargestAccounts(connection, new PublicKey(selectedToken.hex));
+        const getLargest = await getLargestAccounts(
+          connection,
+          new PublicKey(selectedToken.hex)
+        );
         // setActionLoader(false);
-        setHolders(getLargest.value);
+        const activeAccounts = getLargest.value.map((gt) =>
+          accountState(connection, gt.address)
+        );
+        const activeStatus = await Promise.all(activeAccounts);
+        const filteredData = getLargest.value.filter((gl, index) => {
+          if (activeStatus[index]?.toString() == ACCOUNT_STATE.FROZEN) {
+            return gl;
+          }
+        });
+        setHolders(filteredData);
       }
     };
 
@@ -99,7 +130,7 @@ export const CloseAccount = () => {
   return (
     <Grid container className={classes.container} direction={"column"}>
       <Grid item className={classes.title}>
-        <Typography variant="h5">close Account</Typography>
+        <Typography variant="h5">Close Account</Typography>
         <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
       <Grid item marginTop={"2rem"}>
@@ -111,7 +142,9 @@ export const CloseAccount = () => {
                 value={selectedToken?.hex || ""}
                 label="Token"
                 onChange={(e: any) => {
-                  const token = myTokens.find((tkn: any) => tkn.hex === e.target.value);
+                  const token = myTokens.find(
+                    (tkn: any) => tkn.hex === e.target.value
+                  );
                   if (token != undefined) {
                     setSelectedToken(token);
                   }
@@ -144,7 +177,10 @@ export const CloseAccount = () => {
                 >
                   {holders.map((holder: any) => {
                     return (
-                      <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
+                      <MenuItem
+                        key={holder.address.toBase58()}
+                        value={holder.address.toBase58()}
+                      >
                         {holder.address.toBase58()}
                       </MenuItem>
                     );
