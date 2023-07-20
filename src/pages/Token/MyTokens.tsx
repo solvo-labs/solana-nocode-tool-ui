@@ -135,7 +135,7 @@ export const MyTokens = () => {
             </TableHead>
             <TableBody>{listToken()}</TableBody>
             <TableFooter>
-              <TableCell colSpan={4} padding={"none"}>
+              <TableCell colSpan={8} padding={"none"}>
                 <TablePagination
                   rowsPerPageOptions={[1, 5, 10]}
                   component="div"

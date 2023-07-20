@@ -94,6 +94,7 @@ const TokenMint: React.FC = () => {
               type="text"
               value={tokenData.name}
               onChange={(e: any) => setTokenData({ ...tokenData, name: e.target.value })}
+              disable={false}
             ></CustomInput>
             <CustomInput
               placeHolder="Symbol"
@@ -103,6 +104,7 @@ const TokenMint: React.FC = () => {
               type="text"
               value={tokenData.symbol}
               onChange={(e: any) => setTokenData({ ...tokenData, symbol: e.target.value })}
+              disable={false}
             ></CustomInput>
             <CustomInput
               placeHolder="Amount"
@@ -112,6 +114,7 @@ const TokenMint: React.FC = () => {
               type="text"
               value={tokenData.amount}
               onChange={(e: any) => setTokenData({ ...tokenData, amount: e.target.value })}
+              disable={false}
             ></CustomInput>
             <CustomInput
               placeHolder="Decimal"
@@ -121,6 +124,7 @@ const TokenMint: React.FC = () => {
               type="text"
               value={tokenData.decimal}
               onChange={(e: any) => setTokenData({ ...tokenData, decimal: e.target.value })}
+              disable={false}
             ></CustomInput>
           </Stack>
         </Grid>
