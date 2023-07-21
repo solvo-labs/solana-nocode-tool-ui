@@ -8,3 +8,8 @@ export enum PAGES_NAME {
   NFT = "NFT",
   TOKEN = "TOKEN",
 }
+
+export enum ACCOUNT_STATE {
+  FROZEN = "frozen",
+  INITIALIZED = "initialized",
+}

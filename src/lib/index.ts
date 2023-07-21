@@ -1,4 +1,4 @@
-import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { AccountInfo, Connection, LAMPORTS_PER_SOL, ParsedAccountData, PublicKey, RpcResponseAndContext } from "@solana/web3.js";
 import { getTokensWithAccount } from "./token";
 import { getMetadataPDA } from "./tokenRegister";
 
@@ -23,3 +23,18 @@ export const getAccountBalance = async (connection: Connection, publicKey: Publi
 
   return { balance, ui: balance / LAMPORTS_PER_SOL };
 };
+
+export const isAccountActive = async (connection: Connection, publicKey: PublicKey): Promise<boolean> => {
+  const account = await connection.getAccountInfo(publicKey);
+
+  if (account) return account?.executable;
+
+  return false;
+};
+
+export const accountState = async (connection: Connection, publicKey: PublicKey) :Promise<RpcResponseAndContext<AccountInfo<Buffer | ParsedAccountData | string> | null> | undefined> => {
+  const account = await connection.getParsedAccountInfo(publicKey);
+
+  if (account && account.value && !Buffer.isBuffer(account.value.data)) return account.value?.data.parsed.info.state;
+  return undefined;
+}
