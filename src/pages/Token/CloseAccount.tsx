@@ -10,6 +10,7 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import { ACCOUNT_STATE } from "../../utils/enum";
 import toastr from "toastr";
 import { useNavigate } from "react-router-dom";
+import { CustomInput } from "../../components/CustomInput";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -43,12 +44,13 @@ export const CloseAccount = () => {
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [holders, setHolders] = useState<any>([]);
   const [selectedHolder, setSelectedHolder] = useState<string>("");
+  const [destinationPubkey, setDestinationPubkey] = useState<string>("");
   const classes = useStyles();
   const navigate = useNavigate();
 
   const closeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
-      const ix = await closeAccount(new PublicKey(selectedHolder), new PublicKey(selectedToken.hex), publicKey);
+      const ix = await closeAccount(new PublicKey(selectedHolder), new PublicKey(destinationPubkey), publicKey);
 
       const {
         context: { slot: minContextSlot },
@@ -144,28 +146,42 @@ export const CloseAccount = () => {
             </FormControl>
           </Grid>
           {selectedToken && (
-            <Grid item display={"flex"} justifyContent={"center"}>
-              <FormControl fullWidth>
-                <InputLabel id="selectLabel">Select a Holder</InputLabel>
-                <Select
-                  value={selectedHolder}
-                  label="Holders"
-                  onChange={(e: any) => {
-                    setSelectedHolder(e.target.value);
-                  }}
-                  className={classes.input}
-                  id={"custom-select"}
-                >
-                  {holders.map((holder: any) => {
-                    return (
-                      <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
-                        {holder.address.toBase58()}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
-            </Grid>
+            <>
+              <Grid item display={"flex"} justifyContent={"center"}>
+                <FormControl fullWidth>
+                  <InputLabel id="selectLabel">Select a Holder</InputLabel>
+                  <Select
+                    value={selectedHolder}
+                    label="Holders"
+                    onChange={(e: any) => {
+                      setSelectedHolder(e.target.value);
+                    }}
+                    className={classes.input}
+                    id={"custom-select"}
+                  >
+                    {holders.map((holder: any) => {
+                      return (
+                        <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
+                          {holder.address.toBase58()}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item>
+                <CustomInput
+                  placeHolder="Destination Pubkey"
+                  label="Destination Pubkey"
+                  id="destinationPubkey"
+                  name="destinationPubkey"
+                  type="text"
+                  value={destinationPubkey}
+                  onChange={(e: any) => setDestinationPubkey(e.target.value)}
+                  disable={false}
+                ></CustomInput>
+              </Grid>
+            </>
           )}
         </Stack>
       </Grid>
