@@ -100,8 +100,8 @@ const TopBar: React.FC = () => {
               <Button onClick={() => navigate("/stake")}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.STAKE}</Typography>
               </Button>
-              <Button>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.DAO}</Typography>
+              <Button onClick={() => navigate("/raffle")}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.RAFFLE}</Typography>
               </Button>
               <Button>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.NFT}</Typography>

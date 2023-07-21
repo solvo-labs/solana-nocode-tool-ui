@@ -4,7 +4,7 @@ export enum APP_NAME {
 
 export enum PAGES_NAME {
   STAKE = "STAKE",
-  DAO = "DAO",
+  RAFFLE = "RAFFLE",
   NFT = "NFT",
   TOKEN = "TOKEN",
 }
