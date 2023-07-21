@@ -7,8 +7,27 @@ import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
 import { error } from "toastr";
 import toastr from "toastr";
 import { makeStyles } from "@mui/styles";
-import { Button, Card, CircularProgress, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Theme, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CircularProgress,
+  Divider,
+  Grid,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Theme,
+  Typography,
+} from "@mui/material";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { CustomInput } from "../../components/CustomInput";
 
 const useStyles = makeStyles((theme: Theme) => ({
   cardContainer: {
@@ -88,12 +107,12 @@ export const Raffle = () => {
   const [program, setProgram] = useState<Program<Idl>>();
   const [masterAddress, setMasterAddress] = useState<PublicKey>();
   const [lastRaffleId, setLastRaffleId] = useState<number>(0);
-  const [newTicketPrice, setNewTicketPrice] = useState<number>(0.01);
+  const [newTicketPrice, setNewTicketPrice] = useState<number>(0);
   const [activeLotteries, setActiveLotteries] = useState<any>([]);
-  // const [selectedLotteryId, setSelectedLotteryId] = useState<number>();
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+  const [showRaffleModal, setShowRaffleModal] = useState<boolean>(false);
 
   useEffect(() => {
     const init = async () => {
@@ -146,6 +165,8 @@ export const Raffle = () => {
         .rpc();
 
       toastr.success(tx, "New raffle created Successfullx txid : ");
+      setShowRaffleModal(false);
+      setNewTicketPrice(0);
     }
   };
 
@@ -276,7 +297,7 @@ export const Raffle = () => {
       <Grid container className={classes.tableContainer}>
         <h2 style={{ margin: 0 }}>Active Raffles</h2>
         <Grid item className={classes.buttonItem}>
-          <Button variant="contained" color="primary" size="small" onClick={create}>
+          <Button variant="contained" color="primary" size="small" onClick={() => setShowRaffleModal(true)}>
             CREATE A NEW RAFFLE
           </Button>
         </Grid>
@@ -466,6 +487,55 @@ export const Raffle = () => {
           )}
         </Grid>
       </Grid>
+      <Modal
+        className={classes.modal}
+        open={showRaffleModal}
+        onClose={() => {
+          setShowRaffleModal(false);
+          setNewTicketPrice(0);
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            borderRadius: "8px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 1,
+          }}
+        >
+          <div className={classes.modalContent}>
+            <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
+              Create A New Raffle
+            </Typography>
+            <div>
+              <CustomInput
+                placeHolder="Ticket Price"
+                label="Ticket Price"
+                id="amnewTicketPriceunt"
+                name="newTicketPrice"
+                type="text"
+                value={newTicketPrice}
+                onChange={(e: any) => setNewTicketPrice(e.target.value)}
+                disable={false}
+              ></CustomInput>
+              <Divider sx={{ margin: 1 }} />
+              <div style={{ textAlign: "center" }}>
+                <Button disabled={newTicketPrice <= 0} variant="contained" color="primary" size="small" onClick={() => create()}>
+                  Create Raffle
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Box>
+      </Modal>
     </div>
   );
 };
