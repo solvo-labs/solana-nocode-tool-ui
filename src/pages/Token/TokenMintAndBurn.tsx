@@ -43,14 +43,20 @@ export const TokenMintAndBurn = () => {
 
   const [holders, setHolders] = useState<any>([]);
   const [amountToBeBurn, setAmountToBeBurn] = useState<number>(0);
-  const [selectedHolder, setSelectedHolder] = useState<string>("");
+  const [selectedHolder, setSelectedHolder] = useState<any>("");
+  const [myAddresses, setMyAddresses] = useState<any[]>([]);
   const classes = useStyles();
 
   useEffect(() => {
     const fetch = async () => {
       if (selectedToken && publicKey) {
         const getLargest = await getLargestAccounts(connection, new PublicKey(selectedToken.hex));
+        const myAddress = await connection.getTokenAccountsByOwner(publicKey, {
+          mint: new PublicKey(selectedToken.hex),
+        });
+        const myAddressPubkeys = myAddress.value.map((my) => my.pubkey.toBase58());
 
+        setMyAddresses(myAddressPubkeys);
         setHolders(getLargest.value);
       }
     };
@@ -190,7 +196,7 @@ export const TokenMintAndBurn = () => {
                   {holders.map((holder: any) => {
                     return (
                       <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
-                        {holder.address.toBase58()}
+                        {myAddresses.includes(holder.address.toBase58()) && "MY Account : "} {holder.address.toBase58()}
                       </MenuItem>
                     );
                   })}
