@@ -1,26 +1,14 @@
 import { useEffect, useState } from "react";
-import {
-  Divider,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Theme,
-  Typography,
-} from "@mui/material";
+import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { CustomInput } from "../../components/CustomInput";
 import { CustomButton } from "../../components/CustomButton";
-import {
-  burnToken,
-  getLargestAccounts,
-} from "../../lib/token";
+import { burnToken, getLargestAccounts } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID, createMintToInstruction } from "@solana/spl-token";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -47,7 +35,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export const TokenBurn = () => {
+export const TokenMintAndBurn = () => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [myTokens, setMyTokens] = useState<TokenData[]>([]);
@@ -58,13 +46,29 @@ export const TokenBurn = () => {
   const [selectedHolder, setSelectedHolder] = useState<string>("");
   const classes = useStyles();
 
-  const burnTransaction = async () => {
+  useEffect(() => {
+    const fetch = async () => {
+      if (selectedToken && publicKey) {
+        const getLargest = await getLargestAccounts(connection, new PublicKey(selectedToken.hex));
+
+        setHolders(getLargest.value);
+      }
+    };
+
+    fetch();
+  }, [connection, publicKey, selectedToken]);
+
+  const mintTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
-      const ix = await burnToken(
-        publicKey,
-        new PublicKey(selectedToken.hex),
-        new PublicKey(selectedHolder),
-        amountToBeBurn * Math.pow(10, selectedToken.decimal)
+      const ix = new Transaction().add(
+        createMintToInstruction(
+          new PublicKey(selectedToken.hex),
+          new PublicKey(selectedHolder),
+          publicKey,
+          amountToBeBurn * Math.pow(10, selectedToken.decimal),
+          [],
+          TOKEN_PROGRAM_ID
+        )
       );
 
       const {
@@ -74,7 +78,6 @@ export const TokenBurn = () => {
       } = await connection.getLatestBlockhashAndContext();
 
       try {
-
         const burnTransaction = new Transaction();
         burnTransaction.add(ix);
 
@@ -88,7 +91,36 @@ export const TokenBurn = () => {
           lastValidBlockHeight,
           signature: burnSignature,
         });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
 
+  const burnTransaction = async () => {
+    if (publicKey && selectedToken && selectedHolder) {
+      const ix = await burnToken(publicKey, new PublicKey(selectedToken.hex), new PublicKey(selectedHolder), amountToBeBurn * Math.pow(10, selectedToken.decimal));
+
+      const {
+        context: { slot: minContextSlot },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        value: { blockhash, lastValidBlockHeight },
+      } = await connection.getLatestBlockhashAndContext();
+
+      try {
+        const burnTransaction = new Transaction();
+        burnTransaction.add(ix);
+
+        const burnSignature = await sendTransaction(burnTransaction, connection, {
+          minContextSlot,
+          signers: [],
+        });
+
+        await connection.confirmTransaction({
+          blockhash,
+          lastValidBlockHeight,
+          signature: burnSignature,
+        });
       } catch (error) {
         console.log(error);
       }
@@ -107,22 +139,6 @@ export const TokenBurn = () => {
     init();
   }, [connection, publicKey]);
 
-  useEffect(() => {
-    const fetch = async () => {
-      if (selectedToken) {
-        const getLargest = await getLargestAccounts(
-          connection,
-          new PublicKey(selectedToken.hex)
-        );
-        // setActionLoader(false);
-        console.log(getLargest.value[0].address.toBase58());
-        setHolders(getLargest.value);
-      }
-    };
-
-    fetch();
-  }, [connection, selectedToken]);
-
   console.log(holders);
 
   return (
@@ -138,11 +154,9 @@ export const TokenBurn = () => {
               <InputLabel id="selectLabel">Select a Token</InputLabel>
               <Select
                 value={selectedToken?.hex || ""}
-                label="CEP-48 Token"
+                label=" Token"
                 onChange={(e: any) => {
-                  const token = myTokens.find(
-                    (tkn: any) => tkn.hex === e.target.value
-                  );
+                  const token = myTokens.find((tkn: any) => tkn.hex === e.target.value);
                   if (token != undefined) {
                     setSelectedToken(token);
                   }
@@ -166,7 +180,7 @@ export const TokenBurn = () => {
                 <InputLabel id="selectLabel">Select a Holder</InputLabel>
                 <Select
                   value={selectedHolder}
-                  label="CEP-48 Token"
+                  label=" Token"
                   onChange={(e: any) => {
                     setSelectedHolder(e.target.value);
                   }}
@@ -175,10 +189,7 @@ export const TokenBurn = () => {
                 >
                   {holders.map((holder: any) => {
                     return (
-                      <MenuItem
-                        key={holder.address.toBase58()}
-                        value={holder.address.toBase58()}
-                      >
+                      <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
                         {holder.address.toBase58()}
                       </MenuItem>
                     );
@@ -188,12 +199,7 @@ export const TokenBurn = () => {
             </Grid>
           )}
 
-          <Grid
-            container
-            display={"flex"}
-            justifyContent={"center"}
-            direction={"column"}
-          >
+          <Grid container display={"flex"} justifyContent={"center"} direction={"column"}>
             <Grid item display={"flex"} justifyContent={"center"}>
               <CustomInput
                 id=""
@@ -209,13 +215,8 @@ export const TokenBurn = () => {
               ></CustomInput>
             </Grid>
             <Grid item paddingX={"0.25rem"}>
-              <Typography
-                marginTop={"0.25rem"}
-                variant="caption"
-                display={"flex"}
-                justifyContent={"start"}
-              >
-                Burnable token amount:
+              <Typography marginTop={"0.25rem"} variant="caption" display={"flex"} justifyContent={"start"}>
+                Token amount
               </Typography>
             </Grid>
           </Grid>
@@ -226,6 +227,17 @@ export const TokenBurn = () => {
               onClick={() => {
                 if (publicKey) {
                   burnTransaction();
+                } else {
+                  console.log("olmadi");
+                }
+              }}
+            ></CustomButton>
+            <CustomButton
+              label="Mint Token"
+              disable={amountToBeBurn <= 0}
+              onClick={() => {
+                if (publicKey) {
+                  mintTransaction();
                 } else {
                   console.log("olmadi");
                 }
