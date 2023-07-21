@@ -49,7 +49,16 @@ export const MyTokens = () => {
         setActionLoader(false);
       }
     };
+
     init();
+
+    const interval = setInterval(() => {
+      init();
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [connection, publicKey]);
 
   const listToken = () => {
