@@ -8,6 +8,8 @@ import { CustomButton } from "../../components/CustomButton";
 import { freezeAccount, getLargestAccounts } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { ACCOUNT_STATE } from "../../utils/enum";
+import toastr from "toastr";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -42,6 +44,7 @@ export const FreezeAccount = () => {
   const [holders, setHolders] = useState<any>([]);
   const [selectedHolder, setSelectedHolder] = useState<string>("");
   const classes = useStyles();
+  const navigate = useNavigate();
 
   const freezeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
@@ -67,8 +70,11 @@ export const FreezeAccount = () => {
           lastValidBlockHeight,
           signature: freezeSignature,
         });
-      } catch (error) {
-        console.log(error);
+
+        toastr.success("Freeze account completed successfully.");
+        navigate("/my-tokens");
+      } catch (error: any) {
+        toastr.error(error);
       }
     }
   };
@@ -94,7 +100,7 @@ export const FreezeAccount = () => {
         const filteredData = getLargest.value.filter((gl, index) => {
           if (activeAccounts[index]?.toString() != ACCOUNT_STATE.FROZEN) {
             return gl;
-          } 
+          }
         });
         setHolders(filteredData);
       }

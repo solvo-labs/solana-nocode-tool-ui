@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Divider,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Theme,
-  Typography,
-} from "@mui/material";
+import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { accountState, fetchUserTokens } from "../../lib";
@@ -18,6 +8,8 @@ import { CustomButton } from "../../components/CustomButton";
 import { closeAccount, getLargestAccounts } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { ACCOUNT_STATE } from "../../utils/enum";
+import toastr from "toastr";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -52,14 +44,11 @@ export const CloseAccount = () => {
   const [holders, setHolders] = useState<any>([]);
   const [selectedHolder, setSelectedHolder] = useState<string>("");
   const classes = useStyles();
+  const navigate = useNavigate();
 
   const closeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
-      const ix = await closeAccount(
-        new PublicKey(selectedHolder),
-        new PublicKey(selectedToken.hex),
-        publicKey
-      );
+      const ix = await closeAccount(new PublicKey(selectedHolder), new PublicKey(selectedToken.hex), publicKey);
 
       const {
         context: { slot: minContextSlot },
@@ -71,22 +60,21 @@ export const CloseAccount = () => {
         const closeTransaction = new Transaction();
         closeTransaction.add(ix);
 
-        const closeSignature = await sendTransaction(
-          closeTransaction,
-          connection,
-          {
-            minContextSlot,
-            signers: [],
-          }
-        );
+        const closeSignature = await sendTransaction(closeTransaction, connection, {
+          minContextSlot,
+          signers: [],
+        });
 
         await connection.confirmTransaction({
           blockhash,
           lastValidBlockHeight,
           signature: closeSignature,
         });
-      } catch (error) {
-        console.log(error);
+
+        toastr.success("Close account created Successfully");
+        navigate("/my-tokens");
+      } catch (error: any) {
+        toastr.error(error);
       }
     }
   };
@@ -106,14 +94,9 @@ export const CloseAccount = () => {
   useEffect(() => {
     const fetch = async () => {
       if (selectedToken) {
-        const getLargest = await getLargestAccounts(
-          connection,
-          new PublicKey(selectedToken.hex)
-        );
+        const getLargest = await getLargestAccounts(connection, new PublicKey(selectedToken.hex));
         // setActionLoader(false);
-        const activeAccounts = getLargest.value.map((gt) =>
-          accountState(connection, gt.address)
-        );
+        const activeAccounts = getLargest.value.map((gt) => accountState(connection, gt.address));
         const activeStatus = await Promise.all(activeAccounts);
         const filteredData = getLargest.value.filter((gl, index) => {
           if (activeStatus[index]?.toString() == ACCOUNT_STATE.FROZEN) {
@@ -142,9 +125,7 @@ export const CloseAccount = () => {
                 value={selectedToken?.hex || ""}
                 label="Token"
                 onChange={(e: any) => {
-                  const token = myTokens.find(
-                    (tkn: any) => tkn.hex === e.target.value
-                  );
+                  const token = myTokens.find((tkn: any) => tkn.hex === e.target.value);
                   if (token != undefined) {
                     setSelectedToken(token);
                   }
@@ -177,10 +158,7 @@ export const CloseAccount = () => {
                 >
                   {holders.map((holder: any) => {
                     return (
-                      <MenuItem
-                        key={holder.address.toBase58()}
-                        value={holder.address.toBase58()}
-                      >
+                      <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
                         {holder.address.toBase58()}
                       </MenuItem>
                     );

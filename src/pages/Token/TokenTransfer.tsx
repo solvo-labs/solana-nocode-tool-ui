@@ -2,25 +2,15 @@ import { useEffect, useState } from "react";
 import { createTransferInstruction, getAccount } from "@solana/spl-token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import {
-  Grid,
-  Typography,
-  Divider,
-  Stack,
-  Theme,
-  CircularProgress,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  InputLabel,
-  FormControl,
-} from "@mui/material";
+import { Grid, Typography, Divider, Stack, Theme, CircularProgress, Select, MenuItem, SelectChangeEvent, InputLabel, FormControl } from "@mui/material";
 import { CustomButton } from "../../components/CustomButton";
 import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
 import { fetchUserTokens } from "../../lib";
 import { getOrCreateAssociatedTokenAccount } from "../../lib/token";
 import { TokenData } from "../../utils/types";
+import { useNavigate } from "react-router-dom";
+import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -46,6 +36,7 @@ export const TokenTransfer = () => {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const classes = useStyles();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const init = async () => {
@@ -72,17 +63,8 @@ export const TokenTransfer = () => {
         const destination = new PublicKey(destinationPubkey);
         const selectedTokenPubkey = new PublicKey(selectedToken.hex);
 
-        const { associatedToken } = getOrCreateAssociatedTokenAccount(
-          selectedTokenPubkey,
-          publicKey,
-          publicKey
-        );
-        const { associatedToken: toAssociatedToken, transaction: tx2 } =
-          getOrCreateAssociatedTokenAccount(
-            selectedTokenPubkey,
-            publicKey,
-            destination
-          );
+        const { associatedToken } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, publicKey);
+        const { associatedToken: toAssociatedToken, transaction: tx2 } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, destination);
 
         const signature2 = await sendTransaction(tx2, connection, {
           minContextSlot,
@@ -97,14 +79,7 @@ export const TokenTransfer = () => {
 
         const toAccount = await getAccount(connection, toAssociatedToken);
 
-        const transaction = new Transaction().add(
-          createTransferInstruction(
-            account.address,
-            toAccount.address,
-            publicKey,
-            amount * Math.pow(10, selectedToken.decimal)
-          )
-        );
+        const transaction = new Transaction().add(createTransferInstruction(account.address, toAccount.address, publicKey, amount * Math.pow(10, selectedToken.decimal)));
 
         const signature = await sendTransaction(transaction, connection, {
           minContextSlot,
@@ -114,6 +89,9 @@ export const TokenTransfer = () => {
           lastValidBlockHeight,
           signature,
         });
+
+        toastr.success("Transfer completed successfully.");
+        navigate("/my-tokens");
       }
     } catch (error) {
       console.log(error);
@@ -145,25 +123,16 @@ export const TokenTransfer = () => {
         </Grid>
         <Grid item marginTop={"2rem"}>
           <Stack direction={"column"} spacing={4} width={"100%"}>
-            <Grid
-              container
-              display={"flex"}
-              justifyContent={"center"}
-              direction={"column"}
-            >
+            <Grid container display={"flex"} justifyContent={"center"} direction={"column"}>
               <Grid item display={"flex"} justifyContent={"center"}>
                 <FormControl fullWidth>
-                  <InputLabel id="selectLabel">
-                    Select an CEP-48 Token
-                  </InputLabel>
+                  <InputLabel id="selectLabel">Select an CEP-48 Token</InputLabel>
                   <Select
                     value={selectedToken ? selectedToken.hex : "default"}
                     label="ERC-20 Token"
                     variant="outlined"
                     onChange={(event: SelectChangeEvent) => {
-                      const selectedData = tokens.find(
-                        (tk: any) => tk.hex === event.target.value
-                      );
+                      const selectedData = tokens.find((tk: any) => tk.hex === event.target.value);
                       setSelectedToken(selectedData);
                     }}
                     id={"transferSelect"}
@@ -180,16 +149,8 @@ export const TokenTransfer = () => {
                 </FormControl>
               </Grid>
               <Grid item>
-                <Typography
-                  marginTop={"0.25rem"}
-                  variant="caption"
-                  display={"flex"}
-                  justifyContent={"start"}
-                >
-                  {selectedToken
-                    ? "Balance: " +
-                      selectedToken.amount / Math.pow(10, selectedToken.decimal)
-                    : "select token"}
+                <Typography marginTop={"0.25rem"} variant="caption" display={"flex"} justifyContent={"start"}>
+                  {selectedToken ? "Balance: " + selectedToken.amount / Math.pow(10, selectedToken.decimal) : "select token"}
                 </Typography>
               </Grid>
             </Grid>
