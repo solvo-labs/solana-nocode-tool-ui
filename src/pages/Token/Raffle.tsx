@@ -7,32 +7,8 @@ import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
 import { error } from "toastr";
 import toastr from "toastr";
 import { makeStyles } from "@mui/styles";
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  Divider,
-  Grid,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Modal,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Theme,
-  Typography,
-} from "@mui/material";
-import { CustomInput } from "../../components/CustomInput";
-import { withdrawStake, deactivateStake } from "../../lib/stake";
+import { Button, Card, CircularProgress, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Theme, Typography } from "@mui/material";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
 const useStyles = makeStyles((theme: Theme) => ({
   cardContainer: {
@@ -112,7 +88,7 @@ export const Raffle = () => {
   const [program, setProgram] = useState<Program<Idl>>();
   const [masterAddress, setMasterAddress] = useState<PublicKey>();
   const [lastRaffleId, setLastRaffleId] = useState<number>(0);
-  const [newTicketPrice, setNewTicketPrice] = useState<number>(0.1);
+  const [newTicketPrice, setNewTicketPrice] = useState<number>(0.01);
   const [activeLotteries, setActiveLotteries] = useState<any>([]);
   // const [selectedLotteryId, setSelectedLotteryId] = useState<number>();
   const [loading, setLoading] = useState<boolean>(true);
@@ -121,7 +97,7 @@ export const Raffle = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (wallet) {
+      if (wallet && publicKey) {
         const programInfo = getProgram(connection, wallet);
         setProgram(programInfo);
 
@@ -144,37 +120,16 @@ export const Raffle = () => {
 
         const lotteryInfos = await Promise.all(lotteryInfoPromises);
 
-        const activeLotteriesInfo = lotteryInfos.filter((li: any) => li.claimed === false);
-        console.log(activeLotteriesInfo);
+        const activeLotteriesInfo = lotteryInfos.filter((li: any) => li.claimed === false && li.ticketPrice.toString() > 0);
+
         setActiveLotteries(activeLotteriesInfo);
 
         setLoading(false);
-
-        // const lotteryHistory = lotteryInfos.filter((li: any) => li.claimed);
-
-        // const lotteryAddress = await getLotteryAddress(master.lastId as any);
-
-        // const lottery = await program.account.lottery.fetch(lotteryAddress);
-
-        // const totalPrize = getTotalPrize(lottery as any);
-
-        // console.log(lottery);
-        // console.log(totalPrize);
-
-        // const userTickets = await program.account.ticket.all([
-        //   {
-        //     memcmp: {
-        //       bytes: bs58.encode(new BN(lottery.lastId as any).toArrayLike(Buffer, "le", 4)),
-        //       offset: 12,
-        //     },
-        //   },
-        //   { memcmp: { bytes: wallet.publicKey.toBase58(), offset: 16 } },
-        // ]);
       }
     };
 
     init();
-  }, [connection, wallet]);
+  }, [connection, publicKey, wallet]);
 
   const create = async () => {
     const lotteryAddress = await getLotteryAddress(lastRaffleId + 1);
@@ -217,46 +172,64 @@ export const Raffle = () => {
     }
   };
 
-  const pickWinner = async () => {
+  const pickWinner = async (lotteryId: number) => {
     try {
-      const lotteryId = 52;
-      const program = getProgram(connection, wallet!);
-      const lotteryAddress = await getLotteryAddress(lotteryId);
-      const lottery = await program.account.lottery.fetch(lotteryAddress);
+      if (program) {
+        const lotteryAddress = await getLotteryAddress(lotteryId);
 
-      const txHash = await program.methods
-        .pickWinner(lotteryId)
-        .accounts({
-          lottery: lotteryAddress,
-          authority: publicKey || "",
-        })
-        .rpc();
+        const tx = await program.methods
+          .pickWinner(lotteryId)
+          .accounts({
+            lottery: lotteryAddress,
+            authority: publicKey || "",
+          })
+          .rpc();
 
-      console.log(txHash);
+        toastr.success(tx, "Winner Selected Successfullx txid : ");
+      }
     } catch (err) {
       console.log(error);
     }
   };
 
-  const claim = async () => {
+  const claim = async (lotteryId: number) => {
     try {
-      const lotteryId = 52;
-      const program = getProgram(connection, wallet!);
-      const lotteryAddress = await getLotteryAddress(lotteryId);
-      const lottery = await program.account.lottery.fetch(lotteryAddress);
-      console.log(lottery);
+      if (program && publicKey) {
+        const lotteryAddress = await getLotteryAddress(lotteryId);
+        const lottery = await program.account.lottery.fetch(lotteryAddress);
+        const winnerId: number = lottery.winnerId as number;
 
-      const txHash = await program.methods
-        .claimPrize(lotteryId, lottery.winnerId as number)
-        .accounts({
-          lottery: lotteryAddress,
-          ticket: await getTicketAddress(lotteryAddress, lottery.winnerId as number),
-          authority: publicKey || "",
-          systemProgram: SystemProgram.programId,
-        })
-        .rpc();
+        const userTickets = await program.account.ticket.all([
+          {
+            memcmp: {
+              bytes: bs58.encode(new BN(lotteryId).toArrayLike(Buffer, "le", 4)),
+              offset: 12,
+            },
+          },
+          { memcmp: { bytes: publicKey.toBase58(), offset: 16 } },
+        ]);
 
-      console.log(txHash);
+        const userTicketIds: number[] = [];
+
+        userTickets.forEach((ut: any) => {
+          userTicketIds.push(ut.account.id);
+        });
+
+        if (userTicketIds.includes(winnerId)) {
+          const tx = await program.methods
+            .claimPrize(lotteryId, lottery.winnerId as number)
+            .accounts({
+              lottery: lotteryAddress,
+              ticket: await getTicketAddress(lotteryAddress, lottery.winnerId as number),
+              authority: publicKey || "",
+              systemProgram: SystemProgram.programId,
+            })
+            .rpc();
+          toastr.success(tx, "Claim completed  Successfullx txid : ");
+        } else {
+          toastr.warning("You'r not winner, You cant claim");
+        }
+      }
     } catch (err) {
       console.log(error);
     }
@@ -286,8 +259,6 @@ export const Raffle = () => {
       </div>
     );
   }
-
-  console.log(activeLotteries);
 
   return (
     <div
@@ -369,6 +340,17 @@ export const Raffle = () => {
                         }}
                       >
                         <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                          Prize
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        style={{
+                          paddingRight: "8px",
+                          borderBottom: "1px solid #2C6495",
+                        }}
+                      >
+                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
                           Authority
                         </Typography>
                       </TableCell>
@@ -384,22 +366,51 @@ export const Raffle = () => {
                       >
                         <TableCell>
                           <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
-                            <Button
-                              variant="contained"
-                              color="secondary"
-                              size="small"
-                              onClick={() => {
-                                buyTicket(lottery.id);
-                              }}
-                            >
-                              Button
-                            </Button>
+                            {lottery.winnerId === null && (
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                onClick={() => {
+                                  buyTicket(lottery.id);
+                                }}
+                              >
+                                Buy Ticket
+                              </Button>
+                            )}
+
+                            {lottery.authority.toBase58() === publicKey?.toBase58() && lottery.winnerId === null && (
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                onClick={() => {
+                                  pickWinner(lottery.id);
+                                }}
+                              >
+                                Pick Winner
+                              </Button>
+                            )}
+
+                            {lottery.winnerId !== null && (
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                onClick={() => {
+                                  claim(lottery.id);
+                                }}
+                              >
+                                Check && Claim
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
 
                         <TableCell align="right">{lottery.id}</TableCell>
                         <TableCell align="right">{lottery.lastTicketId}</TableCell>
                         <TableCell align="right">{lottery.ticketPrice / LAMPORTS_PER_SOL} SOL</TableCell>
+                        <TableCell align="right">{(lottery.ticketPrice * lottery.lastTicketId) / LAMPORTS_PER_SOL} SOL</TableCell>
                         <TableCell align="right">{lottery.authority.toBase58()}</TableCell>
                       </TableRow>
                     ))}
