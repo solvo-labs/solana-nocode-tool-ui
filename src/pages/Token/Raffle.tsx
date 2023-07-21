@@ -1,31 +1,165 @@
-import { useEffect } from "react";
-import { getLotteryAddress, getMasterAddress, getProgram, getTicketAddress, getTotalPrize } from "../../lib/raffles/program";
+import { ChangeEvent, useEffect, useState } from "react";
+import { getLotteryAddress, getMasterAddress, getProgram, getTicketAddress } from "../../lib/raffles/program";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
-import { BN } from "@project-serum/anchor";
-import { LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
+
+import { BN, Idl, Program } from "@project-serum/anchor";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
 import { error } from "toastr";
+import toastr from "toastr";
+import { makeStyles } from "@mui/styles";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CircularProgress,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Theme,
+  Typography,
+} from "@mui/material";
+import { CustomInput } from "../../components/CustomInput";
+import { withdrawStake, deactivateStake } from "../../lib/stake";
+
+const useStyles = makeStyles((theme: Theme) => ({
+  cardContainer: {
+    justifyContent: "center",
+    marginTop: "1rem",
+    padding: "1rem !important",
+    [theme.breakpoints.down("sm")]: {
+      padding: "1rem",
+    },
+  },
+  tableContainer: {
+    justifyContent: "center",
+    padding: "1rem 1rem 2rem 1rem;",
+    [theme.breakpoints.down("sm")]: {
+      padding: "1rem",
+    },
+  },
+  item: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "0 !important",
+    margin: "0 !important",
+    width: "100%",
+  },
+  card: {
+    width: "100%",
+    marginBottom: "0.8rem",
+    border: "1px solid #2C6495",
+    overflow: "auto !important",
+
+    borderRadius: "1rem !important",
+  },
+  buttonItem: {
+    display: "flex",
+    width: "100%",
+    justifyContent: "flex-end",
+    marginBottom: "1rem !important",
+  },
+  tableItem: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "flex-end",
+    overflowX: "auto",
+    border: "1px solid #2C6495",
+    borderRadius: "1rem",
+  },
+  table: { overflowX: "auto" },
+  tableHeader: {
+    color: "#2C6495 !important",
+    fontWeight: "bold !important",
+  },
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2),
+    position: "relative", // Modal içeriği için göreceli konumlandırma
+  },
+  backButton: {
+    top: theme.spacing(1),
+    left: theme.spacing(1),
+    color: "black",
+    cursor: "pointer",
+  },
+}));
 
 export const Raffle = () => {
+  const classes = useStyles();
   const { connection } = useConnection();
-  const { publicKey, sendTransaction } = useWallet();
+  const { publicKey } = useWallet();
   const wallet = useAnchorWallet();
+  const [program, setProgram] = useState<Program<Idl>>();
+  const [masterAddress, setMasterAddress] = useState<PublicKey>();
+  const [lastRaffleId, setLastRaffleId] = useState<number>(0);
+  const [newTicketPrice, setNewTicketPrice] = useState<number>(0.1);
+  const [activeLotteries, setActiveLotteries] = useState<any>([]);
+  // const [selectedLotteryId, setSelectedLotteryId] = useState<number>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(5);
 
   useEffect(() => {
     const init = async () => {
       if (wallet) {
-        const program = getProgram(connection, wallet);
+        const programInfo = getProgram(connection, wallet);
+        setProgram(programInfo);
 
-        const masterAddress = await getMasterAddress();
-        const master = await program.account.master.fetch(masterAddress);
-        const lotteryAddress = await getLotteryAddress(master.lastId as any);
+        const masterAddressInfo = await getMasterAddress();
+        setMasterAddress(masterAddressInfo);
 
-        const lottery = await program.account.lottery.fetch(lotteryAddress);
+        const master = await programInfo.account.master.fetch(masterAddressInfo);
+        const lastId = master.lastId as number;
+        setLastRaffleId(lastId);
 
-        const totalPrize = getTotalPrize(lottery as any);
+        const lotteryAddressPromises: any = [];
 
-        console.log(lottery);
-        console.log(totalPrize);
+        for (let index = 1; index <= lastId; index++) {
+          lotteryAddressPromises.push(getLotteryAddress(index));
+        }
+
+        const lotteryAddresses = await Promise.all(lotteryAddressPromises);
+
+        const lotteryInfoPromises = lotteryAddresses.map((la) => programInfo.account.lottery.fetch(la));
+
+        const lotteryInfos = await Promise.all(lotteryInfoPromises);
+
+        const activeLotteriesInfo = lotteryInfos.filter((li: any) => li.claimed === false);
+        console.log(activeLotteriesInfo);
+        setActiveLotteries(activeLotteriesInfo);
+
+        setLoading(false);
+
+        // const lotteryHistory = lotteryInfos.filter((li: any) => li.claimed);
+
+        // const lotteryAddress = await getLotteryAddress(master.lastId as any);
+
+        // const lottery = await program.account.lottery.fetch(lotteryAddress);
+
+        // const totalPrize = getTotalPrize(lottery as any);
+
+        // console.log(lottery);
+        // console.log(totalPrize);
 
         // const userTickets = await program.account.ticket.all([
         //   {
@@ -43,37 +177,41 @@ export const Raffle = () => {
   }, [connection, wallet]);
 
   const create = async () => {
-    const lotteryAddress = await getLotteryAddress(51 + 1);
-    const program = getProgram(connection, wallet!);
-    const masterAddress = await getMasterAddress();
+    const lotteryAddress = await getLotteryAddress(lastRaffleId + 1);
 
-    const txHash = await program.methods
-      .createLottery(new BN(0.1).mul(new BN(LAMPORTS_PER_SOL)))
-      .accounts({
-        lottery: lotteryAddress,
-        master: masterAddress,
-        authority: publicKey || "",
-        systemProgram: SystemProgram.programId,
-      })
-      .rpc();
+    if (program && publicKey) {
+      const tx = await program.methods
+        .createLottery(new BN(newTicketPrice * LAMPORTS_PER_SOL))
+        .accounts({
+          lottery: lotteryAddress,
+          master: masterAddress,
+          authority: publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
 
-    console.log(txHash);
+      toastr.success(tx, "New raffle created Successfullx txid : ");
+    }
   };
 
-  const buyTicket = async () => {
+  const buyTicket = async (lotteryId: number) => {
     try {
-      const program = getProgram(connection, wallet!);
-      const lotteryAddress = await getLotteryAddress(52);
-      const lottery = await program.account.lottery.fetch(lotteryAddress);
+      if (program && publicKey) {
+        const lotteryAddress = await getLotteryAddress(lotteryId);
+        const lottery = await program.account.lottery.fetch(lotteryAddress);
 
-      const txHash = await program.methods.buyTicket(52).accounts({
-        lottery: lotteryAddress,
-        ticket: await getTicketAddress(lotteryAddress, (lottery.lastTicketId as number) + 1),
-        buyer: publicKey || "",
-        systemProgram: SystemProgram.programId,
-      });
+        const tx = await program.methods
+          .buyTicket(lotteryId)
+          .accounts({
+            lottery: lotteryAddress,
+            ticket: await getTicketAddress(lotteryAddress, (lottery.lastTicketId as number) + 1),
+            buyer: publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc();
 
-      console.log(txHash);
+        toastr.success(tx, "Bought new ticket Successfullx txid : ");
+      }
     } catch (err) {
       console.log(err);
     }
@@ -124,13 +262,199 @@ export const Raffle = () => {
     }
   };
 
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "4rem",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  console.log(activeLotteries);
+
   return (
-    <div>
-      <span>Hello raffle</span>
-      <div onClick={create}>Create</div>
-      <div onClick={buyTicket}>Buy</div>
-      <div onClick={pickWinner}>Winner</div>
-      <div onClick={claim}>Claim</div>
+    <div
+      style={{
+        height: "100vh",
+        width: "100%",
+        overflowY: "auto",
+        overflowX: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        marginTop: "6rem",
+      }}
+    >
+      <Grid container className={classes.tableContainer}>
+        <h2 style={{ margin: 0 }}>Active Raffles</h2>
+        <Grid item className={classes.buttonItem}>
+          <Button variant="contained" color="primary" size="small" onClick={create}>
+            CREATE A NEW RAFFLE
+          </Button>
+        </Grid>
+        <Grid item justifyContent={"center"} className={classes.tableItem} sx={{ flexDirection: "column !important" }}>
+          {activeLotteries.length !== 0 ? (
+            <div>
+              <TableContainer component={Paper} className={classes.table}>
+                <Table aria-label="proposal table" stickyHeader style={{ minWidth: "800px" }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        align="center"
+                        style={{
+                          paddingRight: "8px",
+                          borderBottom: "1px solid #2C6495",
+                        }}
+                      >
+                        <Typography noWrap className={classes.tableHeader} variant="subtitle1">
+                          Actions
+                        </Typography>
+                      </TableCell>
+
+                      <TableCell
+                        align="right"
+                        style={{
+                          paddingRight: "8px",
+                          borderBottom: "1px solid #2C6495",
+                        }}
+                      >
+                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                          Raffle No #
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        style={{
+                          paddingRight: "8px",
+                          borderBottom: "1px solid #2C6495",
+                        }}
+                      >
+                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                          Ticket Count
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        style={{
+                          paddingRight: "8px",
+                          borderBottom: "1px solid #2C6495",
+                        }}
+                      >
+                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                          Ticket Price
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        style={{
+                          paddingRight: "8px",
+                          borderBottom: "1px solid #2C6495",
+                        }}
+                      >
+                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                          Authority
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {activeLotteries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((lottery: any, index: number) => (
+                      <TableRow
+                        key={index}
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                      >
+                        <TableCell>
+                          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+                            <Button
+                              variant="contained"
+                              color="secondary"
+                              size="small"
+                              onClick={() => {
+                                buyTicket(lottery.id);
+                              }}
+                            >
+                              Button
+                            </Button>
+                          </div>
+                        </TableCell>
+
+                        <TableCell align="right">{lottery.id}</TableCell>
+                        <TableCell align="right">{lottery.lastTicketId}</TableCell>
+                        <TableCell align="right">{lottery.ticketPrice / LAMPORTS_PER_SOL} SOL</TableCell>
+                        <TableCell align="right">{lottery.authority.toBase58()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={activeLotteries.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </div>
+          ) : (
+            <Grid
+              item
+              md={12}
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                display: "flex",
+              }}
+            >
+              <Card
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: "1rem",
+                  padding: "5rem 2.5rem",
+                  margin: "2rem",
+                  boxShadow: "0 0 10px 0 rgba(0,0,0,0.1)",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  display: "flex",
+                }}
+              >
+                <Typography
+                  style={{
+                    color: "#1689c5",
+                    fontSize: "30px",
+                    fontWeight: "bold",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    display: "flex",
+                  }}
+                >
+                  There are no stakes
+                </Typography>
+              </Card>
+            </Grid>
+          )}
+        </Grid>
+      </Grid>
     </div>
   );
 };
