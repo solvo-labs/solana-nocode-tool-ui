@@ -148,6 +148,11 @@ export const Raffle = () => {
     };
 
     init();
+    const interval = setInterval(() => init(), 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [connection, publicKey, wallet]);
 
   const create = async () => {
