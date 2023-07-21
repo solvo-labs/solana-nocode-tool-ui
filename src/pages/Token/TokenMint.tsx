@@ -9,6 +9,8 @@ import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
 import { Divider, Grid, Stack, Theme, Typography } from "@mui/material";
 import { CustomButton } from "../../components/CustomButton";
+import { useNavigate } from "react-router-dom";
+import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -24,6 +26,7 @@ const TokenMint: React.FC = () => {
   const classes = useStyles();
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+  const navigate = useNavigate();
 
   const [tokenData, setTokenData] = useState<Token>({
     name: "",
@@ -67,8 +70,11 @@ const TokenMint: React.FC = () => {
 
         const signature = await sendTransaction(finalTransactions, connection, { minContextSlot });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
-      } catch (error) {
-        console.log(error);
+
+        toastr.success("Token Mint completed successfully");
+        navigate("/my-tokens");
+      } catch (error: any) {
+        toastr.error(error);
       }
     }
   };
