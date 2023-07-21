@@ -9,6 +9,8 @@ import { CustomButton } from "../../components/CustomButton";
 import { burnToken, getLargestAccounts } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, createMintToInstruction } from "@solana/spl-token";
+import { useNavigate } from "react-router-dom";
+import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -43,9 +45,10 @@ export const TokenMintAndBurn = () => {
 
   const [holders, setHolders] = useState<any>([]);
   const [amountToBeBurn, setAmountToBeBurn] = useState<number>(0);
-  const [selectedHolder, setSelectedHolder] = useState<any>("");
+  const [selectedHolder, setSelectedHolder] = useState<any>();
   const [myAddresses, setMyAddresses] = useState<any[]>([]);
   const classes = useStyles();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetch = async () => {
@@ -97,6 +100,9 @@ export const TokenMintAndBurn = () => {
           lastValidBlockHeight,
           signature: burnSignature,
         });
+
+        toastr.success("Mint completed Successfully");
+        navigate("/my-tokens");
       } catch (error) {
         console.log(error);
       }
@@ -127,6 +133,9 @@ export const TokenMintAndBurn = () => {
           lastValidBlockHeight,
           signature: burnSignature,
         });
+
+        toastr.success("Burn completed Successfully");
+        navigate("/my-tokens");
       } catch (error) {
         console.log(error);
       }
@@ -145,12 +154,10 @@ export const TokenMintAndBurn = () => {
     init();
   }, [connection, publicKey]);
 
-  console.log(holders);
-
   return (
     <Grid container className={classes.container} direction={"column"}>
       <Grid item className={classes.title}>
-        <Typography variant="h5">Burn token</Typography>
+        <Typography variant="h5">Mint && Burn token</Typography>
         <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
       <Grid item marginTop={"2rem"}>
@@ -185,10 +192,11 @@ export const TokenMintAndBurn = () => {
               <FormControl fullWidth>
                 <InputLabel id="selectLabel">Select a Holder</InputLabel>
                 <Select
-                  value={selectedHolder}
+                  value={selectedHolder ? selectedHolder.address.toBase58() : ""}
                   label=" Token"
                   onChange={(e: any) => {
-                    setSelectedHolder(e.target.value);
+                    const currentHolder = holders.find((hf: any) => hf.address.toBase58() === e.target.value);
+                    setSelectedHolder(currentHolder);
                   }}
                   className={classes.input}
                   id={"custom-select"}
@@ -220,13 +228,15 @@ export const TokenMintAndBurn = () => {
                 value={amountToBeBurn}
               ></CustomInput>
             </Grid>
-            <Grid item paddingX={"0.25rem"}>
-              <Typography marginTop={"0.25rem"} variant="caption" display={"flex"} justifyContent={"start"}>
-                Token amount
-              </Typography>
-            </Grid>
+            {selectedHolder && (
+              <Grid item paddingX={"0.25rem"}>
+                <Typography marginTop={"0.25rem"} variant="caption" display={"flex"} justifyContent={"start"}>
+                  Token amount : {selectedHolder.uiAmount}
+                </Typography>
+              </Grid>
+            )}
           </Grid>
-          <Grid item display={"flex"} justifyContent={"center"}>
+          <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <CustomButton
               label="Burn Token"
               disable={amountToBeBurn <= 0}
@@ -238,6 +248,7 @@ export const TokenMintAndBurn = () => {
                 }
               }}
             ></CustomButton>
+
             <CustomButton
               label="Mint Token"
               disable={amountToBeBurn <= 0}
