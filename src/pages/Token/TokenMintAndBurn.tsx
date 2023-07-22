@@ -67,12 +67,13 @@ export const TokenMintAndBurn = () => {
     fetch();
   }, [connection, publicKey, selectedToken]);
 
+
   const mintTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
       const ix = new Transaction().add(
         createMintToInstruction(
           new PublicKey(selectedToken.hex),
-          new PublicKey(selectedHolder),
+          selectedHolder.address,
           publicKey,
           amountToBeBurn * Math.pow(10, selectedToken.decimal),
           [],
@@ -111,7 +112,7 @@ export const TokenMintAndBurn = () => {
 
   const burnTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
-      const ix = await burnToken(publicKey, new PublicKey(selectedToken.hex), new PublicKey(selectedHolder), amountToBeBurn * Math.pow(10, selectedToken.decimal));
+      const ix = await burnToken(publicKey, new PublicKey(selectedToken.hex), selectedHolder.address, amountToBeBurn * Math.pow(10, selectedToken.decimal));
 
       const {
         context: { slot: minContextSlot },
