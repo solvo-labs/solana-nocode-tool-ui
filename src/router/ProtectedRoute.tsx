@@ -20,6 +20,7 @@ const ProtectedRoute: React.FC = () => {
   const { connected, connecting } = useWallet();
 
   useEffect(() => {
+    console.log(localStorage.getItem("walletName"));
     if (localStorage.getItem("walletName")) {
       setLoading(false);
     } else {
