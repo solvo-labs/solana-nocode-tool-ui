@@ -17,16 +17,21 @@ const ProtectedRoute: React.FC = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { connected, connecting } = useWallet();
+  const { connected, publicKey, connecting } = useWallet();
 
   useEffect(() => {
-    console.log(localStorage.getItem("walletName"));
-    if (localStorage.getItem("walletName")) {
-      setLoading(false);
-    } else {
+    if (publicKey === undefined) {
       setLoading(false);
     }
-  }, []);
+
+    if (publicKey) {
+      setLoading(false);
+    }
+
+    if (localStorage.getItem("walletName") === null) {
+      setLoading(false);
+    }
+  }, [publicKey]);
 
   if (loading || connecting) {
     return (
