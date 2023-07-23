@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import { Grid, LinearProgress, Theme } from "@mui/material";
 import TopBar from "../components/TopBar";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
