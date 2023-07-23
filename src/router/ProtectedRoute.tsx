@@ -17,13 +17,9 @@ const ProtectedRoute: React.FC = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { connected, publicKey, connecting, wallet } = useWallet();
+  const { connected, publicKey, connecting } = useWallet();
 
   useEffect(() => {
-    if (wallet === null) {
-      setLoading(false);
-    }
-
     if (publicKey === undefined) {
       setLoading(false);
     }
