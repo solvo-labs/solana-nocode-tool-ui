@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import { Grid, LinearProgress, Theme } from "@mui/material";
 import TopBar from "../components/TopBar";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
@@ -18,10 +18,6 @@ const ProtectedRoute: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const { connected, publicKey, connecting } = useWallet();
-
-  console.log(connected, "connected");
-  console.log(publicKey, "publicKey");
-  console.log(connecting, "connecting");
 
   useEffect(() => {
     if (publicKey === undefined) {
