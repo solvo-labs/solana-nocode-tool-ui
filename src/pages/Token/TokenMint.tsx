@@ -14,11 +14,16 @@ import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
-    textAlign: "center",
-    minWidth: "25rem",
+    minWidth: "30vw",
     [theme.breakpoints.down("sm")]: {
-      minWidth: "10rem",
+      minWidth: "80vw",
     },
+  },
+  title: {
+    textAlign: "center",
+  },
+  select: {
+    width: "100%",
   },
 }));
 
@@ -85,7 +90,7 @@ const TokenMint: React.FC = () => {
     <div>
       <Grid container className={classes.container} direction={"column"}>
         <Grid item marginBottom={"2rem"}>
-          <Typography variant="h5" marginTop="3rem">
+          <Typography variant="h5" className={classes.title}>
             Token Mint
           </Typography>
           <Divider sx={{ marginTop: "1rem", background: "white" }} />

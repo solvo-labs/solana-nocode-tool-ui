@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
+import { CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { fetchUserTokens } from "../../lib";
@@ -42,6 +42,8 @@ export const TokenMintAndBurn = () => {
   const { connection } = useConnection();
   const [myTokens, setMyTokens] = useState<TokenData[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenData>();
+  const [loading, setLoading] = useState<boolean>(true);
+
 
   const [holders, setHolders] = useState<any>([]);
   const [amountToBeBurn, setAmountToBeBurn] = useState<number>(0);
@@ -149,16 +151,33 @@ export const TokenMintAndBurn = () => {
         const data = await fetchUserTokens(connection, publicKey);
 
         setMyTokens(data);
+        setLoading(false);
         // console.log(data.filter((dp)=> dp.hex === "BpAC9vBjvhqQAewx5E1RdqZNrNAD2wbTQP7muK5NNpBJ" ));
       }
     };
     init();
   }, [connection, publicKey]);
 
+  if (  loading) {
+    return (
+      <div
+        style={{
+          height: "4rem",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
+
   return (
     <Grid container className={classes.container} direction={"column"}>
       <Grid item className={classes.title}>
-        <Typography variant="h5">Mint && Burn token</Typography>
+        <Typography variant="h5">Mint & Burn token</Typography>
         <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
       <Grid item marginTop={"2rem"}>
