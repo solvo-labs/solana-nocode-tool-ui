@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
@@ -67,18 +68,10 @@ export const TokenMintAndBurn = () => {
     fetch();
   }, [connection, publicKey, selectedToken]);
 
-
   const mintTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
       const ix = new Transaction().add(
-        createMintToInstruction(
-          new PublicKey(selectedToken.hex),
-          selectedHolder.address,
-          publicKey,
-          amountToBeBurn * Math.pow(10, selectedToken.decimal),
-          [],
-          TOKEN_PROGRAM_ID
-        )
+        createMintToInstruction(new PublicKey(selectedToken.hex), selectedHolder.address, publicKey, amountToBeBurn * Math.pow(10, selectedToken.decimal), [], TOKEN_PROGRAM_ID)
       );
 
       const {
@@ -205,7 +198,7 @@ export const TokenMintAndBurn = () => {
                   {holders.map((holder: any) => {
                     return (
                       <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
-                        {myAddresses.includes(holder.address.toBase58()) && "MY Account : "} {holder.address.toBase58()}
+                        {myAddresses.includes(holder.address.toBase58()) && "My Account: "} {holder.address.toBase58()}
                       </MenuItem>
                     );
                   })}
