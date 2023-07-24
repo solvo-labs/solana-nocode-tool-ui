@@ -54,7 +54,7 @@ export const MyTokens = () => {
 
     const interval = setInterval(() => {
       init();
-    }, 1000);
+    }, 5000);
 
     return () => {
       clearInterval(interval);
