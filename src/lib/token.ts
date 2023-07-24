@@ -11,6 +11,7 @@ import {
   getAccount,
   getAssociatedTokenAddressSync,
   getMinimumBalanceForRentExemptMint,
+  Account,
 } from "@solana/spl-token";
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 
@@ -33,16 +34,21 @@ export const createMint = async (connection: Connection, publicKey: PublicKey, f
   return { transaction, toAccount };
 };
 
-export const getOrCreateAssociatedTokenAccount = (mint: PublicKey, payer: PublicKey, owner: PublicKey) => {
+export const getOrCreateAssociatedTokenAccount = async (mint: PublicKey, payer: PublicKey, owner: PublicKey, connection: Connection) => {
+  let account: Account;
   const associatedToken = getAssociatedTokenAddressSync(mint, owner, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
 
-  const transaction = new Transaction().add(createAssociatedTokenAccountInstruction(payer, associatedToken, owner, mint, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID));
-
-  return { transaction, associatedToken };
+  try {
+    account = await getAccount(connection, associatedToken);
+    return { associatedToken, account };
+  } catch {
+    const transaction = new Transaction().add(createAssociatedTokenAccountInstruction(payer, associatedToken, owner, mint, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID));
+    return { associatedToken, transaction };
+  }
 };
 
 export const getTokenBalance = async (connection: Connection, payer: PublicKey, mint: PublicKey) => {
-  const { associatedToken } = getOrCreateAssociatedTokenAccount(mint, payer, payer);
+  const { associatedToken } = await getOrCreateAssociatedTokenAccount(mint, payer, payer, connection);
   const tokenAccount = await getAccount(connection, associatedToken);
   const balance = await connection.getTokenAccountBalance(tokenAccount.address);
 
