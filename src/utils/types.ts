@@ -5,6 +5,8 @@ export type Token = {
   symbol: string;
   amount: number;
   decimal: number;
+  freezeAuthority?: string;
+  authority?: string;
 };
 
 export type TokenData = {
