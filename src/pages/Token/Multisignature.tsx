@@ -11,6 +11,9 @@ import { makeStyles } from "@mui/styles";
 import { CustomInput } from "../../components/CustomInput";
 import { CustomButton } from "../../components/CustomButton";
 import { HighlightOff } from "@mui/icons-material";
+import { createMultiSig } from "../../lib/multisig";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey, Transaction } from "@solana/web3.js";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -38,6 +41,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export const Multisignature = () => {
+  const classes = useStyles();  
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const [signatures, setSignatures] = useState<string[]>([""]);
 
   const addInput = () => {
@@ -58,10 +64,49 @@ export const Multisignature = () => {
     newSignature[index] = e.target.value;
     setSignatures(newSignature);
   };
-  
-  console.log(signatures);
 
-  const classes = useStyles();
+  const lastSignature = signatures[signatures.length - 1];
+  const disable = !(lastSignature != "");
+
+  const signatureTransaction = async () => {
+    if (publicKey) {
+      console.log(signatures);
+
+      const signatureKeys = signatures.map((key: string) => new PublicKey(key));
+      const transaction = await createMultiSig(
+        connection,
+        publicKey,
+        signatureKeys.length,
+        signatureKeys
+      );
+      const {
+        context: { slot: minContextSlot },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        value: { blockhash, lastValidBlockHeight },
+      } = await connection.getLatestBlockhashAndContext();
+      try {
+
+        
+        const signatureTransaction = new Transaction();
+        signatureTransaction.add(transaction);
+
+        const signatureSignature = await sendTransaction(
+          transaction,
+          connection
+        );
+        console.log(signatureSignature);
+
+        await connection.confirmTransaction({
+          blockhash,
+          lastValidBlockHeight,
+          signature: signatureSignature,
+        });
+      } catch (error: any) {
+        toastr.error(error);
+      }
+    }
+  };
+
   return (
     <Grid container className={classes.container} direction={"column"}>
       <Grid item className={classes.title}>
@@ -108,7 +153,7 @@ export const Multisignature = () => {
           >
             <Grid item display={"flex"} justifyContent={"center"}>
               <CustomButton
-                disable={false}
+                disable={disable}
                 label="Add signature"
                 onClick={addInput}
                 key={"key"}
@@ -121,11 +166,9 @@ export const Multisignature = () => {
               marginTop={"1rem"}
             >
               <CustomButton
-                disable={false}
+                disable={disable}
                 label="Confirm signature"
-                onClick={() => {
-                  console.log(signatures);
-                }}
+                onClick={signatureTransaction}
                 key={"key"}
               ></CustomButton>
             </Grid>
