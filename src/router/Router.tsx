@@ -12,6 +12,7 @@ import { FreezeAccount } from "../pages/Token/FreezeAccount";
 import { CloseAccount } from "../pages/Token/CloseAccount";
 import { Raffle } from "../pages/Token/Raffle";
 import NotFoundPage from "../components/NotFound";
+import { Vesting } from "../pages/Tokenomics/Vesting";
 
 const Router: React.FC = () => {
   return (
@@ -28,6 +29,7 @@ const Router: React.FC = () => {
             <Route path="/freeze-account" index element={<FreezeAccount />} />
             <Route path="/close-account" index element={<CloseAccount />} />
             <Route path="/raffle" index element={<Raffle />} />
+            <Route path="/vesting" index element={<Vesting />} />
           </Route>
           <Route path="/login" index element={<Login />} />
           <Route path="*" index element={<NotFoundPage />} />
