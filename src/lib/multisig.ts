@@ -1,7 +1,7 @@
 import { MULTISIG_SIZE, TOKEN_PROGRAM_ID, createInitializeMultisigInstruction, getMinimumBalanceForRentExemptMultisig } from "@solana/spl-token";
 import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 
-export const createMultiSig = async (connection: Connection, owner: PublicKey, signatureCount: number, signers: PublicKey[]) => {
+export const createMultiSig = async (connection: Connection, owner: PublicKey, threshold: number, signers: PublicKey[]) => {
   const lamports = await getMinimumBalanceForRentExemptMultisig(connection);
   const newAccount = Keypair.generate();
 
@@ -13,7 +13,7 @@ export const createMultiSig = async (connection: Connection, owner: PublicKey, s
       lamports,
       programId: TOKEN_PROGRAM_ID,
     }),
-    createInitializeMultisigInstruction(newAccount.publicKey, signers, signatureCount)
+    createInitializeMultisigInstruction(newAccount.publicKey, signers, threshold)
   );
 
   return { transaction, newAccount };
