@@ -88,3 +88,19 @@ export const getVestingMyOwn = async (publicKey: PublicKey) => {
     // handle exception
   }
 };
+
+export const withdraw = async (wallet: AnchorWallet, id: string, amount: number, decimals: number) => {
+  const withdrawStreamParams = {
+    invoker: wallet, // Wallet/Keypair signing the transaction.
+    id: id, // Identifier of a stream to be withdrawn from.
+    amount: getBN(amount, decimals), // Requested amount to withdraw. If stream is completed, the whole amount will be withdrawn.
+  };
+
+  try {
+    const { ixs, tx } = await client.withdraw(withdrawStreamParams);
+
+    return { ixs, tx };
+  } catch (exception) {
+    // handle exception
+  }
+};
