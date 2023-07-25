@@ -86,7 +86,7 @@ export const Vesting = () => {
 
         const newAccount = await getAccount(connection, associatedToken);
 
-        // vestTest(wallet, selectedToken.hex, newAccount.address.toBase58());
+        vestTest(wallet, selectedToken.hex, newAccount.address.toBase58());
 
         // vestMultiTest(wallet, selectedToken.hex, [newAccount.address.toBase58()]);
       }

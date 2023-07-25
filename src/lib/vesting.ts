@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { StreamClient, Cluster, BN, getBN } from "@streamflow/stream";
+import { StreamClient, Cluster, BN, getBN, StreamType, StreamDirection } from "@streamflow/stream";
 import { getTimestamp } from "./utils";
+import { Wallet } from "@project-serum/anchor";
+import { PublicKey } from "@solana/web3.js";
 export const client = new StreamClient("https://api.devnet.solana.com", Cluster.Devnet, "confirmed");
 
 export const vestTest = async (wallet: AnchorWallet, mint: string, recipient: string) => {
@@ -10,7 +12,7 @@ export const vestTest = async (wallet: AnchorWallet, mint: string, recipient: st
     recipient, // Solana recipient address.
     mint, // SPL Token mint.
     start: getTimestamp() + 300, // Timestamp (in seconds) when the stream/token vesting starts.
-    depositedAmount: getBN(99, 9), // depositing 100 tokens with 9 decimals mint.
+    depositedAmount: getBN(10, 9), // depositing 100 tokens with 9 decimals mint.
     period: 1, // Time step (period) in seconds per which the unlocking occurs.
     cliff: 1701388800, // Vesting contract "cliff" timestamp in seconds.
     cliffAmount: new BN(10), // Amount unlocked at the "cliff" timestamp.
@@ -30,7 +32,7 @@ export const vestTest = async (wallet: AnchorWallet, mint: string, recipient: st
     const { ixs, tx, metadata } = await client.create(createStreamParams);
     console.log(ixs);
     console.log(tx);
-    console.log(metadata);
+    console.log(metadata.publicKey.toBase58());
   } catch (exception) {
     // handle exception
     console.log(exception);
@@ -69,5 +71,20 @@ export const vestMultiTest = async (wallet: AnchorWallet, mint: string, recipien
     console.log(txs);
   } catch (exception) {
     console.log(exception);
+  }
+};
+
+export const getVestingMyOwn = async (publicKey: PublicKey) => {
+  try {
+    const streams = await client.get({
+      wallet: publicKey, // Wallet signing the transaction.
+      type: StreamType.All, // (optional) Type, default is StreamType.All
+      direction: StreamDirection.All, // (optional) Direction, default is StreamDirection.All)
+    });
+
+    return streams;
+  } catch (exception) {
+    console.log(exception);
+    // handle exception
   }
 };

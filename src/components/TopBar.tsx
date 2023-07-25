@@ -103,8 +103,8 @@ const TopBar: React.FC = () => {
               <Button onClick={() => navigate("/raffle")}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.RAFFLE}</Typography>
               </Button>
-              <Button>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.NFT}</Typography>
+              <Button onClick={() => navigate("/vesting")}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.VESTING}</Typography>
               </Button>
               <Button onClick={handleClickForSolana} onMouseOver={handleClickForSolana}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.TOKEN}</Typography>
