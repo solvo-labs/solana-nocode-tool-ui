@@ -6,7 +6,7 @@ import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapte
 import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomButton } from "../../components/CustomButton";
-import { vestMultiTest, vestTest } from "../../lib/vesting";
+import { vestTest } from "../../lib/vesting";
 import { getOrCreateAssociatedTokenAccount } from "../../lib/token";
 import { PublicKey } from "@solana/web3.js";
 import { getAccount } from "@solana/spl-token";
@@ -67,7 +67,7 @@ export const Vesting = () => {
       );
 
       if (account) {
-        vestTest(wallet, selectedToken.hex, account.address.toBase58());
+        vestTest(wallet, selectedToken, account.address.toBase58());
       } else {
         const {
           context: { slot: minContextSlot },
@@ -86,7 +86,7 @@ export const Vesting = () => {
 
         const newAccount = await getAccount(connection, associatedToken);
 
-        vestTest(wallet, selectedToken.hex, newAccount.address.toBase58());
+        vestTest(wallet, selectedToken, newAccount.address.toBase58());
 
         // vestMultiTest(wallet, selectedToken.hex, [newAccount.address.toBase58()]);
       }

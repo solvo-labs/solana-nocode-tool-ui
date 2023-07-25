@@ -2,21 +2,22 @@
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import { StreamClient, Cluster, BN, getBN, StreamType, StreamDirection } from "@streamflow/stream";
 import { getTimestamp } from "./utils";
-import { Wallet } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
+import { TokenData } from "../utils/types";
+
 export const client = new StreamClient("https://api.devnet.solana.com", Cluster.Devnet, "confirmed");
 
-export const vestTest = async (wallet: AnchorWallet, mint: string, recipient: string) => {
+export const vestTest = async (wallet: AnchorWallet, mint: TokenData, recipient: string) => {
   const createStreamParams = {
     sender: wallet, // Wallet/Keypair signing the transaction, creating and sending the stream.
     recipient, // Solana recipient address.
-    mint, // SPL Token mint.
+    mint: mint.hex, // SPL Token mint.
     start: getTimestamp() + 300, // Timestamp (in seconds) when the stream/token vesting starts.
-    depositedAmount: getBN(10, 9), // depositing 100 tokens with 9 decimals mint.
+    depositedAmount: getBN(10, mint.decimal), // depositing 100 tokens with 9 decimals mint.
     period: 1, // Time step (period) in seconds per which the unlocking occurs.
     cliff: 1701388800, // Vesting contract "cliff" timestamp in seconds.
     cliffAmount: new BN(10), // Amount unlocked at the "cliff" timestamp.
-    amountPerPeriod: getBN(5, 9), // Release rate: how many tokens are unlocked per each period.
+    amountPerPeriod: getBN(5, mint.decimal), // Release rate: how many tokens are unlocked per each period.
     name: "Test", // The stream name or subject.
     canTopup: false, // setting to FALSE will effectively create a vesting contract.
     cancelableBySender: true, // Whether or not sender can cancel the stream.
@@ -39,21 +40,21 @@ export const vestTest = async (wallet: AnchorWallet, mint: string, recipient: st
   }
 };
 
-export const vestMultiTest = async (wallet: AnchorWallet, mint: string, recipients: string[]) => {
+export const vestMultiTest = async (wallet: AnchorWallet, mint: TokenData, recipients: string[]) => {
   const recipientsData = recipients.map((rp: string) => {
     return {
       recipient: rp, // Solana recipient address.
-      depositedAmount: getBN(10, 9), // depositing 10 tokens with 9 decimals mint.
+      depositedAmount: getBN(10, mint.decimal), // depositing 10 tokens with 9 decimals mint.
       name: "Test", // The stream name/subject.
-      cliffAmount: getBN(10, 9), // amount released on cliff for this recipient
-      amountPerPeriod: getBN(1, 9), //amount released every specified period epoch
+      cliffAmount: getBN(10, mint.decimal), // amount released on cliff for this recipient
+      amountPerPeriod: getBN(1, mint.decimal), //amount released every specified period epoch
     };
   });
 
   const createMultiStreamsParams = {
     sender: wallet, // Wallet/Keypair signing the transaction, creating and sending the stream.
     recipientsData, // Array of Solana recipient address.
-    mint, // SPL Token mint.
+    mint: mint.hex, // SPL Token mint.
     start: getTimestamp() + 400, // Timestamp (in seconds) when the stream/token vesting starts.
     period: 1, // Time step (period) in seconds per which the unlocking occurs.
     cliff: 1701388800, // Vesting contract "cliff" timestamp in seconds.
