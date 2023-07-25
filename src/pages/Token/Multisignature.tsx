@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Divider,
-  Grid,
-  IconButton,
-  Stack,
-  Theme,
-  Typography,
-} from "@mui/material";
+import { Divider, Grid, IconButton, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomInput } from "../../components/CustomInput";
 import { CustomButton } from "../../components/CustomButton";
@@ -41,7 +34,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export const Multisignature = () => {
-  const classes = useStyles();  
+  const classes = useStyles();
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [signatures, setSignatures] = useState<string[]>([""]);
@@ -56,10 +49,7 @@ export const Multisignature = () => {
     setSignatures(list);
   };
 
-  const signatureSetter = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
+  const signatureSetter = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const newSignature = [...signatures];
     newSignature[index] = e.target.value;
     setSignatures(newSignature);
@@ -70,31 +60,17 @@ export const Multisignature = () => {
 
   const signatureTransaction = async () => {
     if (publicKey) {
-      console.log(signatures);
-
       const signatureKeys = signatures.map((key: string) => new PublicKey(key));
-      const transaction = await createMultiSig(
-        connection,
-        publicKey,
-        signatureKeys.length,
-        signatureKeys
-      );
+      const { transaction, newAccount } = await createMultiSig(connection, publicKey, signatureKeys.length, signatureKeys);
+
       const {
-        context: { slot: minContextSlot },
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         value: { blockhash, lastValidBlockHeight },
       } = await connection.getLatestBlockhashAndContext();
       try {
-
-        
         const signatureTransaction = new Transaction();
         signatureTransaction.add(transaction);
 
-        const signatureSignature = await sendTransaction(
-          transaction,
-          connection
-        );
-        console.log(signatureSignature);
+        const signatureSignature = await sendTransaction(transaction, connection, { signers: [newAccount] });
 
         await connection.confirmTransaction({
           blockhash,
@@ -122,9 +98,7 @@ export const Multisignature = () => {
                   key={index}
                   label="Signature"
                   name="signature"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    signatureSetter(e, index)
-                  }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => signatureSetter(e, index)}
                   placeHolder="Signature"
                   type="text"
                   value={signatures[index]}
@@ -145,32 +119,12 @@ export const Multisignature = () => {
               )}
             </Grid>
           ))}
-          <Grid
-            container
-            direction={"column"}
-            display={"flex"}
-            justifyContent={"center"}
-          >
+          <Grid container direction={"column"} display={"flex"} justifyContent={"center"}>
             <Grid item display={"flex"} justifyContent={"center"}>
-              <CustomButton
-                disable={disable}
-                label="Add signature"
-                onClick={addInput}
-                key={"key"}
-              ></CustomButton>
+              <CustomButton disable={disable} label="Add signature" onClick={addInput} key={"key"}></CustomButton>
             </Grid>
-            <Grid
-              item
-              display={"flex"}
-              justifyContent={"center"}
-              marginTop={"1rem"}
-            >
-              <CustomButton
-                disable={disable}
-                label="Confirm signature"
-                onClick={signatureTransaction}
-                key={"key"}
-              ></CustomButton>
+            <Grid item display={"flex"} justifyContent={"center"} marginTop={"1rem"}>
+              <CustomButton disable={disable} label="Confirm signature" onClick={signatureTransaction} key={"key"}></CustomButton>
             </Grid>
           </Grid>
         </Stack>
