@@ -37,37 +37,37 @@ export const vestTest = async (wallet: AnchorWallet, mint: string, recipient: st
   }
 };
 
-// export const vestTest = async (wallet: AnchorWallet) => {
-//   const recipients = [
-//     {
-//       recipient: "9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f", // Solana recipient address.
-//       depositedAmount: getBN(10, 9), // depositing 10 tokens with 9 decimals mint.
-//       name: "Test", // The stream name/subject.
-//       cliffAmount: getBN(10, 9), // amount released on cliff for this recipient
-//       amountPerPeriod: getBN(1, 9), //amount released every specified period epoch
-//     },
-//   ];
+export const vestMultiTest = async (wallet: AnchorWallet, mint: string, recipients: string[]) => {
+  const recipientsData = recipients.map((rp: string) => {
+    return {
+      recipient: rp, // Solana recipient address.
+      depositedAmount: getBN(10, 9), // depositing 10 tokens with 9 decimals mint.
+      name: "Test", // The stream name/subject.
+      cliffAmount: getBN(10, 9), // amount released on cliff for this recipient
+      amountPerPeriod: getBN(1, 9), //amount released every specified period epoch
+    };
+  });
 
-//   const createMultiStreamsParams = {
-//     sender: wallet, // Wallet/Keypair signing the transaction, creating and sending the stream.
-//     recipientsData: recipients, // Array of Solana recipient address.
-//     mint: "CV3KoKnbEAdt7W6xfnTmqAk93EWVLpMbctFiqzMCLht7", // SPL Token mint.
-//     start: getTimestamp(), // Timestamp (in seconds) when the stream/token vesting starts.
-//     period: 1, // Time step (period) in seconds per which the unlocking occurs.
-//     cliff: 1701388800, // Vesting contract "cliff" timestamp in seconds.
-//     canTopup: true, // setting to FALSE will effectively create a vesting contract.
-//     cancelableBySender: true, // Whether or not sender can cancel the stream.
-//     cancelableByRecipient: false, // Whether or not recipient can cancel the stream.
-//     transferableBySender: true, // Whether or not sender can transfer the stream.
-//     transferableByRecipient: false, // Whether or not recipient can transfer the stream.
-//     automaticWithdrawal: false, // Whether or not a 3rd party can initiate withdraw in the name of recipient (currently not used, set it to FALSE).
-//     partner: null, //  (optional) Partner's wallet address (string | null).
-//   };
+  const createMultiStreamsParams = {
+    sender: wallet, // Wallet/Keypair signing the transaction, creating and sending the stream.
+    recipientsData, // Array of Solana recipient address.
+    mint, // SPL Token mint.
+    start: getTimestamp() + 400, // Timestamp (in seconds) when the stream/token vesting starts.
+    period: 1, // Time step (period) in seconds per which the unlocking occurs.
+    cliff: 1701388800, // Vesting contract "cliff" timestamp in seconds.
+    canTopup: true, // setting to FALSE will effectively create a vesting contract.
+    cancelableBySender: true, // Whether or not sender can cancel the stream.
+    cancelableByRecipient: false, // Whether or not recipient can cancel the stream.
+    transferableBySender: true, // Whether or not sender can transfer the stream.
+    transferableByRecipient: false, // Whether or not recipient can transfer the stream.
+    automaticWithdrawal: false, // Whether or not a 3rd party can initiate withdraw in the name of recipient (currently not used, set it to FALSE).
+    partner: null, //  (optional) Partner's wallet address (string | null).
+  };
 
-//   try {
-//     const { txs } = await client.createMultiple(createMultiStreamsParams);
-//     console.log(txs);
-//   } catch (exception) {
-//     console.log(exception);
-//   }
-// };
+  try {
+    const { txs } = await client.createMultiple(createMultiStreamsParams);
+    console.log(txs);
+  } catch (exception) {
+    console.log(exception);
+  }
+};
