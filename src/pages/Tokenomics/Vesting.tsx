@@ -9,8 +9,12 @@ import { CustomButton } from "../../components/CustomButton";
 import { vestMulti } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { getBN } from "@streamflow/stream";
-import { Recipient, VestParams } from "../../lib/models/Vesting";
+import { Recipient, VestParams, VestParamsData } from "../../lib/models/Vesting";
 import { getTimestamp } from "../../lib/utils";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import dayjs, { Dayjs } from "dayjs";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -44,6 +48,11 @@ export const Vesting = () => {
   const { connection } = useConnection();
   const [receipentPubkey, setReceipentPubkey] = useState<string>("9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f");
   const [selectedToken, setSelectedToken] = useState<TokenData>();
+  const [vestParams, setVestParams] = useState<VestParamsData>({
+    startDate: dayjs().add(1, "h"),
+    cliff: dayjs().add(3, "day"),
+    period: 1,
+  });
   const classes = useStyles();
 
   useEffect(() => {
@@ -145,7 +154,35 @@ export const Vesting = () => {
           </FormControl>
           <FormControl fullWidth>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateTimePicker label="Basic date time picker" />
+              {
+                <DateTimePicker
+                  value={vestParams.startDate}
+                  disablePast
+                  label="Start Date"
+                  onChange={(value: dayjs.Dayjs | null) => {
+                    if (value) {
+                      setVestParams({ ...vestParams, startDate: value });
+                    }
+                  }}
+                />
+              }
+            </LocalizationProvider>
+          </FormControl>
+          <FormControl fullWidth>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              {
+                <DateTimePicker
+                  defaultValue={vestParams.cliff}
+                  disablePast
+                  label="Cliff Date"
+                  minDate={vestParams.startDate}
+                  onChange={(value: dayjs.Dayjs | null) => {
+                    if (value) {
+                      setVestParams({ ...vestParams, cliff: value });
+                    }
+                  }}
+                />
+              }
             </LocalizationProvider>
           </FormControl>
         </Stack>

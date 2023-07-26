@@ -1,9 +1,16 @@
 import { StreamflowSolana } from "@streamflow/stream";
+import { Dayjs } from "dayjs";
 
 export type VestParams = {
   startDate: number;
   period: number;
   cliff?: number;
+};
+
+export type VestParamsData = {
+  startDate: Dayjs;
+  period: number;
+  cliff?: Dayjs;
 };
 
 export type Recipient = {
