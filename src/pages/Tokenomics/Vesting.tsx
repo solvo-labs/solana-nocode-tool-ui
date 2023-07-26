@@ -6,10 +6,12 @@ import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapte
 import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomButton } from "../../components/CustomButton";
-import { vestTest } from "../../lib/vesting";
+import { getStreamById, getVestingMyOwn, vestTest, withdraw } from "../../lib/vesting";
 import { getOrCreateAssociatedTokenAccount } from "../../lib/token";
 import { PublicKey } from "@solana/web3.js";
 import { getAccount } from "@solana/spl-token";
+import { getBN } from "@streamflow/stream";
+import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -58,40 +60,36 @@ export const Vesting = () => {
   }, [connection, publicKey]);
 
   const startVesting = async () => {
-    if (wallet && selectedToken && publicKey) {
-      const { account, transaction, associatedToken } = await getOrCreateAssociatedTokenAccount(
-        new PublicKey(selectedToken.hex),
-        publicKey,
-        new PublicKey(receipentPubkey),
-        connection
-      );
-
-      if (account) {
-        vestTest(wallet, selectedToken, account.address.toBase58());
-      } else {
-        const {
-          context: { slot: minContextSlot },
-          value: { blockhash, lastValidBlockHeight },
-        } = await connection.getLatestBlockhashAndContext();
-
-        const signature = await sendTransaction(transaction, connection, {
-          minContextSlot,
-        });
-
-        await connection.confirmTransaction({
-          blockhash,
-          lastValidBlockHeight,
-          signature: signature,
-        });
-
-        const newAccount = await getAccount(connection, associatedToken);
-
-        vestTest(wallet, selectedToken, newAccount.address.toBase58());
-
-        // vestMultiTest(wallet, selectedToken.hex, [newAccount.address.toBase58()]);
-      }
+    if (wallet && selectedToken && receipentPubkey) {
+      vestTest(wallet as SignerWalletAdapter, selectedToken, receipentPubkey, 100, 10, 10);
     }
   };
+
+  // const withdrawToken = async () => {
+  //   if (wallet) {
+  //     const data = await getStreamById("4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB");
+
+  //     console.log(data);
+
+  //     withdraw(wallet as any, "4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB", 100, 9);
+  //     // unlock("2cf8zjHfUR68qUVPWWWdf3E34udtH9tDpm4L9vf2FJGx");
+  //   }
+  // };
+
+  useEffect(() => {
+    const init = async () => {
+      if (publicKey) {
+        const data = await getVestingMyOwn(publicKey.toBase58());
+        console.log(data);
+        const filteredData = data?.filter((dt) => dt[0] === "4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB");
+        console.log(filteredData[0][1]);
+        console.log(filteredData[0][1].withdrawnAmount.toNumber() / Math.pow(10, 9));
+        console.log(filteredData[0][1].amountPerPeriod.toNumber() / Math.pow(10, 9));
+      }
+    };
+
+    init();
+  }, [publicKey]);
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -145,6 +143,9 @@ export const Vesting = () => {
 
           <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <CustomButton label="Start Vesting" disable={false} onClick={startVesting} />
+          </Grid>
+          <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+            <CustomButton label="WithdrawToken" disable={false} onClick={withdrawToken} />
           </Grid>
         </Stack>
       </Grid>
