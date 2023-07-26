@@ -55,22 +55,15 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const TopBar: React.FC = () => {
-  const [anchorElForSolana, setAnchorElForSolana] =
-    React.useState<null | HTMLElement>(null);
-  const openForSolana = Boolean(anchorElForSolana);
   const [anchorElForProfile, setAnchorElForProfile] =
     React.useState<null | HTMLElement>(null);
   const openForProfile = Boolean(anchorElForProfile);
 
-  const [anchorElStake, setAnchorElStake] = useState<null | HTMLElement>(null);
-  const openForStake = Boolean(anchorElStake);
-  const [anchorElRaffle, setAnchorElRaffle] = useState<null | HTMLElement>(
-    null
-  );
-  const openForRaffle = Boolean(anchorElRaffle);
-  const [anchorElVesting, setAnchorElVesting] = useState<null | HTMLElement>(
-    null
-  );
+  // const [anchorElStake, setAnchorElStake] = useState<null | HTMLElement>(null);
+  // const openForStake = Boolean(anchorElStake);
+  // const [anchorElRaffle, setAnchorElRaffle] = useState<null | HTMLElement>(null);
+  // const openForRaffle = Boolean(anchorElRaffle);
+  const [anchorElVesting, setAnchorElVesting] = useState<null | HTMLElement>(null);
   const openForVesting = Boolean(anchorElVesting);
   const [anchorElToken, setAnchorElToken] = useState<null | HTMLElement>(null);
   const openForToken = Boolean(anchorElToken);
@@ -89,43 +82,43 @@ const TopBar: React.FC = () => {
 
   const tokenMint = () => {
     navigate("/token");
-    setAnchorElForSolana(null);
+    setAnchorElToken(null);
   };
 
   const myTokens = () => {
     navigate("/my-tokens");
-    setAnchorElForSolana(null);
+    setAnchorElToken(null);
   };
 
   const transfer = () => {
     navigate("/token-transfer");
-    setAnchorElForSolana(null);
+    setAnchorElToken(null);
   };
 
   const mintAndBurn = () => {
     navigate("/burn-mint-token");
-    setAnchorElForSolana(null);
+    setAnchorElToken(null);
   };
 
   const freezeAccount = () => {
     navigate("/freeze-account");
-    setAnchorElForSolana(null);
+    setAnchorElToken(null);
   };
   const closeAccount = () => {
     navigate("/close-account");
-    setAnchorElForSolana(null);
+    setAnchorElToken(null);
   };
   const multisingature = () => {
     navigate("/multisignature");
-    setAnchorElForSolana(null);
+    setAnchorElToken(null);
   };
   const vesting = () => {
     navigate("/vesting");
-    setAnchorElForSolana(null);
+    setAnchorElVesting(null);
   };
   const vestinList = () => {
     navigate("/vesting-list");
-    setAnchorElForSolana(null);
+    setAnchorElVesting(null);
   };
 
   return (

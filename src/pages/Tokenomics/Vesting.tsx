@@ -42,10 +42,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const Vesting = () => {
   const [tokens, setTokens] = useState<TokenData[]>([]);
-  const { publicKey, sendTransaction } = useWallet();
+  const { publicKey } = useWallet();
   const wallet = useAnchorWallet();
   const { connection } = useConnection();
-  const [receipentPubkey, setReceipentPubkey] = useState<string>("9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f");
+  const [receipentPubkey] = useState<string>("9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f");
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [vestParams, setVestParams] = useState<VestParamsData>({
     startDate: dayjs().add(1, "h"),
