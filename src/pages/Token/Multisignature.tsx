@@ -1,12 +1,23 @@
-import React, { useState } from "react";
-import { Divider, Grid, IconButton, Stack, Theme, Typography } from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Divider,
+  Grid,
+  IconButton,
+  Stack,
+  Theme,
+  Typography,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomInput } from "../../components/CustomInput";
 import { CustomButton } from "../../components/CustomButton";
 import { HighlightOff } from "@mui/icons-material";
-import { createMultiSig } from "../../lib/multisig";
+import {
+  createMultiSig,
+  fetchAllMultisignatureAddress,
+} from "../../lib/multisig";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -49,19 +60,31 @@ export const Multisignature = () => {
     setSignatures(list);
   };
 
-  const signatureSetter = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const signatureSetter = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const newSignature = [...signatures];
     newSignature[index] = e.target.value;
     setSignatures(newSignature);
   };
 
-  const lastSignature = signatures[signatures.length - 1];
-  const disable = !(lastSignature != "");
+  const disable = useMemo(() => {
+    const lastSignature = signatures[signatures.length - 1];
+    const lenghtControl = signatures.every((e: string) => e.length > 31 && e.length < 45);
+    const disable = !(lastSignature != "" && lenghtControl);
+    return disable;
+  }, [signatures]);
 
   const signatureTransaction = async () => {
     if (publicKey) {
       const signatureKeys = signatures.map((key: string) => new PublicKey(key));
-      const { transaction, newAccount } = await createMultiSig(connection, publicKey, signatureKeys.length, signatureKeys);
+      const { transaction, newAccount } = await createMultiSig(
+        connection,
+        publicKey,
+        signatureKeys.length,
+        signatureKeys
+      );
 
       const {
         value: { blockhash, lastValidBlockHeight },
@@ -70,7 +93,11 @@ export const Multisignature = () => {
         const signatureTransaction = new Transaction();
         signatureTransaction.add(transaction);
 
-        const signatureSignature = await sendTransaction(transaction, connection, { signers: [newAccount] });
+        const signatureSignature = await sendTransaction(
+          transaction,
+          connection,
+          { signers: [newAccount] }
+        );
 
         await connection.confirmTransaction({
           blockhash,
@@ -82,6 +109,24 @@ export const Multisignature = () => {
       }
     }
   };
+
+  useEffect(() => {
+    const init = async () => {
+      if (publicKey) {
+        const account = await fetchAllMultisignatureAddress(
+          connection,
+          publicKey
+        );
+        const activeAccounts = await Promise.all(account);
+        account.forEach((account, index) => {
+          const parse = account.account?.data;
+          // console.log(parse);
+        });
+      }
+    };
+
+    init();
+  }, []);
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -98,7 +143,9 @@ export const Multisignature = () => {
                   key={index}
                   label="Signature"
                   name="signature"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => signatureSetter(e, index)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    signatureSetter(e, index)
+                  }
                   placeHolder="Signature"
                   type="text"
                   value={signatures[index]}
@@ -119,12 +166,32 @@ export const Multisignature = () => {
               )}
             </Grid>
           ))}
-          <Grid container direction={"column"} display={"flex"} justifyContent={"center"}>
+          <Grid
+            container
+            direction={"column"}
+            display={"flex"}
+            justifyContent={"center"}
+          >
             <Grid item display={"flex"} justifyContent={"center"}>
-              <CustomButton disable={disable} label="Add signature" onClick={addInput} key={"key"}></CustomButton>
+              <CustomButton
+                disable={disable}
+                label="Add signature"
+                onClick={addInput}
+                key={"key"}
+              ></CustomButton>
             </Grid>
-            <Grid item display={"flex"} justifyContent={"center"} marginTop={"1rem"}>
-              <CustomButton disable={disable} label="Confirm signature" onClick={signatureTransaction} key={"key"}></CustomButton>
+            <Grid
+              item
+              display={"flex"}
+              justifyContent={"center"}
+              marginTop={"1rem"}
+            >
+              <CustomButton
+                disable={disable}
+                label="Confirm signature"
+                onClick={signatureTransaction}
+                key={"key"}
+              ></CustomButton>
             </Grid>
           </Grid>
         </Stack>
