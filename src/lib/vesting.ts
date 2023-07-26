@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { StreamflowSolana, Types, getBN, getNumberFromBN } from "@streamflow/stream";
+import { StreamflowSolana, Types, getBN } from "@streamflow/stream";
 import { getTimestamp } from "./utils";
 import { TokenData } from "../utils/types";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
@@ -7,7 +7,7 @@ import { StreamDirection, StreamType } from "@streamflow/stream/dist/common/type
 
 export const client = new StreamflowSolana.SolanaStreamClient("https://api.devnet.solana.com", Types.ICluster.Devnet, "confirmed");
 
-export const vestTest = async (wallet: SignerWalletAdapter, mint: TokenData, recipient: string, amount: number, amountPerPeriod: number, cliffAmount: number) => {
+export const vestSingle = async (wallet: SignerWalletAdapter, mint: TokenData, recipient: string, amount: number, amountPerPeriod: number, cliffAmount: number) => {
   const createStreamParams = {
     tokenId: mint.hex, // SPL token mint or Aptos Coin type
     recipient, // Recipient address (base58 string for Solana)
@@ -37,6 +37,55 @@ export const vestTest = async (wallet: SignerWalletAdapter, mint: TokenData, rec
   } catch (exception) {
     // handle exception
     console.log(exception);
+  }
+};
+
+export const vestMulti = async (wallet: SignerWalletAdapter, mint: TokenData) => {
+  const recipients = [
+    {
+      recipient: "9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f", // Recipient address (base58 string for Solana)
+      amount: getBN(50, 9), // Deposited amount of tokens (using smallest denomination).
+      name: "Receipent1", // The stream name or subject.
+      cliffAmount: getBN(10, 9), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+      amountPerPeriod: getBN(1, 9), // Release rate: how many tokens are unlocked per each period.
+    },
+    {
+      recipient: "BodqLnSPXrArdj3sKWF3hULSpiuABrcdwhtWw8om1JdQ", // Recipient address (base58 string for Solana)
+      amount: getBN(20, 9), // Deposited amount of tokens (using smallest denomination).
+      name: "Receipent2", // The stream name or subject.
+      cliffAmount: getBN(5, 9), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+      amountPerPeriod: getBN(1, 9), // Release rate: how many tokens are unlocked per each period.
+    },
+    // ... Other Recipient options
+  ];
+
+  const createMultiStreamsParams = {
+    tokenId: mint.hex, // SPL token mint or Aptos Coin type
+    cliff: getTimestamp() + 120, // Vesting contract "cliff" timestamp in seconds.
+    period: 1, // Time step (period) in seconds per which the unlocking occurs.
+    start: getTimestamp() + 60, // Timestamp (in seconds) when the stream/token vesting starts.
+    canTopup: false, // setting to FALSE will effectively create a vesting contract.
+    cancelableBySender: true, // Wether or not sender can cancel the stream.
+    cancelableByRecipient: false, // Wether or not recipient can cancel the stream.
+    transferableBySender: true, // Wether or not sender can transfer the stream.
+    transferableByRecipient: false, // Wether or not recipient can transfer the stream.
+    automaticWithdrawal: true, // [optional] Wether or not a 3rd party (e.g. cron job, "cranker") can initiate a token withdraw/transfer.
+    withdrawalFrequency: 10, // [optional] Relevant when automatic withdrawal is enabled. If greater than 0 our withdrawor will take care of withdrawals. If equal to 0 our withdrawor will skip, but everyone else can initiate withdrawals.
+    canPause: false, // [optional] [WIP] Wether stream is Pausable
+    canUpdateRate: false, // [optional] [WIP] Wether stream rate can be updated
+    recipients,
+  };
+
+  const solanaParams = {
+    sender: wallet, // SignerWalletAdapter or Keypair of Sender account
+  };
+
+  try {
+    const { txs, metadatas } = await client.createMultiple(createMultiStreamsParams, solanaParams);
+
+    console.log(txs);
+  } catch (exception) {
+    // handle exception
   }
 };
 

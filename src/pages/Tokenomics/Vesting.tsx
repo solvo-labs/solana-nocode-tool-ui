@@ -6,11 +6,7 @@ import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapte
 import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomButton } from "../../components/CustomButton";
-import { getStreamById, getVestingMyOwn, vestTest, withdraw } from "../../lib/vesting";
-import { getOrCreateAssociatedTokenAccount } from "../../lib/token";
-import { PublicKey } from "@solana/web3.js";
-import { getAccount } from "@solana/spl-token";
-import { getBN } from "@streamflow/stream";
+import { getVestingMyOwn, vestMulti, vestSingle } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -61,7 +57,8 @@ export const Vesting = () => {
 
   const startVesting = async () => {
     if (wallet && selectedToken && receipentPubkey) {
-      vestTest(wallet as SignerWalletAdapter, selectedToken, receipentPubkey, 100, 10, 10);
+      // vestSingle(wallet as SignerWalletAdapter, selectedToken, receipentPubkey, 100, 10, 10);
+      vestMulti(wallet as SignerWalletAdapter, selectedToken);
     }
   };
 
@@ -76,20 +73,20 @@ export const Vesting = () => {
   //   }
   // };
 
-  useEffect(() => {
-    const init = async () => {
-      if (publicKey) {
-        const data = await getVestingMyOwn(publicKey.toBase58());
-        console.log(data);
-        const filteredData = data?.filter((dt) => dt[0] === "4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB");
-        console.log(filteredData[0][1]);
-        console.log(filteredData[0][1].withdrawnAmount.toNumber() / Math.pow(10, 9));
-        console.log(filteredData[0][1].amountPerPeriod.toNumber() / Math.pow(10, 9));
-      }
-    };
+  // useEffect(() => {
+  //   const init = async () => {
+  //     if (publicKey) {
+  //       const data = await getVestingMyOwn(publicKey.toBase58());
+  //       console.log(data);
+  //       const filteredData = data?.filter((dt) => dt[0] === "4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB");
+  //       console.log(filteredData[0][1]);
+  //       console.log(filteredData[0][1].withdrawnAmount.toNumber() / Math.pow(10, 9));
+  //       console.log(filteredData[0][1].amountPerPeriod.toNumber() / Math.pow(10, 9));
+  //     }
+  //   };
 
-    init();
-  }, [publicKey]);
+  //   init();
+  // }, [publicKey]);
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -144,9 +141,9 @@ export const Vesting = () => {
           <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <CustomButton label="Start Vesting" disable={false} onClick={startVesting} />
           </Grid>
-          <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+          {/* <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <CustomButton label="WithdrawToken" disable={false} onClick={withdrawToken} />
-          </Grid>
+          </Grid> */}
         </Stack>
       </Grid>
     </Grid>
