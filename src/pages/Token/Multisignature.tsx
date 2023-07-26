@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Divider, Grid, IconButton, Stack, Theme, Typography } from "@mui/material";
+import { Divider, FormControl, Grid, IconButton, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomInput } from "../../components/CustomInput";
 import { CustomButton } from "../../components/CustomButton";
@@ -115,18 +115,20 @@ export const Multisignature = () => {
         <Stack direction={"column"} width={"100%"} spacing={4}>
           {signatures.map((_e: string, index) => (
             <Grid container display={"flex"} justifyContent={"space-evenly"}>
-              <Grid item>
-                <CustomInput
-                  key={index}
-                  label="Signature"
-                  name="signature"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => signatureSetter(e, index)}
-                  placeHolder="Signature"
-                  type="text"
-                  value={signatures[index]}
-                  disable={false}
-                ></CustomInput>
-              </Grid>
+              <FormControl fullWidth>
+                <Grid item>
+                  <CustomInput
+                    key={index}
+                    label="Signature"
+                    name="signature"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => signatureSetter(e, index)}
+                    placeHolder="Signature"
+                    type="text"
+                    value={signatures[index]}
+                    disable={false}
+                  ></CustomInput>
+                </Grid>
+              </FormControl>
               {signatures.length > 1 && (
                 <Grid item>
                   <IconButton
@@ -143,10 +145,15 @@ export const Multisignature = () => {
           ))}
           <Grid container direction={"column"} display={"flex"} justifyContent={"center"}>
             <Grid item display={"flex"} justifyContent={"center"}>
-              <CustomButton disable={disable} label="Add signature" onClick={addInput} key={"key"}></CustomButton>
+              <FormControl fullWidth>
+                <CustomButton disable={disable} label="Add signature" onClick={addInput} key={"key"}></CustomButton>
+              </FormControl>
             </Grid>
+
             <Grid item display={"flex"} justifyContent={"center"} marginTop={"1rem"}>
-              <CustomButton disable={disable} label="Confirm signature" onClick={signatureTransaction} key={"key"}></CustomButton>
+              <FormControl fullWidth>
+                <CustomButton disable={disable} label="Confirm signature" onClick={signatureTransaction} key={"key"}></CustomButton>
+              </FormControl>
             </Grid>
           </Grid>
         </Stack>
