@@ -13,11 +13,9 @@ import { CustomButton } from "../../components/CustomButton";
 import { HighlightOff } from "@mui/icons-material";
 import {
   createMultiSig,
-  fetchAllMultisignatureAddress,
 } from "../../lib/multisig";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -112,17 +110,17 @@ export const Multisignature = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (publicKey) {
-        const account = await fetchAllMultisignatureAddress(
-          connection,
-          publicKey
-        );
-        const activeAccounts = await Promise.all(account);
-        account.forEach((account, index) => {
-          const parse = account.account?.data;
-          // console.log(parse);
-        });
-      }
+      // if (publicKey) {
+      //   const account = await fetchAllMultisignatureAddress(
+      //     connection,
+      //     publicKey
+      //   );
+      //   const activeAccounts = await Promise.all(account);
+      //   account.forEach((account, index) => {
+      //     // const parse = account.account?.data;
+      //     // console.log(parse);
+      //   });
+      // }
     };
 
     init();
@@ -136,7 +134,7 @@ export const Multisignature = () => {
       </Grid>
       <Grid item marginTop={"2rem"}>
         <Stack direction={"column"} width={"100%"} spacing={4}>
-          {signatures.map((e: any, index) => (
+          {signatures.map((_e:string,index) => (
             <Grid container display={"flex"} justifyContent={"space-evenly"}>
               <Grid item>
                 <CustomInput
