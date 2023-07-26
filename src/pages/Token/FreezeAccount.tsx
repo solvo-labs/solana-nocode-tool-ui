@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
+import { CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { accountState, fetchUserTokens } from "../../lib";
@@ -43,6 +43,7 @@ export const FreezeAccount = () => {
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [holders, setHolders] = useState<any>([]);
   const [selectedHolder, setSelectedHolder] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
   const classes = useStyles();
   const navigate = useNavigate();
 
@@ -85,6 +86,7 @@ export const FreezeAccount = () => {
         const data = await fetchUserTokens(connection, publicKey);
 
         setMyTokens(data);
+        setLoading(false);
         // console.log(data.filter((dp)=> dp.hex === "BpAC9vBjvhqQAewx5E1RdqZNrNAD2wbTQP7muK5NNpBJ" ));
       }
     };
@@ -108,6 +110,22 @@ export const FreezeAccount = () => {
 
     fetch();
   }, [connection, selectedToken]);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "4rem",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <Grid container className={classes.container} direction={"column"}>

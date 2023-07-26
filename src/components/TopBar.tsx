@@ -87,6 +87,10 @@ const TopBar: React.FC = () => {
     navigate("/close-account");
     setAnchorElForSolana(null);
   };
+  const multisingature = () => {
+    navigate("/multisignature");
+    setAnchorElForSolana(null);
+  };
 
   return (
     <div>
@@ -144,6 +148,9 @@ const TopBar: React.FC = () => {
                 </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={closeAccount}>
                   <Typography>Close Account</Typography>
+                </MenuItem>
+                <MenuItem className={classes.menuItem} onClick={multisingature}>
+                  <Typography>Multisignature</Typography>
                 </MenuItem>
               </Menu>
             </Box>

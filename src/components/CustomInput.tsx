@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 type Props = {
   placeHolder: string;
   label: string;
-  id: string;
+  id?: string;
   name: string;
   type: string;
   value: string | number;
