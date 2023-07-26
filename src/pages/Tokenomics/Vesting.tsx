@@ -8,6 +8,9 @@ import { makeStyles } from "@mui/styles";
 import { CustomButton } from "../../components/CustomButton";
 import { getVestingMyOwn, vestMulti, vestSingle } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
+import { getBN } from "@streamflow/stream";
+import { Recipient, VestParams } from "../../lib/models/Vesting";
+import { getTimestamp } from "../../lib/utils";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -58,7 +61,32 @@ export const Vesting = () => {
   const startVesting = async () => {
     if (wallet && selectedToken && receipentPubkey) {
       // vestSingle(wallet as SignerWalletAdapter, selectedToken, receipentPubkey, 100, 10, 10);
-      vestMulti(wallet as SignerWalletAdapter, selectedToken);
+
+      const recipients: Recipient[] = [
+        {
+          recipient: "9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f", // Recipient address (base58 string for Solana)
+          amount: getBN(50, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          name: "Receipent1", // The stream name or subject.
+          cliffAmount: getBN(10, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(1, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+        },
+        {
+          recipient: "BodqLnSPXrArdj3sKWF3hULSpiuABrcdwhtWw8om1JdQ", // Recipient address (base58 string for Solana)
+          amount: getBN(20, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          name: "Receipent2", // The stream name or subject.
+          cliffAmount: getBN(5, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(1, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+        },
+        // ... Other Recipient options
+      ];
+
+      const params: VestParams = {
+        startDate: getTimestamp() + 60,
+        cliff: getTimestamp() + 120,
+        period: 1,
+      };
+
+      vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipients);
     }
   };
 
