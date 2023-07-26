@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { createMint, getOrCreateAssociatedTokenAccount } from "../../lib/token";
-import { Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, createMintToInstruction, getAccount } from "@solana/spl-token";
 import { register } from "../../lib/tokenRegister";
 import { Token } from "../../utils/types";
@@ -38,12 +39,19 @@ const TokenMint: React.FC = () => {
     symbol: "",
     amount: 0,
     decimal: 8,
+    freezeAuthority: publicKey?.toBase58(),
+    authority: publicKey?.toBase58(),
   });
 
   const createTransaction = async () => {
     if (publicKey) {
       // @To-do set freeze authority with input
-      const { transaction, toAccount } = await createMint(connection, publicKey, publicKey, tokenData.decimal);
+      const { transaction, toAccount } = await createMint(
+        connection,
+        publicKey,
+        tokenData.freezeAuthority ? new PublicKey(tokenData.freezeAuthority) : publicKey,
+        tokenData.decimal
+      );
 
       const {
         context: { slot: minContextSlot },
@@ -64,7 +72,14 @@ const TokenMint: React.FC = () => {
 
         // supply
         const transaction3 = new Transaction().add(
-          createMintToInstruction(toAccount.publicKey, account.address, publicKey, tokenData.amount * Math.pow(10, tokenData.decimal), [], TOKEN_PROGRAM_ID)
+          createMintToInstruction(
+            toAccount.publicKey,
+            account.address,
+            tokenData.authority ? new PublicKey(tokenData.authority) : publicKey,
+            tokenData.amount * Math.pow(10, tokenData.decimal),
+            [],
+            TOKEN_PROGRAM_ID
+          )
         );
 
         const transaction4 = register(toAccount.publicKey.toBase58(), publicKey, { name: tokenData.name, symbol: tokenData.symbol });
@@ -136,10 +151,30 @@ const TokenMint: React.FC = () => {
               value={tokenData.decimal}
               onChange={(e: any) => setTokenData({ ...tokenData, decimal: e.target.value })}
               disable={false}
-            ></CustomInput>
+            />
+            <CustomInput
+              placeHolder="Authority"
+              label="Authority"
+              id="authority"
+              name="authority"
+              type="text"
+              value={tokenData.authority || ""}
+              onChange={(e: any) => setTokenData({ ...tokenData, authority: e.target.value })}
+              disable={false}
+            />
+            <CustomInput
+              placeHolder="Freeze Authority"
+              label="Freeze Authority"
+              id="freezeAuthority"
+              name="freezeAuthority"
+              type="text"
+              value={tokenData.freezeAuthority || ""}
+              onChange={(e: any) => setTokenData({ ...tokenData, freezeAuthority: e.target.value })}
+              disable={false}
+            />
           </Stack>
         </Grid>
-        <Grid item>
+        <Grid item marginBottom={8}>
           <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
         </Grid>
       </Grid>

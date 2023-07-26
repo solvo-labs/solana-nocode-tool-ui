@@ -27,6 +27,10 @@ const ProtectedRoute: React.FC = () => {
     if (publicKey) {
       setLoading(false);
     }
+
+    if (localStorage.getItem("walletName") === null) {
+      setLoading(false);
+    }
   }, [publicKey]);
 
   if (loading || connecting) {
