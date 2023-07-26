@@ -6,7 +6,7 @@ import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapte
 import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomButton } from "../../components/CustomButton";
-import { getVestingMyOwn, vestMulti, vestSingle } from "../../lib/vesting";
+import { vestMulti } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { getBN } from "@streamflow/stream";
 import { Recipient, VestParams } from "../../lib/models/Vesting";
@@ -106,10 +106,6 @@ export const Vesting = () => {
   //     if (publicKey) {
   //       const data = await getVestingMyOwn(publicKey.toBase58());
   //       console.log(data);
-  //       const filteredData = data?.filter((dt) => dt[0] === "4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB");
-  //       console.log(filteredData[0][1]);
-  //       console.log(filteredData[0][1].withdrawnAmount.toNumber() / Math.pow(10, 9));
-  //       console.log(filteredData[0][1].amountPerPeriod.toNumber() / Math.pow(10, 9));
   //     }
   //   };
 
@@ -122,57 +118,40 @@ export const Vesting = () => {
         <Typography variant="h5">Vesting</Typography>
         <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
-      <Grid item marginTop={"2rem"}>
+      <Grid item marginTop={"1.2rem"}>
         <Stack direction={"column"} width={"100%"} spacing={4}>
-          <Grid item display={"flex"} justifyContent={"center"}>
-            <FormControl fullWidth>
-              <InputLabel id="selectLabel">Select a Token</InputLabel>
-              <Select
-                value={selectedToken?.hex || ""}
-                label=" Token"
-                onChange={(e: SelectChangeEvent<string>) => {
-                  const token = tokens.find((tkn: TokenData) => tkn.hex === e.target.value);
-                  if (token != undefined) {
-                    setSelectedToken(token);
-                  }
-                }}
-                className={classes.input}
-                id={"custom-select"}
-              >
-                {tokens.map((tk: TokenData) => {
-                  return (
-                    <MenuItem key={tk.hex} value={tk.hex}>
-                      {tk.metadata.name + "(" + tk.metadata.symbol + ")"}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* <Grid container display={"flex"} justifyContent={"center"} direction={"column"}>
-            <Grid item display={"flex"} justifyContent={"center"}>
-              <CustomInput
-                id=""
-                label="Amount"
-                name="amount"
-                onChange={(e: any) => {
-                  setAmountToBeBurn(e.target.value);
-                }}
-                placeHolder="Amount"
-                type="number"
-                disable={false}
-                value={amountToBeBurn}
-              ></CustomInput>
-            </Grid> */}
-
-          <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-            <CustomButton label="Start Vesting" disable={false} onClick={startVesting} />
-          </Grid>
-          {/* <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-            <CustomButton label="WithdrawToken" disable={false} onClick={withdrawToken} />
-          </Grid> */}
+          <FormControl fullWidth>
+            <InputLabel id="selectLabel">Select a Token</InputLabel>
+            <Select
+              value={selectedToken?.hex || ""}
+              label=" Token"
+              onChange={(e: SelectChangeEvent<string>) => {
+                const token = tokens.find((tkn: TokenData) => tkn.hex === e.target.value);
+                if (token != undefined) {
+                  setSelectedToken(token);
+                }
+              }}
+              className={classes.input}
+              id={"custom-select"}
+            >
+              {tokens.map((tk: TokenData) => {
+                return (
+                  <MenuItem key={tk.hex} value={tk.hex}>
+                    {tk.metadata.name + "(" + tk.metadata.symbol + ")"}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateTimePicker label="Basic date time picker" />
+            </LocalizationProvider>
+          </FormControl>
         </Stack>
+      </Grid>
+      <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+        <CustomButton label="Start Vesting" disable={false} onClick={startVesting} />
       </Grid>
     </Grid>
   );
