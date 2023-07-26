@@ -1,7 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { useNavigate } from "react-router-dom";
-import { AppBar, Avatar, Box, Button, Container, IconButton, Menu, MenuItem, Theme, Toolbar, Tooltip, Typography } from "@mui/material";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  Theme,
+  Toolbar,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { APP_NAME, PAGES_NAME } from "../utils/enum";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletDisconnectButton } from "@solana/wallet-adapter-react-ui";
@@ -42,17 +55,32 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const TopBar: React.FC = () => {
-  const [anchorElForSolana, setAnchorElForSolana] = React.useState<null | HTMLElement>(null);
+  const [anchorElForSolana, setAnchorElForSolana] =
+    React.useState<null | HTMLElement>(null);
   const openForSolana = Boolean(anchorElForSolana);
-  const [anchorElForProfile, setAnchorElForProfile] = React.useState<null | HTMLElement>(null);
+  const [anchorElForProfile, setAnchorElForProfile] =
+    React.useState<null | HTMLElement>(null);
   const openForProfile = Boolean(anchorElForProfile);
+
+  const [anchorElStake, setAnchorElStake] = useState<null | HTMLElement>(null);
+  const openForStake = Boolean(anchorElStake);
+  const [anchorElRaffle, setAnchorElRaffle] = useState<null | HTMLElement>(
+    null
+  );
+  const openForRaffle = Boolean(anchorElRaffle);
+  const [anchorElVesting, setAnchorElVesting] = useState<null | HTMLElement>(
+    null
+  );
+  const openForVesting = Boolean(anchorElVesting);
+  const [anchorElToken, setAnchorElToken] = useState<null | HTMLElement>(null);
+  const openForToken = Boolean(anchorElToken);
 
   const classes = useStyles();
   const navigate = useNavigate();
   const { publicKey } = useWallet();
 
-  const handleClickForSolana = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElForSolana(event.currentTarget);
+  const handleClick = (event: React.MouseEvent<HTMLElement>, setState: any) => {
+    setState(event.currentTarget);
   };
 
   const handleClickForProfile = (event: React.MouseEvent<HTMLElement>) => {
@@ -91,34 +119,55 @@ const TopBar: React.FC = () => {
     navigate("/multisignature");
     setAnchorElForSolana(null);
   };
+  const vesting = () => {
+    navigate("/vesting");
+    setAnchorElForSolana(null);
+  };
+  const vestinList = () => {
+    navigate("/vesting-list");
+    setAnchorElForSolana(null);
+  };
 
   return (
     <div>
       <AppBar className={classes.appBar}>
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <Typography variant="h5" noWrap component="a" href="" className={classes.appName} onClick={() => navigate("/")}>
+            <Typography
+              variant="h5"
+              noWrap
+              component="a"
+              href=""
+              className={classes.appName}
+              onClick={() => navigate("/")}
+            >
               {APP_NAME.SOLANA}
             </Typography>
             <Box sx={{ flexGrow: 1, display: "flex" }}>
               <Button onClick={() => navigate("/stake")}>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.STAKE}</Typography>
+                <Typography className={classes.menuTitle}>
+                  {PAGES_NAME.STAKE}
+                </Typography>
               </Button>
               <Button onClick={() => navigate("/raffle")}>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.RAFFLE}</Typography>
+                <Typography className={classes.menuTitle}>
+                  {PAGES_NAME.RAFFLE}
+                </Typography>
               </Button>
-              <Button onClick={() => navigate("/vesting")}>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.VESTING}</Typography>
-              </Button>
-              <Button onClick={handleClickForSolana} onMouseOver={handleClickForSolana}>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.TOKEN}</Typography>
+              <Button
+                onClick={(e: any) => handleClick(e, setAnchorElVesting)}
+                onMouseOver={(e: any) => handleClick(e, setAnchorElVesting)}
+              >
+                <Typography className={classes.menuTitle}>
+                  {PAGES_NAME.VESTING}
+                </Typography>
               </Button>
               <Menu
                 id="demo-positioned-menu"
                 aria-labelledby="demo-positioned-button"
-                anchorEl={anchorElForSolana}
-                open={openForSolana}
-                onClose={() => setAnchorElForSolana(null)}
+                anchorEl={anchorElVesting}
+                open={openForVesting}
+                onClose={() => setAnchorElVesting(null)}
                 anchorOrigin={{
                   vertical: "bottom",
                   horizontal: "left",
@@ -128,7 +177,48 @@ const TopBar: React.FC = () => {
                   horizontal: "left",
                 }}
                 sx={{
-                  "& .MuiPaper-root": { background: "#000000", color: "#FFFFFF", border: "1px solid #AA66FE" },
+                  "& .MuiPaper-root": {
+                    background: "#000000",
+                    color: "#FFFFFF",
+                    border: "1px solid #AA66FE",
+                  },
+                }}
+              >
+                <MenuItem className={classes.menuItem} onClick={vesting}>
+                  <Typography>Vesting</Typography>
+                </MenuItem>
+                <MenuItem className={classes.menuItem} onClick={vestinList}>
+                  <Typography>Vesting List</Typography>
+                </MenuItem>
+              </Menu>
+              <Button
+                onClick={(e: any) => handleClick(e, setAnchorElToken)}
+                onMouseOver={(e: any) => handleClick(e, setAnchorElToken)}
+              >
+                <Typography className={classes.menuTitle}>
+                  {PAGES_NAME.TOKEN}
+                </Typography>
+              </Button>
+              <Menu
+                id="demo-positioned-menu"
+                aria-labelledby="demo-positioned-button"
+                anchorEl={anchorElToken}
+                open={openForToken}
+                onClose={() => setAnchorElToken(null)}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                sx={{
+                  "& .MuiPaper-root": {
+                    background: "#000000",
+                    color: "#FFFFFF",
+                    border: "1px solid #AA66FE",
+                  },
                 }}
               >
                 <MenuItem className={classes.menuItem} onClick={myTokens}>
@@ -157,7 +247,11 @@ const TopBar: React.FC = () => {
 
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Profile">
-                <IconButton onClick={handleClickForProfile} onMouseOver={handleClickForProfile} sx={{ p: 0 }}>
+                <IconButton
+                  onClick={handleClickForProfile}
+                  onMouseOver={handleClickForProfile}
+                  sx={{ p: 0 }}
+                >
                   <Avatar alt="alt" src="" />
                 </IconButton>
               </Tooltip>
@@ -176,7 +270,11 @@ const TopBar: React.FC = () => {
                   horizontal: "left",
                 }}
                 sx={{
-                  "& .MuiPaper-root": { background: "#000000", color: "#FFFFFF", border: "1px solid #AA66FE" },
+                  "& .MuiPaper-root": {
+                    background: "#000000",
+                    color: "#FFFFFF",
+                    border: "1px solid #AA66FE",
+                  },
                 }}
               >
                 <Tooltip title="Copy Key">
@@ -184,10 +282,16 @@ const TopBar: React.FC = () => {
                     className={classes.menuItem}
                     onClick={(event: React.MouseEvent) => {
                       event.stopPropagation();
-                      navigator.clipboard.writeText(publicKey ? publicKey.toBase58() : "There is nothing!");
+                      navigator.clipboard.writeText(
+                        publicKey ? publicKey.toBase58() : "There is nothing!"
+                      );
                     }}
                   >
-                    <Typography>{publicKey?.toBase58().slice(0, 10) + "..." + publicKey?.toBase58().slice(-6)}</Typography>
+                    <Typography>
+                      {publicKey?.toBase58().slice(0, 10) +
+                        "..." +
+                        publicKey?.toBase58().slice(-6)}
+                    </Typography>
                   </MenuItem>
                 </Tooltip>
                 <MenuItem className={classes.menuItem}>
