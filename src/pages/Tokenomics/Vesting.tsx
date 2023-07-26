@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
@@ -10,11 +10,10 @@ import { vestMulti } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { getBN } from "@streamflow/stream";
 import { Recipient, VestParams, VestParamsData } from "../../lib/models/Vesting";
-import { getTimestamp } from "../../lib/utils";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -74,25 +73,25 @@ export const Vesting = () => {
       const recipients: Recipient[] = [
         {
           recipient: "9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f", // Recipient address (base58 string for Solana)
-          amount: getBN(50, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
           name: "Receipent1", // The stream name or subject.
-          cliffAmount: getBN(10, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(1, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+          cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(100, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
         },
         {
-          recipient: "BodqLnSPXrArdj3sKWF3hULSpiuABrcdwhtWw8om1JdQ", // Recipient address (base58 string for Solana)
-          amount: getBN(20, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          recipient: "CMiHYdJFr1sGYhT1y1Svy4KyhASweq4yoTGtEFVZi5cP", // Recipient address (base58 string for Solana)
+          amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
           name: "Receipent2", // The stream name or subject.
-          cliffAmount: getBN(5, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(1, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+          cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(100, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
         },
         // ... Other Recipient options
       ];
 
       const params: VestParams = {
-        startDate: getTimestamp() + 60,
-        cliff: getTimestamp() + 120,
-        period: 1,
+        startDate: vestParams.startDate.unix(),
+        // cliff: vestParams.cliff?.unix(),
+        period: 100,
       };
 
       vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipients);
