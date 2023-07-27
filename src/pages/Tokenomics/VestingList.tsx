@@ -22,7 +22,8 @@ import { makeStyles } from "@mui/styles";
 import CloseIcon from '@mui/icons-material/Close';
 import DoneIcon from '@mui/icons-material/Done';
 
-const useStyles = makeStyles((theme: Theme) => ({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const useStyles = makeStyles((_theme: Theme) => ({
   container: {
     minWidth: 1200,
     maxWidth: 1200,
