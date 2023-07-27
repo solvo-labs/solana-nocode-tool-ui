@@ -9,11 +9,12 @@ import { CustomButton } from "../../components/CustomButton";
 import { vestMulti } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { getBN } from "@streamflow/stream";
-import { Recipient, VestParams, VestParamsData } from "../../lib/models/Vesting";
+import { Durations, DurationsType, Recipient, VestParams, VestParamsData } from "../../lib/models/Vesting";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
+import { CustomInput } from "../../components/CustomInput";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -52,6 +53,7 @@ export const Vesting = () => {
     cliff: dayjs().add(3, "day"),
     period: 1,
   });
+  const [selectedDuration, setSelectedDuration] = useState<number>(Durations.DAY);
   const classes = useStyles();
 
   useEffect(() => {
@@ -72,18 +74,18 @@ export const Vesting = () => {
 
       const recipients: Recipient[] = [
         {
-          recipient: "9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f", // Recipient address (base58 string for Solana)
-          amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          recipient: "HQj1c4aNzz9C8PFbSBkGCow33beFAsdiqq6gdrYPqf1L", // Recipient address (base58 string for Solana)
+          amount: getBN(10, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
           name: "Receipent1", // The stream name or subject.
           cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(100, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+          amountPerPeriod: getBN(10, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
         },
         {
-          recipient: "CMiHYdJFr1sGYhT1y1Svy4KyhASweq4yoTGtEFVZi5cP", // Recipient address (base58 string for Solana)
-          amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          recipient: "FX3qSJpidqPfhK8SbNfpoJaZggB9ZQVQ8ACdeRgKrS9d", // Recipient address (base58 string for Solana)
+          amount: getBN(10, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
           name: "Receipent2", // The stream name or subject.
           cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(100, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+          amountPerPeriod: getBN(10, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
         },
         // ... Other Recipient options
       ];
@@ -91,7 +93,7 @@ export const Vesting = () => {
       const params: VestParams = {
         startDate: vestParams.startDate.unix(),
         // cliff: vestParams.cliff?.unix(),
-        period: 100,
+        period: vestParams.period * selectedDuration,
       };
 
       vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipients);
@@ -151,6 +153,7 @@ export const Vesting = () => {
               })}
             </Select>
           </FormControl>
+
           <FormControl fullWidth>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {
@@ -167,7 +170,48 @@ export const Vesting = () => {
               }
             </LocalizationProvider>
           </FormControl>
-          <FormControl fullWidth>
+          <Grid container>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <CustomInput
+                  placeHolder="Duration"
+                  label="Duration"
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={vestParams.period}
+                  onChange={(e: any) => {
+                    setVestParams({ ...vestParams, period: e.target.value });
+                  }}
+                  disable={false}
+                ></CustomInput>
+              </FormControl>
+            </Grid>
+            <Grid item xs={8}>
+              <FormControl fullWidth>
+                <InputLabel id="selectLabel">Durations</InputLabel>
+                <Select
+                  value={selectedDuration.toString()}
+                  label="Durations"
+                  onChange={(e: SelectChangeEvent<string>) => {
+                    setSelectedDuration(Number(e.target.value));
+                  }}
+                  className={classes.input}
+                  id={"durations"}
+                >
+                  {Object.keys(Durations).map((tk) => {
+                    return (
+                      <MenuItem key={tk} value={Durations[tk as keyof DurationsType]}>
+                        {tk}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
+          {/* <FormControl fullWidth>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {
                 <DateTimePicker
@@ -183,7 +227,7 @@ export const Vesting = () => {
                 />
               }
             </LocalizationProvider>
-          </FormControl>
+          </FormControl> */}
         </Stack>
       </Grid>
       <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>

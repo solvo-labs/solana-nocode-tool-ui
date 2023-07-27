@@ -53,7 +53,7 @@ export const vestMulti = async (wallet: SignerWalletAdapter, mint: TokenData, ve
     transferableBySender: false, // Wether or not sender can transfer the stream.
     transferableByRecipient: false, // Wether or not recipient can transfer the stream.
     automaticWithdrawal: true, // [optional] Wether or not a 3rd party (e.g. cron job, "cranker") can initiate a token withdraw/transfer.
-    withdrawalFrequency: 100, // [optional] Relevant when automatic withdrawal is enabled. If greater than 0 our withdrawor will take care of withdrawals. If equal to 0 our withdrawor will skip, but everyone else can initiate withdrawals.
+    withdrawalFrequency: vestParams.period, // [optional] Relevant when automatic withdrawal is enabled. If greater than 0 our withdrawor will take care of withdrawals. If equal to 0 our withdrawor will skip, but everyone else can initiate withdrawals.
     recipients,
   };
 
