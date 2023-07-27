@@ -22,7 +22,7 @@ type Props = {
   name: string;
   type: string;
   value: string | number;
-  onChange: any;
+  onChange: React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> | undefined;
   disable?: boolean;
 };
 
