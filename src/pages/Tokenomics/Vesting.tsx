@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, Theme, Typography } from "@mui/material";
+import { Divider, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, Switch, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomButton } from "../../components/CustomButton";
 import { vestMulti } from "../../lib/vesting";
@@ -46,7 +46,6 @@ export const Vesting = () => {
   const { publicKey } = useWallet();
   const wallet = useAnchorWallet();
   const { connection } = useConnection();
-  const [receipentPubkey] = useState<string>("9U3AaVHiVhncxnQQGRabQCb1wy7SYJStWbLJXhYXPJ1f");
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [vestParams, setVestParams] = useState<VestParamsData>({
     startDate: dayjs().add(1, "h"),
@@ -55,6 +54,9 @@ export const Vesting = () => {
     selectedDuration: Durations.DAY,
     selectedUnlockSchedule: UnlockSchedule.HOURLY,
   });
+
+  const [activateCliff, setActivateCliff] = useState<boolean>(false);
+
   const classes = useStyles();
 
   useEffect(() => {
@@ -70,12 +72,12 @@ export const Vesting = () => {
   }, [connection, publicKey]);
 
   const startVesting = async () => {
-    if (wallet && selectedToken && receipentPubkey) {
+    if (wallet && selectedToken) {
       const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
 
       const params: VestParams = {
         startDate: vestParams.startDate.unix(),
-        // cliff: vestParams.cliff?.unix(),
+        cliff: activateCliff ? vestParams.cliff?.unix() : 0,
         period: (vestParams.period * vestParams.selectedDuration) / amountPer,
       };
 
@@ -84,14 +86,14 @@ export const Vesting = () => {
           recipient: "HQj1c4aNzz9C8PFbSBkGCow33beFAsdiqq6gdrYPqf1L", // Recipient address (base58 string for Solana)
           amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
           name: "Receipent1", // The stream name or subject.
-          cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          cliffAmount: getBN(20, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
           amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
         },
         {
           recipient: "FX3qSJpidqPfhK8SbNfpoJaZggB9ZQVQ8ACdeRgKrS9d", // Recipient address (base58 string for Solana)
           amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
           name: "Receipent2", // The stream name or subject.
-          cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          cliffAmount: getBN(20, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
           amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
         },
         // ... Other Recipient options
@@ -232,23 +234,27 @@ export const Vesting = () => {
             </Select>
           </FormControl>
 
-          {/* <FormControl fullWidth>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              {
-                <DateTimePicker
-                  defaultValue={vestParams.cliff}
-                  disablePast
-                  label="Cliff Date"
-                  minDate={vestParams.startDate}
-                  onChange={(value: dayjs.Dayjs | null) => {
-                    if (value) {
-                      setVestParams({ ...vestParams, cliff: value });
-                    }
-                  }}
-                />
-              }
-            </LocalizationProvider>
-          </FormControl> */}
+          <FormControlLabel control={<Switch value={activateCliff} onChange={() => setActivateCliff(!activateCliff)} />} label="Activate Cliff" />
+
+          {activateCliff && (
+            <FormControl fullWidth>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                {
+                  <DateTimePicker
+                    defaultValue={vestParams.cliff}
+                    disablePast
+                    label="Cliff Date"
+                    minDate={vestParams.startDate}
+                    onChange={(value: dayjs.Dayjs | null) => {
+                      if (value) {
+                        setVestParams({ ...vestParams, cliff: value });
+                      }
+                    }}
+                  />
+                }
+              </LocalizationProvider>
+            </FormControl>
+          )}
         </Stack>
       </Grid>
       <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
