@@ -9,7 +9,7 @@ import { CustomButton } from "../../components/CustomButton";
 import { vestMulti } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { getBN } from "@streamflow/stream";
-import { Durations, DurationsType, Recipient, VestParams, VestParamsData } from "../../lib/models/Vesting";
+import { Durations, DurationsType, Recipient, UnlockSchedule, UnlockScheduleType, VestParams, VestParamsData } from "../../lib/models/Vesting";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -52,8 +52,9 @@ export const Vesting = () => {
     startDate: dayjs().add(1, "h"),
     cliff: dayjs().add(3, "day"),
     period: 1,
+    selectedDuration: Durations.DAY,
+    selectedUnlockSchedule: UnlockSchedule.HOURLY,
   });
-  const [selectedDuration, setSelectedDuration] = useState<number>(Durations.DAY);
   const classes = useStyles();
 
   useEffect(() => {
@@ -70,31 +71,31 @@ export const Vesting = () => {
 
   const startVesting = async () => {
     if (wallet && selectedToken && receipentPubkey) {
-      // vestSingle(wallet as SignerWalletAdapter, selectedToken, receipentPubkey, 100, 10, 10);
-
-      const recipients: Recipient[] = [
-        {
-          recipient: "HQj1c4aNzz9C8PFbSBkGCow33beFAsdiqq6gdrYPqf1L", // Recipient address (base58 string for Solana)
-          amount: getBN(10, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
-          name: "Receipent1", // The stream name or subject.
-          cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(10, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
-        },
-        {
-          recipient: "FX3qSJpidqPfhK8SbNfpoJaZggB9ZQVQ8ACdeRgKrS9d", // Recipient address (base58 string for Solana)
-          amount: getBN(10, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
-          name: "Receipent2", // The stream name or subject.
-          cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(10, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
-        },
-        // ... Other Recipient options
-      ];
+      const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
 
       const params: VestParams = {
         startDate: vestParams.startDate.unix(),
         // cliff: vestParams.cliff?.unix(),
-        period: vestParams.period * selectedDuration,
+        period: (vestParams.period * vestParams.selectedDuration) / amountPer,
       };
+
+      const recipients: Recipient[] = [
+        {
+          recipient: "HQj1c4aNzz9C8PFbSBkGCow33beFAsdiqq6gdrYPqf1L", // Recipient address (base58 string for Solana)
+          amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          name: "Receipent1", // The stream name or subject.
+          cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+        },
+        {
+          recipient: "FX3qSJpidqPfhK8SbNfpoJaZggB9ZQVQ8ACdeRgKrS9d", // Recipient address (base58 string for Solana)
+          amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          name: "Receipent2", // The stream name or subject.
+          cliffAmount: getBN(0, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+        },
+        // ... Other Recipient options
+      ];
 
       vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipients);
     }
@@ -191,10 +192,10 @@ export const Vesting = () => {
               <FormControl fullWidth>
                 <InputLabel id="selectLabel">Durations</InputLabel>
                 <Select
-                  value={selectedDuration.toString()}
+                  value={vestParams.selectedDuration.toString()}
                   label="Durations"
                   onChange={(e: SelectChangeEvent<string>) => {
-                    setSelectedDuration(Number(e.target.value));
+                    setVestParams({ ...vestParams, selectedDuration: Number(e.target.value) });
                   }}
                   className={classes.input}
                   id={"durations"}
@@ -210,6 +211,26 @@ export const Vesting = () => {
               </FormControl>
             </Grid>
           </Grid>
+          <FormControl fullWidth>
+            <InputLabel id="selectLabel">Unlock Schedule</InputLabel>
+            <Select
+              value={vestParams.selectedUnlockSchedule.toString()}
+              label="Unlock Schedule"
+              onChange={(e: SelectChangeEvent<string>) => {
+                setVestParams({ ...vestParams, selectedUnlockSchedule: Number(e.target.value) });
+              }}
+              className={classes.input}
+              id={"Unlock Schedule"}
+            >
+              {Object.keys(UnlockSchedule).map((tk) => {
+                return (
+                  <MenuItem key={tk} value={UnlockSchedule[tk as keyof UnlockScheduleType]}>
+                    {tk}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
 
           {/* <FormControl fullWidth>
             <LocalizationProvider dateAdapter={AdapterDayjs}>

@@ -11,6 +11,8 @@ export type VestParamsData = {
   startDate: Dayjs;
   period: number;
   cliff?: Dayjs;
+  selectedDuration: number;
+  selectedUnlockSchedule: number;
 };
 
 export type Recipient = {
@@ -37,4 +39,26 @@ export const Durations: DurationsType = {
   MONTH: 2592000,
   QUARTER: 7776000,
   YEAR: 31536000,
+};
+
+export type UnlockScheduleType = {
+  PER_SECOND: number;
+  PER_MINUTE: number;
+  HOURLY: number;
+  DAILY: number;
+  WEEKLY: number;
+  MONTHLY: number;
+  QUARTERLY: number;
+  YEARLY: number;
+};
+
+export const UnlockSchedule: UnlockScheduleType = {
+  PER_SECOND: 1,
+  PER_MINUTE: 60,
+  HOURLY: 3600,
+  DAILY: 86400,
+  WEEKLY: 604800,
+  MONTHLY: 2592000,
+  QUARTERLY: 7776000,
+  YEARLY: 31536000,
 };
