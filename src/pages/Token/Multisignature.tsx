@@ -114,7 +114,7 @@ export const Multisignature = () => {
       <Grid item marginTop={"2rem"}>
         <Stack direction={"column"} width={"100%"} spacing={4}>
           {signatures.map((_e: string, index) => (
-            <Grid container display={"flex"} justifyContent={"space-evenly"}>
+            <Grid container display={"flex"} key={index} justifyContent={"space-evenly"}>
               <FormControl fullWidth>
                 <Grid item>
                   <CustomInput

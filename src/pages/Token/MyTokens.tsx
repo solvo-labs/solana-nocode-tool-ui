@@ -63,8 +63,8 @@ export const MyTokens = () => {
 
   const listToken = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any) => (
-      <TableRow className={classes.tableRow}>
+    return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any, index: number) => (
+      <TableRow className={classes.tableRow} key={index}>
         <TableCell>{a.metadata.name}</TableCell>
         <TableCell>{a.metadata.symbol}</TableCell>
         <TableCell>{a.supply.value.uiAmount}</TableCell>

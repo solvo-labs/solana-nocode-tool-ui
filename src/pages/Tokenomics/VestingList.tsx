@@ -116,8 +116,8 @@ export const VestingList = () => {
   const listVesting = () => {
     return vestingList
       ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-      ?.map((e: any) => (
-        <TableRow className={classes.tableRow}>
+      ?.map((e: any, index: number) => (
+        <TableRow className={classes.tableRow} key={index}>
           <TableCell>{e[1].name}</TableCell>
           <TableCell align="center">
             {e[1].end * 1000 < Date.now() ? (<DoneIcon color="success" sx={{zIndex: "-10px"}}></DoneIcon>) : (<CloseIcon sx={{ color: "red", zIndex: "-20px" }}></CloseIcon>)}
