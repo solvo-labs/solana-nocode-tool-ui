@@ -77,7 +77,7 @@ const timestampToDate = (timestamp: number) => {
 export const VestingList = () => {
   const { publicKey } = useWallet();
   const [loading, setLoading] = useState<boolean>(true);
-  const [vestingList, setVestingList] = useState<[string, Stream][] | undefined>([]);
+  const [vestingList, setVestingList] = useState<[string, Stream][]>([]);
   const classes = useStyles();
 
   const [page, setPage] = useState(0);
@@ -97,7 +97,7 @@ export const VestingList = () => {
       if (publicKey) {
         const data = await getVestingMyOwn(publicKey.toBase58());
         const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
-        setVestingList(sortedData);
+        setVestingList(sortedData || []);
         setLoading(false);
       }
     };
