@@ -1,9 +1,32 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Box, Divider, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Modal, Select, SelectChangeEvent, Stack, Switch, Tab, Theme, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  MenuItem,
+  Modal,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  Switch,
+  Tab,
+  Theme,
+  Typography,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomButton } from "../../components/CustomButton";
 import { vestMulti } from "../../lib/vesting";
@@ -19,7 +42,8 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import RecipientComponent from "../../components/RecipientComponent";
-import toastr from "toastr";
+import toastr, { warning } from "toastr";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -99,7 +123,7 @@ export const Vesting = () => {
   }, [connection, publicKey]);
 
   const startVesting = async () => {
-    if (wallet && selectedToken) {
+    if (wallet && selectedToken && recipients.length > 0) {
       const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
 
       const params: VestParams = {
@@ -108,25 +132,32 @@ export const Vesting = () => {
         period: (vestParams.period * vestParams.selectedDuration) / amountPer,
       };
 
-      const recipients: Recipient[] = [
-        {
-          recipient: "HQj1c4aNzz9C8PFbSBkGCow33beFAsdiqq6gdrYPqf1L", // Recipient address (base58 string for Solana)
-          amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
-          name: "Receipent1", // The stream name or subject.
-          cliffAmount: getBN(20, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
-        },
-        {
-          recipient: "FX3qSJpidqPfhK8SbNfpoJaZggB9ZQVQ8ACdeRgKrS9d", // Recipient address (base58 string for Solana)
-          amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
-          name: "Receipent2", // The stream name or subject.
-          cliffAmount: getBN(20, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
-        },
-        // ... Other Recipient options
-      ];
+      // {
+      //   recipient: "HQj1c4aNzz9C8PFbSBkGCow33beFAsdiqq6gdrYPqf1L", // Recipient address (base58 string for Solana)
+      //   amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+      //   name: "Receipent1", // The stream name or subject.
+      //   cliffAmount: getBN(20, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+      //   amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+      // },
+      // {
+      //   recipient: "FX3qSJpidqPfhK8SbNfpoJaZggB9ZQVQ8ACdeRgKrS9d", // Recipient address (base58 string for Solana)
+      //   amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+      //   name: "Receipent2", // The stream name or subject.
+      //   cliffAmount: getBN(20, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+      //   amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+      // },
 
-      vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipients);
+      const recipientList: Recipient[] = recipients.map((data) => {
+        return {
+          recipient: data.recipientAddress, // Recipient address (base58 string for Solana)
+          amount: getBN(data.amount, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          name: data.name, // The stream name or subject.
+          cliffAmount: getBN(data.cliffAmount, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(data.amount / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+        };
+      });
+
+      vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipientList);
     }
   };
 
@@ -261,6 +292,8 @@ export const Vesting = () => {
             </Select>
           </FormControl>
 
+          <FormControlLabel control={<Switch value={true} defaultChecked></Switch>} label="Automatic Withdraw" />
+
           <FormControlLabel control={<Switch value={activateCliff} onChange={() => setActivateCliff(!activateCliff)} />} label="Activate Cliff" />
 
           {activateCliff && (
@@ -287,8 +320,8 @@ export const Vesting = () => {
       <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
         <CustomButton label="Add Recipient" disable={false} onClick={() => setRecipientModal({ show: true })} />
       </Grid>
-      <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-        <CustomButton label="Start Vesting" disable={false} onClick={startVesting} />
+      <Grid item marginTop={2} marginBottom={5} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+        <CustomButton label="Create Vesting Contract" disable={selectedToken === undefined || vestParams.period <= 0 || recipients.length <= 0} onClick={startVesting} />
       </Grid>
 
       <Modal
@@ -307,7 +340,7 @@ export const Vesting = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 600,
+            width: 800,
             bgcolor: "background.paper",
             border: "2px solid #000",
             boxShadow: 24,
@@ -316,7 +349,7 @@ export const Vesting = () => {
         >
           <div className={classes.modalContent}>
             <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
-              Manage The Receipent's
+              Manage The Recipient's
             </Typography>
             <Divider />
             <TabContext value={recipientModal?.activeTab || "1"}>
@@ -340,7 +373,7 @@ export const Vesting = () => {
                 <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
                   <CustomButton
                     label="Save Recipient"
-                    disable={false}
+                    disable={recipient.amount <= 0 || recipient.name === "" || recipient.recipientAddress === ""}
                     onClick={() => {
                       const lastRecipients = [...recipients, recipient];
 
@@ -351,7 +384,57 @@ export const Vesting = () => {
                   />
                 </Grid>
               </TabPanel>
-              <TabPanel value="2">Item Two</TabPanel>
+              <TabPanel value="2">
+                {recipients.length > 0 ? (
+                  <List dense sx={{ width: "100%", maxWidth: 800 }}>
+                    {recipients.map((value, index) => {
+                      const labelId = `checkbox-list-secondary-label-${value}`;
+                      return (
+                        <>
+                          <ListItem
+                            key={index}
+                            secondaryAction={
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                onClick={() => {
+                                  const clonedState = [...recipients];
+                                  clonedState.splice(index, 1);
+
+                                  setRecipients(clonedState);
+                                }}
+                              >
+                                <DeleteIcon />
+                              </Button>
+                            }
+                            disablePadding
+                          >
+                            <ListItemButton>
+                              <ListItemText
+                                style={{ color: "black" }}
+                                id={labelId}
+                                primary={
+                                  "Name : " +
+                                  value.name +
+                                  ", Address : " +
+                                  value.recipientAddress +
+                                  ", Amount : " +
+                                  value.amount +
+                                  (value.cliffAmount > 0 ? ",Cliff Amount : " + value.cliffAmount : "")
+                                }
+                              />
+                            </ListItemButton>
+                          </ListItem>
+                          <Divider sx={{ marginTop: "0.5rem", marginBottom: "0.5rem", background: "black" }} />
+                        </>
+                      );
+                    })}
+                  </List>
+                ) : (
+                  <span style={{ color: "black" }}>There are no recipients</span>
+                )}
+              </TabPanel>
             </TabContext>
           </div>
         </Box>
