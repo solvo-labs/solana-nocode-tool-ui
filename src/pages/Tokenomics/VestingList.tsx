@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useState } from "react";
 import { getVestingMyOwn } from "../../lib/vesting";
@@ -16,11 +17,14 @@ import {
   TablePagination,
   TableRow,
   Theme,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import CloseIcon from '@mui/icons-material/Close';
-import DoneIcon from '@mui/icons-material/Done';
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import DoneIcon from "@mui/icons-material/Done";
+import { getTimestamp } from "../../lib/utils";
+import PendingIcon from "@mui/icons-material/Pending";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
@@ -66,25 +70,14 @@ const timestampToDate = (timestamp: number) => {
     value.length < 2 ? (value = 0 + "" + value) : value;
     return value;
   };
-  const date =
-    formatter(dayFormat) +
-    "/" +
-    formatter(monthFormat) +
-    "/" +
-    dateFormat.getFullYear() +
-    " " +
-    formatter(hourFormat) +
-    ":" +
-    formatter(minutesFormat);
+  const date = formatter(dayFormat) + "/" + formatter(monthFormat) + "/" + dateFormat.getFullYear() + " " + formatter(hourFormat) + ":" + formatter(minutesFormat);
   return timestamp == 0 ? "-" : date;
 };
 
 export const VestingList = () => {
   const { publicKey } = useWallet();
   const [loading, setLoading] = useState<boolean>(true);
-  const [vestingList, setVestingList] = useState<
-    [string, Stream][] | undefined
-  >([]);
+  const [vestingList, setVestingList] = useState<[string, Stream][] | undefined>([]);
   const classes = useStyles();
 
   const [page, setPage] = useState(0);
@@ -94,9 +87,7 @@ export const VestingList = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
@@ -104,11 +95,8 @@ export const VestingList = () => {
   useEffect(() => {
     const init = async () => {
       if (publicKey) {
-        const keyim = "CMiHYdJFr1sGYhT1y1Svy4KyhASweq4yoTGtEFVZi5cP";
-        const data = await getVestingMyOwn(keyim);
-        const sortedData = data?.sort(
-          (a, b) => a[1].createdAt - b[1].createdAt
-        );
+        const data = await getVestingMyOwn(publicKey.toBase58());
+        const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
         setVestingList(sortedData);
         setLoading(false);
       }
@@ -117,30 +105,59 @@ export const VestingList = () => {
     init();
   }, [publicKey]);
 
+  const getStatusIcon = (startDate: number, endDate: number) => {
+    const timestamp = getTimestamp();
+
+    if (endDate <= timestamp) {
+      return (
+        <Tooltip title="Process is completed">
+          {
+            <span>
+              <DoneIcon color="success" sx={{ zIndex: "-10px" }} />
+            </span>
+          }
+        </Tooltip>
+      );
+    } else if (timestamp >= startDate && timestamp <= endDate) {
+      return (
+        <Tooltip title="Vesting is processing">
+          {
+            <span>
+              <AutorenewIcon color="success" sx={{ zIndex: "-10px" }} />
+            </span>
+          }
+        </Tooltip>
+      );
+    }
+
+    return (
+      <Tooltip title="Process is waiting">
+        {
+          <span>
+            <PendingIcon color="warning" sx={{ zIndex: "-10px" }} />
+          </span>
+        }
+      </Tooltip>
+    );
+  };
+
   const listVesting = () => {
-    return vestingList
-      ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-      ?.map((e: any, index: number) => (
-        <TableRow className={classes.tableRow} key={index}>
-          <TableCell>{e[1].name}</TableCell>
-          <TableCell align="center">
-            {e[1].end * 1000 < Date.now() ? (<DoneIcon color="success" sx={{zIndex: "-10px"}}></DoneIcon>) : (<CloseIcon sx={{ color: "red", zIndex: "-20px" }}></CloseIcon>)}
-          </TableCell>
-          <TableCell>{timestampToDate(e[1].start)}</TableCell>
-          <TableCell>{timestampToDate(e[1].end)}</TableCell>
-          <TableCell>{timestampToDate(e[1].lastWithdrawnAt)}</TableCell>
-          <TableCell>{e[1].mint.slice(0, 8)}</TableCell>
-          <TableCell align="center">{e[1].period}</TableCell>
-          <TableCell align="center">{e[1].withdrawnAmount.toNumber() / 10000000}</TableCell>
-          <TableCell align="center">{e[1].depositedAmount.toNumber() / 10000000}</TableCell>
-          <TableCell>{timestampToDate(e[1].cliff)}</TableCell>
-          <TableCell align="center">
-            {e[1].cliffAmount.toNumber() /
-              Math.pow(10, e[1].cliffAmount.length)}
-          </TableCell>
-          <TableCell align="center">{String(e[1].transferableBySender)}</TableCell>
-        </TableRow>
-      ));
+    return vestingList?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)?.map((e: any, index: number) => (
+      <TableRow className={classes.tableRow} key={index}>
+        <TableCell>{e[1].name}</TableCell>
+        <TableCell align="center">{getStatusIcon(e[1].start, e[1].end)}</TableCell>
+        <TableCell>{timestampToDate(e[1].start)}</TableCell>
+        <TableCell>{timestampToDate(e[1].end)}</TableCell>
+        <TableCell>{timestampToDate(e[1].lastWithdrawnAt)}</TableCell>
+        <TableCell>{e[1].mint.slice(0, 8)}</TableCell>
+        <TableCell align="center">{e[1].period}</TableCell>
+        <TableCell align="center">{e[1].withdrawnAmount.toNumber() / 10000000}</TableCell>
+        <TableCell align="center">{e[1].depositedAmount.toNumber() / 10000000}</TableCell>
+        <TableCell>{timestampToDate(e[1].cliff)}</TableCell>
+        <TableCell align="center">{e[1].cliffAmount.toNumber() / Math.pow(10, e[1].cliffAmount.length)}</TableCell>
+        <TableCell align="center">{String(e[1].automaticWithdrawal)}</TableCell>
+      </TableRow>
+    ));
   };
 
   if (loading) {
@@ -171,22 +188,36 @@ export const VestingList = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell align="center" className={classes.tableTitle}>Name</TableCell>
-                  <TableCell align="center" className={classes.tableTitle}>Complate</TableCell>
-                  <TableCell align="center" className={classes.tableTitle}>Start</TableCell>
-                  <TableCell align="center" className={classes.tableTitle}>End</TableCell>
                   <TableCell align="center" className={classes.tableTitle}>
-                    Last With Drawn At
+                    Name
                   </TableCell>
-                  <TableCell align="center" className={classes.tableTitle}>Mint</TableCell>
-                  <TableCell align="center" className={classes.tableTitle}>Period</TableCell>
+                  <TableCell align="center" className={classes.tableTitle}>
+                    Status
+                  </TableCell>
+                  <TableCell align="center" className={classes.tableTitle}>
+                    Start
+                  </TableCell>
+                  <TableCell align="center" className={classes.tableTitle}>
+                    End
+                  </TableCell>
+                  <TableCell align="center" className={classes.tableTitle}>
+                    Last Withdrawn At
+                  </TableCell>
+                  <TableCell align="center" className={classes.tableTitle}>
+                    Mint
+                  </TableCell>
+                  <TableCell align="center" className={classes.tableTitle}>
+                    Period
+                  </TableCell>
                   <TableCell align="center" className={classes.tableTitle}>
                     Withdrawn Amount
                   </TableCell>
                   <TableCell align="center" className={classes.tableTitle}>
                     Deposited Amount
                   </TableCell>
-                  <TableCell align="center" className={classes.tableTitle}>Cliff</TableCell>
+                  <TableCell align="center" className={classes.tableTitle}>
+                    Cliff
+                  </TableCell>
                   <TableCell align="center" className={classes.tableTitle}>
                     Cliff Amount
                   </TableCell>
