@@ -59,11 +59,11 @@ const TokenMint: React.FC = () => {
       } = await connection.getLatestBlockhashAndContext();
 
       try {
-        const { transaction: transaction2, associatedToken } = getOrCreateAssociatedTokenAccount(toAccount.publicKey, publicKey, publicKey);
+        const { transaction: transaction2, associatedToken } = await getOrCreateAssociatedTokenAccount(toAccount.publicKey, publicKey, publicKey, connection);
 
         const mintTransactions = new Transaction();
         mintTransactions.add(transaction);
-        mintTransactions.add(transaction2);
+        mintTransactions.add(transaction2!);
 
         const mintSignature = await sendTransaction(mintTransactions, connection, { minContextSlot, signers: [toAccount] });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: mintSignature });

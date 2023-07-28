@@ -22,20 +22,12 @@ type Props = {
   name: string;
   type: string;
   value: string | number;
-  onChange: any;
+  onChange: React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> | undefined;
   disable?: boolean;
+  required?: boolean;
 };
 
-export const CustomInput: React.FC<Props> = ({
-  placeHolder,
-  label,
-  id,
-  name,
-  type,
-  value,
-  onChange,
-  disable = false,
-}) => {
+export const CustomInput: React.FC<Props> = ({ placeHolder, label, id, name, type, value, onChange, disable = false, required = true }) => {
   const classes = useStyles();
 
   return (
@@ -47,7 +39,7 @@ export const CustomInput: React.FC<Props> = ({
       label={label}
       value={value}
       onChange={onChange}
-      required
+      required={required}
       type={type}
       disabled={disable}
     ></TextField>

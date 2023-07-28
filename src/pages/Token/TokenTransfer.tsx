@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { createTransferInstruction, getAccount } from "@solana/spl-token";
 import { PublicKey, Transaction } from "@solana/web3.js";
@@ -63,35 +64,54 @@ export const TokenTransfer = () => {
         const destination = new PublicKey(destinationPubkey);
         const selectedTokenPubkey = new PublicKey(selectedToken.hex);
 
-        const { associatedToken } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, publicKey);
-        const { associatedToken: toAssociatedToken, transaction: tx2 } = getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, destination);
+        const { associatedToken } = await getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, publicKey, connection);
 
-        const signature2 = await sendTransaction(tx2, connection, {
-          minContextSlot,
-        });
-        await connection.confirmTransaction({
-          blockhash,
-          lastValidBlockHeight,
-          signature: signature2,
-        });
+        const fromAccount = await getAccount(connection, associatedToken);
 
-        const account = await getAccount(connection, associatedToken);
+        const {
+          transaction: tx2,
+          account: toAccount,
+          associatedToken: associatedTokenTo,
+        } = await getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, destination, connection);
 
-        const toAccount = await getAccount(connection, toAssociatedToken);
+        if (tx2) {
+          const signature2 = await sendTransaction(tx2, connection, {
+            minContextSlot,
+          });
+          await connection.confirmTransaction({
+            blockhash,
+            lastValidBlockHeight,
+            signature: signature2,
+          });
 
-        const transaction = new Transaction().add(createTransferInstruction(account.address, toAccount.address, publicKey, amount * Math.pow(10, selectedToken.decimal)));
+          const newAccount = await getAccount(connection, associatedTokenTo);
 
-        const signature = await sendTransaction(transaction, connection, {
-          minContextSlot,
-        });
-        await connection.confirmTransaction({
-          blockhash,
-          lastValidBlockHeight,
-          signature,
-        });
+          const transaction = new Transaction().add(createTransferInstruction(fromAccount.address, newAccount.address, publicKey, amount * Math.pow(10, selectedToken.decimal)));
 
-        toastr.success("Transfer completed successfully.");
-        navigate("/my-tokens");
+          const signature = await sendTransaction(transaction, connection, {
+            minContextSlot,
+          });
+          await connection.confirmTransaction({
+            blockhash,
+            lastValidBlockHeight,
+            signature,
+          });
+          toastr.success("Transfer completed successfully.");
+          navigate("/my-tokens");
+        } else {
+          const transaction = new Transaction().add(createTransferInstruction(fromAccount.address, toAccount.address, publicKey, amount * Math.pow(10, selectedToken.decimal)));
+
+          const signature = await sendTransaction(transaction, connection, {
+            minContextSlot,
+          });
+          await connection.confirmTransaction({
+            blockhash,
+            lastValidBlockHeight,
+            signature,
+          });
+          toastr.success("Transfer completed successfully.");
+          navigate("/my-tokens");
+        }
       }
     } catch (error) {
       console.log(error);
@@ -126,7 +146,7 @@ export const TokenTransfer = () => {
             <Grid container display={"flex"} justifyContent={"center"} direction={"column"}>
               <Grid item display={"flex"} justifyContent={"center"}>
                 <FormControl fullWidth>
-                  <InputLabel id="selectLabel">Select an CEP-48 Token</InputLabel>
+                  <InputLabel id="selectLabel">Select a Token</InputLabel>
                   <Select
                     value={selectedToken ? selectedToken.hex : "default"}
                     label="ERC-20 Token"

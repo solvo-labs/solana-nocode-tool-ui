@@ -296,7 +296,6 @@ export const Raffle = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        marginTop: "6rem",
       }}
     >
       <Grid container className={classes.tableContainer}>

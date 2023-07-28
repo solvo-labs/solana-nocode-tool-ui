@@ -473,15 +473,15 @@ export const Stake = () => {
                 />
               )}
 
-              <List sx={{ width: "100%", maxWidth: 400, maxHeight: 500, color: "black", margin: 0, padding: 0, cursor: "pointer", overflowY: "auto" }}>
+              <List sx={{ width: "100%", maxWidth: 400, maxHeight: 500, color: "black", margin: 0, padding: 0, cursor: "pointer", overflowY: "auto" }} key={"list"}>
                 {selectedValidator && (
-                  <div>
-                    <span>Validator : {selectedValidator.votePubkey.slice(0, 16)} </span>
-                    <Divider sx={{ margin: 1 }} />
-                    <span>Activated SOL : {(selectedValidator.activatedStake / LAMPORTS_PER_SOL).toFixed(2)}SOL </span>
-                    <Divider sx={{ margin: 1 }} />
-                    <span>Commision : {selectedValidator.commission}% </span>
-                    <Divider sx={{ margin: 1 }} />
+                  <div key={"stakeModal"}>
+                    <span key={"validator"}>Validator : {selectedValidator.votePubkey.slice(0, 16)} </span>
+                    <Divider sx={{ margin: 1 }} key={"divider1"}/>
+                    <span key={"activeSol"}>Activated SOL : {(selectedValidator.activatedStake / LAMPORTS_PER_SOL).toFixed(2)}SOL </span>
+                    <Divider sx={{ margin: 1 }} key={"divider2"}/>
+                    <span key={"commision"}>Commision : {selectedValidator.commission}% </span>
+                    <Divider sx={{ margin: 1 }} key={"divider3"}/>
                     <CustomInput
                       placeHolder="Sol Amount"
                       label="Sol Amount"
@@ -491,10 +491,11 @@ export const Stake = () => {
                       value={stakeAmount}
                       onChange={(e: any) => setStakeAmount(e.target.value)}
                       disable={false}
+                      key={"stakeAmount"}
                     ></CustomInput>
-                    <Divider sx={{ margin: 1 }} />
-                    <div style={{ textAlign: "center" }}>
-                      <Button disabled={stakeAmount <= 0} variant="contained" color="primary" size="small" onClick={() => startStake()}>
+                    <Divider sx={{ margin: 1 }} key={"divider4"}/>
+                    <div style={{ textAlign: "center" }} key={"buttonDiv"}>
+                      <Button disabled={stakeAmount <= 0} variant="contained" color="primary" size="small" onClick={() => startStake()} key={"stakeButton"}>
                         STAKE SOL
                       </Button>
                     </div>
@@ -502,20 +503,21 @@ export const Stake = () => {
                 )}
 
                 {selectedValidator === undefined &&
-                  validators.map((vl) => {
+                  validators.map((vl, index:number) => {
                     return (
-                      <>
-                        <ListItem onClick={() => setSelectedValidator(vl)}>
-                          <ListItemAvatar>
-                            <Avatar>{vl.votePubkey.slice(0, 2)}</Avatar>
+                      <div key={index}>
+                        <ListItem onClick={() => setSelectedValidator(vl)} key={index}>
+                          <ListItemAvatar key={"listItemAvatar"+index}>
+                            <Avatar key={index}>{vl.votePubkey.slice(0, 2)}</Avatar>
                           </ListItemAvatar>
                           <ListItemText
+                            key={index}
                             primary={vl.votePubkey.slice(0, 10) + "..." + vl.votePubkey.slice(-3)}
                             secondary={(vl.activatedStake / LAMPORTS_PER_SOL).toFixed(2) + " SOL"}
                           />
                         </ListItem>
-                        <Divider />
-                      </>
+                        <Divider key={"divider5"}/>
+                      </div>
                     );
                   })}
               </List>
