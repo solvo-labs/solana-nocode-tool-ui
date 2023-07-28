@@ -29,6 +29,10 @@ const useStyles = makeStyles((_theme: Theme) => ({
     maxWidth: 1200,
     justifyContent: "center",
   },
+  titleContainer: {
+    minWidth: "30vw",
+    textAlign: "center",
+  },
   tableTitle: {
     backgroundColor: "purple",
     color: "white !important",
@@ -158,7 +162,7 @@ export const VestingList = () => {
   return (
     vestingList && (
       <Grid container direction={"row"} className={classes.container}>
-        <Grid item>
+        <Grid item className={classes.titleContainer}>
           <Typography variant="h5">Vesting List</Typography>
           <Divider sx={{ marginTop: "1rem", background: "white" }} />
         </Grid>
