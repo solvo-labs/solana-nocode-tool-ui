@@ -46,7 +46,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
         <CustomInput
           label="Cliff Amount (Optional)"
           name="cliffAmount"
-          onChange={(e: any) => inputOnChange({ ...inputs, recipientAddress: e.target.value })}
+          onChange={(e: any) => inputOnChange({ ...inputs, cliffAmount: e.target.value })}
           placeHolder={"Cliff Amount"}
           type="text"
           value={inputs.cliffAmount}

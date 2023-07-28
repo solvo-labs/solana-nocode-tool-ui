@@ -19,6 +19,7 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import RecipientComponent from "../../components/RecipientComponent";
+import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -62,6 +63,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
+const recipientDefaultState = { name: "", amount: 0, cliffAmount: 0, recipientAddress: "" };
+
 export const Vesting = () => {
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const { publicKey } = useWallet();
@@ -79,6 +82,7 @@ export const Vesting = () => {
   const [activateCliff, setActivateCliff] = useState<boolean>(false);
   const [recipientModal, setRecipientModal] = useState<{ show: boolean; activeTab?: string }>({ show: false, activeTab: "1" });
   const [recipients, setRecipients] = useState<RecipientFormInput[]>([]);
+  const [recipient, setRecipient] = useState<RecipientFormInput>(recipientDefaultState);
 
   const classes = useStyles();
 
@@ -328,11 +332,24 @@ export const Vesting = () => {
               </Box>
               <TabPanel value="1">
                 <RecipientComponent
-                  inputs={{ name: "", amount: 0, cliffAmount: 0, recipientAddress: "" }}
+                  inputs={recipient}
                   inputOnChange={(data) => {
-                    console.log(data);
+                    setRecipient(data);
                   }}
                 />
+                <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+                  <CustomButton
+                    label="Save Recipient"
+                    disable={false}
+                    onClick={() => {
+                      const lastRecipients = [...recipients, recipient];
+
+                      setRecipients(lastRecipients);
+                      setRecipient(recipientDefaultState);
+                      toastr.success("Recipient added succesfully.");
+                    }}
+                  />
+                </Grid>
               </TabPanel>
               <TabPanel value="2">Item Two</TabPanel>
             </TabContext>
