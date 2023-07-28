@@ -44,6 +44,7 @@ import TabPanel from "@mui/lab/TabPanel";
 import RecipientComponent from "../../components/RecipientComponent";
 import toastr, { warning } from "toastr";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -107,6 +108,7 @@ export const Vesting = () => {
   const [recipientModal, setRecipientModal] = useState<{ show: boolean; activeTab?: string }>({ show: false, activeTab: "1" });
   const [recipients, setRecipients] = useState<RecipientFormInput[]>([]);
   const [recipient, setRecipient] = useState<RecipientFormInput>(recipientDefaultState);
+  const navigate = useNavigate();
 
   const classes = useStyles();
 
@@ -157,7 +159,17 @@ export const Vesting = () => {
         };
       });
 
-      vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipientList);
+      const data = await vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipientList);
+
+      toastr.success("Contract Deployed Successfully");
+
+      console.log(data);
+
+      data?.txs.forEach((tx) => {
+        window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
+      });
+
+      navigate("/vesting-list");
     }
   };
 
