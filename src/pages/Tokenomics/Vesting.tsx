@@ -7,7 +7,6 @@ import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapte
 import {
   Box,
   Button,
-  Checkbox,
   Divider,
   FormControl,
   FormControlLabel,
@@ -42,7 +41,7 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import RecipientComponent from "../../components/RecipientComponent";
-import toastr, { warning } from "toastr";
+import toastr from "toastr";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 
@@ -367,7 +366,7 @@ export const Vesting = () => {
             <TabContext value={recipientModal?.activeTab || "1"}>
               <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                 <TabList
-                  onChange={(event: React.SyntheticEvent, newValue: string) => {
+                  onChange={(_event: React.SyntheticEvent, newValue: string) => {
                     setRecipientModal({ ...recipientModal, activeTab: newValue });
                   }}
                 >
