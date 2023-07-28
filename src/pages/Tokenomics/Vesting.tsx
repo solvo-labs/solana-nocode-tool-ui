@@ -3,18 +3,22 @@ import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Divider, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, Switch, Theme, Typography } from "@mui/material";
+import { Box, Divider, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Modal, Select, SelectChangeEvent, Stack, Switch, Tab, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomButton } from "../../components/CustomButton";
 import { vestMulti } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { getBN } from "@streamflow/stream";
-import { Durations, DurationsType, Recipient, UnlockSchedule, UnlockScheduleType, VestParams, VestParamsData } from "../../lib/models/Vesting";
+import { Durations, DurationsType, Recipient, RecipientFormInput, UnlockSchedule, UnlockScheduleType, VestParams, VestParamsData } from "../../lib/models/Vesting";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 import { CustomInput } from "../../components/CustomInput";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
+import RecipientComponent from "../../components/RecipientComponent";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -39,6 +43,23 @@ const useStyles = makeStyles((theme: Theme) => ({
       // minWidth: "12rem !important",
     },
   },
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2),
+    position: "relative", // Modal içeriği için göreceli konumlandırma
+  },
+  backButton: {
+    top: theme.spacing(1),
+    left: theme.spacing(1),
+    color: "black",
+    cursor: "pointer",
+  },
 }));
 
 export const Vesting = () => {
@@ -56,6 +77,8 @@ export const Vesting = () => {
   });
 
   const [activateCliff, setActivateCliff] = useState<boolean>(false);
+  const [recipientModal, setRecipientModal] = useState<{ show: boolean; activeTab?: string }>({ show: false, activeTab: "1" });
+  const [recipients, setRecipients] = useState<RecipientFormInput[]>([]);
 
   const classes = useStyles();
 
@@ -258,8 +281,64 @@ export const Vesting = () => {
         </Stack>
       </Grid>
       <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+        <CustomButton label="Add Recipient" disable={false} onClick={() => setRecipientModal({ show: true })} />
+      </Grid>
+      <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
         <CustomButton label="Start Vesting" disable={false} onClick={startVesting} />
       </Grid>
+
+      <Modal
+        className={classes.modal}
+        open={recipientModal.show}
+        onClose={() => {
+          setRecipientModal({ show: false });
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            borderRadius: "8px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 600,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 1,
+          }}
+        >
+          <div className={classes.modalContent}>
+            <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
+              Manage The Receipent's
+            </Typography>
+            <Divider />
+            <TabContext value={recipientModal?.activeTab || "1"}>
+              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                <TabList
+                  onChange={(event: React.SyntheticEvent, newValue: string) => {
+                    setRecipientModal({ ...recipientModal, activeTab: newValue });
+                  }}
+                >
+                  <Tab label="Add New Recipient" value="1" />
+                  <Tab label="Recipient List" value="2" />
+                </TabList>
+              </Box>
+              <TabPanel value="1">
+                <RecipientComponent
+                  inputs={{ name: "", amount: 0, cliffAmount: 0, recipientAddress: "" }}
+                  inputOnChange={(data) => {
+                    console.log(data);
+                  }}
+                />
+              </TabPanel>
+              <TabPanel value="2">Item Two</TabPanel>
+            </TabContext>
+          </div>
+        </Box>
+      </Modal>
     </Grid>
   );
 };

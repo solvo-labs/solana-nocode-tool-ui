@@ -17,6 +17,7 @@
     "@metaplex-foundation/js": "^0.19.4",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
     "@mui/icons-material": "^5.14.1",
+    "@mui/lab": "^5.0.0-alpha.137",
     "@mui/material": "^5.14.2",
     "@mui/styles": "^5.14.1",
     "@mui/x-date-pickers": "^6.10.1",

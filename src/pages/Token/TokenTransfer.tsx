@@ -146,7 +146,7 @@ export const TokenTransfer = () => {
             <Grid container display={"flex"} justifyContent={"center"} direction={"column"}>
               <Grid item display={"flex"} justifyContent={"center"}>
                 <FormControl fullWidth>
-                  <InputLabel id="selectLabel">Select an CEP-48 Token</InputLabel>
+                  <InputLabel id="selectLabel">Select a Token</InputLabel>
                   <Select
                     value={selectedToken ? selectedToken.hex : "default"}
                     label="ERC-20 Token"

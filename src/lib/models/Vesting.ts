@@ -62,3 +62,10 @@ export const UnlockSchedule: UnlockScheduleType = {
   QUARTERLY: 7776000,
   YEARLY: 31536000,
 };
+
+export type RecipientFormInput = {
+  amount: number;
+  name: string;
+  cliffAmount: number;
+  recipientAddress: string;
+};
