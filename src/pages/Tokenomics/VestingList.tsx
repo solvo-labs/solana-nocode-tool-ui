@@ -103,6 +103,13 @@ export const VestingList = () => {
     };
 
     init();
+    const interval = setInterval(() => {
+      init();
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [publicKey]);
 
   const getStatusIcon = (startDate: number, endDate: number) => {
