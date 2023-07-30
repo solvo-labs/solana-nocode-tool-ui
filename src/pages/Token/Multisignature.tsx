@@ -7,6 +7,8 @@ import { HighlightOff } from "@mui/icons-material";
 import { createMultiSig } from "../../lib/multisig";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction } from "@solana/web3.js";
+import { useNavigate } from "react-router-dom";
+import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -38,6 +40,7 @@ export const Multisignature = () => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [signatures, setSignatures] = useState<string[]>([publicKey?.toBase58() || ""]);
+  const navigate = useNavigate();
 
   const addInput = () => {
     setSignatures([...signatures, ""]);
@@ -81,6 +84,10 @@ export const Multisignature = () => {
           lastValidBlockHeight,
           signature: signatureSignature,
         });
+
+
+        toastr.success("Multisignature created successfully.");
+        navigate("/");
       } catch (error: any) {
         toastr.error(error);
       }
