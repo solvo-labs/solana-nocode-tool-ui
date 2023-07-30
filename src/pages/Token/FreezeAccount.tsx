@@ -46,6 +46,7 @@ export const FreezeAccount = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const classes = useStyles();
   const navigate = useNavigate();
+  const [myAddresses, setMyAddresses] = useState<any[]>([]);
 
   const freezeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
@@ -92,6 +93,23 @@ export const FreezeAccount = () => {
     };
     init();
   }, [connection, publicKey]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      if (selectedToken && publicKey) {
+        const getLargest = await getLargestAccounts(connection, new PublicKey(selectedToken.hex));
+        const myAddress = await connection.getTokenAccountsByOwner(publicKey, {
+          mint: new PublicKey(selectedToken.hex),
+        });
+        const myAddressPubkeys = myAddress.value.map((my) => my.pubkey.toBase58());
+
+        setMyAddresses(myAddressPubkeys);
+        setHolders(getLargest.value);
+      }
+    };
+
+    fetch();
+  }, [connection, publicKey, selectedToken]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -176,7 +194,7 @@ export const FreezeAccount = () => {
                   {holders.map((holder: any) => {
                     return (
                       <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
-                        {holder.address.toBase58() + " "}
+                        {myAddresses.includes(holder.address.toBase58()) && "My Account: "} {holder.address.toBase58()}
                       </MenuItem>
                     );
                   })}
