@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useMemo, useState } from "react";
 import { Divider, FormControl, Grid, IconButton, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
@@ -40,6 +41,7 @@ export const Multisignature = () => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [signatures, setSignatures] = useState<string[]>([publicKey?.toBase58() || ""]);
+  const [threshold, setThreshold] = useState<number>(1);
   const navigate = useNavigate();
 
   const addInput = () => {
@@ -68,7 +70,7 @@ export const Multisignature = () => {
   const signatureTransaction = async () => {
     if (publicKey) {
       const signatureKeys = signatures.map((key: string) => new PublicKey(key));
-      const { transaction, newAccount } = await createMultiSig(connection, publicKey, signatureKeys.length, signatureKeys);
+      const { transaction, newAccount } = await createMultiSig(connection, publicKey, threshold, signatureKeys);
 
       const {
         value: { blockhash, lastValidBlockHeight },
@@ -85,7 +87,6 @@ export const Multisignature = () => {
           signature: signatureSignature,
         });
 
-
         toastr.success("Multisignature created successfully.");
         navigate("/");
       } catch (error: any) {
@@ -94,23 +95,23 @@ export const Multisignature = () => {
     }
   };
 
-  useEffect(() => {
-    const init = async () => {
-      // if (publicKey) {
-      //   const account = await fetchAllMultisignatureAddress(
-      //     connection,
-      //     publicKey
-      //   );
-      //   const activeAccounts = await Promise.all(account);
-      //   account.forEach((account, index) => {
-      //     // const parse = account.account?.data;
-      //     // console.log(parse);
-      //   });
-      // }
-    };
+  // useEffect(() => {
+  //   const init = async () => {
+  //     // if (publicKey) {
+  //     //   const account = await fetchAllMultisignatureAddress(
+  //     //     connection,
+  //     //     publicKey
+  //     //   );
+  //     //   const activeAccounts = await Promise.all(account);
+  //     //   account.forEach((account, index) => {
+  //     //     // const parse = account.account?.data;
+  //     //     // console.log(parse);
+  //     //   });
+  //     // }
+  //   };
 
-    init();
-  }, []);
+  //   init();
+  // }, []);
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -150,6 +151,28 @@ export const Multisignature = () => {
               )}
             </Grid>
           ))}
+
+          <Grid container>
+            <Grid item xs={4} sx={{ minHeight: "1.4375em", display: "flex", justifyContent: "center" }}>
+              <span style={{ fontSize: "1.3rem", alignItems: "center", display: "flex" }}>{signatures.length} OF</span>
+            </Grid>
+            <Grid item xs={8}>
+              <FormControl fullWidth>
+                <Grid item>
+                  <CustomInput
+                    label="Threshold"
+                    name="threshold"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setThreshold(Number(e.target.value))}
+                    placeHolder="Threshold"
+                    type="text"
+                    value={threshold}
+                    disable={false}
+                  ></CustomInput>
+                </Grid>
+              </FormControl>
+            </Grid>
+          </Grid>
+
           <Grid container direction={"column"} display={"flex"} justifyContent={"center"}>
             <Grid item display={"flex"} justifyContent={"center"}>
               <FormControl fullWidth>
