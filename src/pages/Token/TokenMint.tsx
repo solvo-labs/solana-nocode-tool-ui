@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { createMint, getOrCreateAssociatedTokenAccount } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, createMintToInstruction, getAccount } from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID, createMintToInstruction } from "@solana/spl-token";
 import { register } from "../../lib/tokenRegister";
 import { Token } from "../../utils/types";
 import { CustomInput } from "../../components/CustomInput";
@@ -61,20 +61,11 @@ const TokenMint: React.FC = () => {
       try {
         const { transaction: transaction2, associatedToken } = await getOrCreateAssociatedTokenAccount(toAccount.publicKey, publicKey, publicKey, connection);
 
-        const mintTransactions = new Transaction();
-        mintTransactions.add(transaction);
-        mintTransactions.add(transaction2!);
-
-        const mintSignature = await sendTransaction(mintTransactions, connection, { minContextSlot, signers: [toAccount] });
-        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: mintSignature });
-
-        const account = await getAccount(connection, associatedToken, undefined, TOKEN_PROGRAM_ID);
-
         // supply
         const transaction3 = new Transaction().add(
           createMintToInstruction(
             toAccount.publicKey,
-            account.address,
+            associatedToken,
             tokenData.authority ? new PublicKey(tokenData.authority) : publicKey,
             tokenData.amount * Math.pow(10, tokenData.decimal),
             [],
@@ -85,10 +76,12 @@ const TokenMint: React.FC = () => {
         const transaction4 = register(toAccount.publicKey.toBase58(), publicKey, { name: tokenData.name, symbol: tokenData.symbol });
 
         const finalTransactions = new Transaction();
+        finalTransactions.add(transaction);
+        finalTransactions.add(transaction2!);
         finalTransactions.add(transaction3);
         finalTransactions.add(transaction4);
 
-        const signature = await sendTransaction(finalTransactions, connection, { minContextSlot });
+        const signature = await sendTransaction(finalTransactions, connection, { minContextSlot, signers: [toAccount] });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
 
         toastr.success("Token Mint completed successfully");
