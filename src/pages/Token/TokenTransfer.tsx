@@ -75,27 +75,21 @@ export const TokenTransfer = () => {
         } = await getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, destination, connection);
 
         if (tx2) {
-          const signature2 = await sendTransaction(tx2, connection, {
+          const transactions = new Transaction();
+
+          transactions.add(tx2);
+          transactions.add(createTransferInstruction(fromAccount.address, associatedTokenTo, publicKey, amount * Math.pow(10, selectedToken.decimal)));
+
+          const signature = await sendTransaction(transactions, connection, {
             minContextSlot,
           });
-          await connection.confirmTransaction({
-            blockhash,
-            lastValidBlockHeight,
-            signature: signature2,
-          });
 
-          const newAccount = await getAccount(connection, associatedTokenTo);
-
-          const transaction = new Transaction().add(createTransferInstruction(fromAccount.address, newAccount.address, publicKey, amount * Math.pow(10, selectedToken.decimal)));
-
-          const signature = await sendTransaction(transaction, connection, {
-            minContextSlot,
-          });
           await connection.confirmTransaction({
             blockhash,
             lastValidBlockHeight,
             signature,
           });
+
           toastr.success("Transfer completed successfully.");
           navigate("/my-tokens");
         } else {
