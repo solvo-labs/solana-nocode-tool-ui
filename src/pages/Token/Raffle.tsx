@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeEvent, useEffect, useState } from "react";
 import { getLotteryAddress, getMasterAddress, getProgram, getTicketAddress } from "../../lib/raffles/program";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
@@ -120,7 +121,7 @@ export const Raffle = () => {
         const programInfo = getProgram(connection, wallet);
         setProgram(programInfo);
 
-        const masterAddressInfo = await getMasterAddress();
+        const masterAddressInfo = getMasterAddress();
         setMasterAddress(masterAddressInfo);
 
         const master = await programInfo.account.master.fetch(masterAddressInfo);
@@ -156,7 +157,7 @@ export const Raffle = () => {
   }, [connection, publicKey, wallet]);
 
   const create = async () => {
-    const lotteryAddress = await getLotteryAddress(lastRaffleId + 1);
+    const lotteryAddress = getLotteryAddress(lastRaffleId + 1);
 
     if (program && publicKey) {
       const tx = await program.methods
@@ -178,14 +179,14 @@ export const Raffle = () => {
   const buyTicket = async (lotteryId: number) => {
     try {
       if (program && publicKey) {
-        const lotteryAddress = await getLotteryAddress(lotteryId);
+        const lotteryAddress = getLotteryAddress(lotteryId);
         const lottery = await program.account.lottery.fetch(lotteryAddress);
 
         const tx = await program.methods
           .buyTicket(lotteryId)
           .accounts({
             lottery: lotteryAddress,
-            ticket: await getTicketAddress(lotteryAddress, (lottery.lastTicketId as number) + 1),
+            ticket: getTicketAddress(lotteryAddress, (lottery.lastTicketId as number) + 1),
             buyer: publicKey,
             systemProgram: SystemProgram.programId,
           })
@@ -201,7 +202,7 @@ export const Raffle = () => {
   const pickWinner = async (lotteryId: number) => {
     try {
       if (program) {
-        const lotteryAddress = await getLotteryAddress(lotteryId);
+        const lotteryAddress = getLotteryAddress(lotteryId);
 
         const tx = await program.methods
           .pickWinner(lotteryId)
@@ -221,7 +222,7 @@ export const Raffle = () => {
   const claim = async (lotteryId: number) => {
     try {
       if (program && publicKey) {
-        const lotteryAddress = await getLotteryAddress(lotteryId);
+        const lotteryAddress = getLotteryAddress(lotteryId);
         const lottery = await program.account.lottery.fetch(lotteryAddress);
         const winnerId: number = lottery.winnerId as number;
 
@@ -246,7 +247,7 @@ export const Raffle = () => {
             .claimPrize(lotteryId, lottery.winnerId as number)
             .accounts({
               lottery: lotteryAddress,
-              ticket: await getTicketAddress(lotteryAddress, lottery.winnerId as number),
+              ticket: getTicketAddress(lotteryAddress, lottery.winnerId as number),
               authority: publicKey || "",
               systemProgram: SystemProgram.programId,
             })
