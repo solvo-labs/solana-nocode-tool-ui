@@ -48,6 +48,7 @@ export const CloseAccount = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const classes = useStyles();
   const navigate = useNavigate();
+  const [myAddresses, setMyAddresses] = useState<any[]>([]);
 
   const closeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
@@ -113,6 +114,23 @@ export const CloseAccount = () => {
 
     fetch();
   }, [connection, selectedToken]);
+
+  useEffect(() => {
+    const fetch = async () => {
+      if (selectedToken && publicKey) {
+        const getLargest = await getLargestAccounts(connection, new PublicKey(selectedToken.hex));
+        const myAddress = await connection.getTokenAccountsByOwner(publicKey, {
+          mint: new PublicKey(selectedToken.hex),
+        });
+        const myAddressPubkeys = myAddress.value.map((my) => my.pubkey.toBase58());
+
+        setMyAddresses(myAddressPubkeys);
+        setHolders(getLargest.value);
+      }
+    };
+
+    fetch();
+  }, [connection, publicKey, selectedToken]);
 
   if (loading) {
     return (
@@ -180,8 +198,8 @@ export const CloseAccount = () => {
                     {holders.map((holder: any) => {
                       return (
                         <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
-                          {holder.address.toBase58()}
-                        </MenuItem>
+                        {myAddresses.includes(holder.address.toBase58()) && "My Account: "} {holder.address.toBase58()}
+                      </MenuItem>
                       );
                     })}
                   </Select>
