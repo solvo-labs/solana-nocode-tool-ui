@@ -1,20 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { useNavigate } from "react-router-dom";
-import {
-  AppBar,
-  Avatar,
-  Box,
-  Button,
-  Container,
-  IconButton,
-  Menu,
-  MenuItem,
-  Theme,
-  Toolbar,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { AppBar, Avatar, Box, Button, Container, IconButton, Menu, MenuItem, Theme, Toolbar, Tooltip, Typography } from "@mui/material";
 import { APP_NAME, PAGES_NAME } from "../utils/enum";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletDisconnectButton } from "@solana/wallet-adapter-react-ui";
@@ -55,8 +43,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const TopBar: React.FC = () => {
-  const [anchorElForProfile, setAnchorElForProfile] =
-    React.useState<null | HTMLElement>(null);
+  const [anchorElForProfile, setAnchorElForProfile] = React.useState<null | HTMLElement>(null);
   const openForProfile = Boolean(anchorElForProfile);
 
   // const [anchorElStake, setAnchorElStake] = useState<null | HTMLElement>(null);
@@ -81,7 +68,7 @@ const TopBar: React.FC = () => {
   };
 
   const tokenMint = () => {
-    navigate("/token");
+    navigate("/token-create");
     setAnchorElToken(null);
   };
 
@@ -126,34 +113,18 @@ const TopBar: React.FC = () => {
       <AppBar className={classes.appBar}>
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <Typography
-              variant="h5"
-              noWrap
-              component="a"
-              href=""
-              className={classes.appName}
-              onClick={() => navigate("/")}
-            >
+            <Typography variant="h5" noWrap component="a" href="" className={classes.appName} onClick={() => navigate("/")}>
               {APP_NAME.SOLANA}
             </Typography>
             <Box sx={{ flexGrow: 1, display: "flex" }}>
               <Button onClick={() => navigate("/stake")}>
-                <Typography className={classes.menuTitle}>
-                  {PAGES_NAME.STAKE}
-                </Typography>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.STAKE}</Typography>
               </Button>
               <Button onClick={() => navigate("/raffle")}>
-                <Typography className={classes.menuTitle}>
-                  {PAGES_NAME.RAFFLE}
-                </Typography>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.RAFFLE}</Typography>
               </Button>
-              <Button
-                onClick={(e: any) => handleClick(e, setAnchorElVesting)}
-                onMouseOver={(e: any) => handleClick(e, setAnchorElVesting)}
-              >
-                <Typography className={classes.menuTitle}>
-                  {PAGES_NAME.VESTING}
-                </Typography>
+              <Button onClick={(e: any) => handleClick(e, setAnchorElVesting)} onMouseOver={(e: any) => handleClick(e, setAnchorElVesting)}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.VESTING}</Typography>
               </Button>
               <Menu
                 id="demo-positioned-menu"
@@ -184,13 +155,8 @@ const TopBar: React.FC = () => {
                   <Typography>Vesting List</Typography>
                 </MenuItem>
               </Menu>
-              <Button
-                onClick={(e: any) => handleClick(e, setAnchorElToken)}
-                onMouseOver={(e: any) => handleClick(e, setAnchorElToken)}
-              >
-                <Typography className={classes.menuTitle}>
-                  {PAGES_NAME.TOKEN}
-                </Typography>
+              <Button onClick={(e: any) => handleClick(e, setAnchorElToken)} onMouseOver={(e: any) => handleClick(e, setAnchorElToken)}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.TOKEN}</Typography>
               </Button>
               <Menu
                 id="demo-positioned-menu"
@@ -240,11 +206,7 @@ const TopBar: React.FC = () => {
 
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Profile">
-                <IconButton
-                  onClick={handleClickForProfile}
-                  onMouseOver={handleClickForProfile}
-                  sx={{ p: 0 }}
-                >
+                <IconButton onClick={handleClickForProfile} onMouseOver={handleClickForProfile} sx={{ p: 0 }}>
                   <Avatar alt="alt" src="" />
                 </IconButton>
               </Tooltip>
@@ -275,16 +237,10 @@ const TopBar: React.FC = () => {
                     className={classes.menuItem}
                     onClick={(event: React.MouseEvent) => {
                       event.stopPropagation();
-                      navigator.clipboard.writeText(
-                        publicKey ? publicKey.toBase58() : "There is nothing!"
-                      );
+                      navigator.clipboard.writeText(publicKey ? publicKey.toBase58() : "There is nothing!");
                     }}
                   >
-                    <Typography>
-                      {publicKey?.toBase58().slice(0, 10) +
-                        "..." +
-                        publicKey?.toBase58().slice(-6)}
-                    </Typography>
+                    <Typography>{publicKey?.toBase58().slice(0, 10) + "..." + publicKey?.toBase58().slice(-6)}</Typography>
                   </MenuItem>
                 </Tooltip>
                 <MenuItem className={classes.menuItem}>
