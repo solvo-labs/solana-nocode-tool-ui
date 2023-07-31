@@ -117,7 +117,6 @@ export const Vesting = () => {
         const data = await fetchUserTokens(connection, publicKey);
 
         setTokens(data);
-        // console.log(data.filter((dp)=> dp.hex === "BpAC9vBjvhqQAewx5E1RdqZNrNAD2wbTQP7muK5NNpBJ" ));
       }
     };
     init();
@@ -132,21 +131,6 @@ export const Vesting = () => {
         cliff: activateCliff ? vestParams.cliff?.unix() : 0,
         period: (vestParams.period * vestParams.selectedDuration) / amountPer,
       };
-
-      // {
-      //   recipient: "HQj1c4aNzz9C8PFbSBkGCow33beFAsdiqq6gdrYPqf1L", // Recipient address (base58 string for Solana)
-      //   amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
-      //   name: "Receipent1", // The stream name or subject.
-      //   cliffAmount: getBN(20, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-      //   amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
-      // },
-      // {
-      //   recipient: "FX3qSJpidqPfhK8SbNfpoJaZggB9ZQVQ8ACdeRgKrS9d", // Recipient address (base58 string for Solana)
-      //   amount: getBN(100, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
-      //   name: "Receipent2", // The stream name or subject.
-      //   cliffAmount: getBN(20, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-      //   amountPerPeriod: getBN(100 / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
-      // },
 
       const recipientList: Recipient[] = recipients.map((data) => {
         return {
