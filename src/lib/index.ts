@@ -2,8 +2,8 @@ import { AccountInfo, Connection, LAMPORTS_PER_SOL, ParsedAccountData, PublicKey
 import { getTokensWithAccount } from "./token";
 import { getMetadataPDA } from "./tokenRegister";
 
-export const fetchUserTokens = async (connection: Connection, payer: PublicKey) => {
-  const tokensFromWallet = await getTokensWithAccount(connection, payer);
+export const fetchUserTokens = async (connection: Connection, payer: PublicKey, mint?: PublicKey) => {
+  const tokensFromWallet = await getTokensWithAccount(connection, payer, mint);
 
   const getTokensMetadataPromises = tokensFromWallet.map((tf) => {
     return getMetadataPDA(tf.token, connection);
