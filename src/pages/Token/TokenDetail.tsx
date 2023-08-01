@@ -54,10 +54,26 @@ const useStyles = makeStyles((theme: Theme) => ({
     [theme.breakpoints.down("md")]: {
       maxWidth: "90vw",
     },
+    paddingBottom: "1rem",
   },
   card: {
-    minHeight: "200px",
+    minHeight: "240px",
   },
+  info: {
+    marginTop: "0.25rem",
+    marginBottom: "0.25rem",
+  },
+  copyButton: {
+    "& .css-nixcjy-MuiSvgIcon-root": {
+      fontSize: "1rem !important",
+      padding: "0rem !important",
+    },
+  },
+  tabTitle: {
+    [theme.breakpoints.down("md")]: {
+      fontSize: "0.7rem !important",
+    },
+  }
 }));
 
 export const TokenDetail = () => {
@@ -89,7 +105,11 @@ export const TokenDetail = () => {
   useEffect(() => {
     const init = async () => {
       if (publicKey && tokenHex) {
-        const data = await fetchUserTokens(connection, publicKey, new PublicKey(tokenHex));
+        const data = await fetchUserTokens(
+          connection,
+          publicKey,
+          new PublicKey(tokenHex)
+        );
         console.log(data);
         setToken(data[0]);
       }
@@ -141,7 +161,12 @@ export const TokenDetail = () => {
         const destination = new PublicKey(destinationPubkey);
         const selectedTokenPubkey = new PublicKey(token.hex);
 
-        const { associatedToken } = await getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, publicKey, connection);
+        const { associatedToken } = await getOrCreateAssociatedTokenAccount(
+          selectedTokenPubkey,
+          publicKey,
+          publicKey,
+          connection
+        );
 
         const fromAccount = await getAccount(connection, associatedToken);
 
@@ -149,13 +174,25 @@ export const TokenDetail = () => {
           transaction: tx2,
           account: toAccount,
           associatedToken: associatedTokenTo,
-        } = await getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, destination, connection);
+        } = await getOrCreateAssociatedTokenAccount(
+          selectedTokenPubkey,
+          publicKey,
+          destination,
+          connection
+        );
 
         if (tx2) {
           const transactions = new Transaction();
 
           transactions.add(tx2);
-          transactions.add(createTransferInstruction(fromAccount.address, associatedTokenTo, publicKey, transferAmount * Math.pow(10, token.decimal)));
+          transactions.add(
+            createTransferInstruction(
+              fromAccount.address,
+              associatedTokenTo,
+              publicKey,
+              transferAmount * Math.pow(10, token.decimal)
+            )
+          );
 
           const signature = await sendTransaction(transactions, connection, {
             minContextSlot,
@@ -169,7 +206,14 @@ export const TokenDetail = () => {
 
           toastr.success("Transfer completed successfully.");
         } else {
-          const transaction = new Transaction().add(createTransferInstruction(fromAccount.address, toAccount.address, publicKey, transferAmount * Math.pow(10, token.decimal)));
+          const transaction = new Transaction().add(
+            createTransferInstruction(
+              fromAccount.address,
+              toAccount.address,
+              publicKey,
+              transferAmount * Math.pow(10, token.decimal)
+            )
+          );
 
           const signature = await sendTransaction(transaction, connection, {
             minContextSlot,
@@ -297,13 +341,14 @@ export const TokenDetail = () => {
           <Card className={classes.card}>
             <CardContent>
               <Typography
+                className={classes.info}
                 sx={{ fontWeight: "bold" }}
                 variant="subtitle1"
                 marginBottom={"0.5rem"}
               >
                 Token Summary
               </Typography>
-              <Grid container>
+              <Grid container className={classes.info}>
                 <Grid container width={"20%"}>
                   <Typography variant="body2">Name:</Typography>
                 </Grid>
@@ -313,7 +358,7 @@ export const TokenDetail = () => {
                   </Typography>
                 </Grid>
               </Grid>
-              <Grid container>
+              <Grid container className={classes.info}>
                 <Grid container width={"20%"}>
                   <Typography variant="body2">Symbol:</Typography>
                 </Grid>
@@ -323,7 +368,7 @@ export const TokenDetail = () => {
                   </Typography>
                 </Grid>
               </Grid>
-              <Grid container>
+              <Grid container className={classes.info}>
                 <Grid container width={"20%"}>
                   <Typography variant="body2">Hex:</Typography>
                 </Grid>
@@ -334,14 +379,19 @@ export const TokenDetail = () => {
                   justifyContent={"space-between"}
                 >
                   <Typography variant="body2">
-                    {token?.hex.slice(0, 20) + "..."}
+                    {token?.hex.slice(0, 24) + "..."}
                   </Typography>
-                  <IconButton size="small">
-                    <ContentCopyIcon fontSize="small"></ContentCopyIcon>
+                  <IconButton
+                    className={classes.copyButton}
+                    sx={{ padding: "0rem" }}
+                  >
+                    <ContentCopyIcon
+                      sx={{ fontSize: "1rem", margin: "0rem" }}
+                    ></ContentCopyIcon>
                   </IconButton>
                 </Grid>
               </Grid>
-              <Grid container>
+              <Grid container className={classes.info}>
                 <Grid container width={"20%"}>
                   <Typography variant="body2">Decimal:</Typography>
                 </Grid>
@@ -349,12 +399,24 @@ export const TokenDetail = () => {
                   <Typography variant="body2">{token?.decimal}</Typography>
                 </Grid>
               </Grid>
-              <Grid container>
+              <Grid container className={classes.info}>
                 <Grid container width={"20%"}>
                   <Typography variant="body2">Owner:</Typography>
                 </Grid>
-                <Grid container width={"70%"}>
-                  <Typography variant="body2">{token?.owner}</Typography>
+                <Grid container width={"80%"}
+                  justifyContent={"space-between"}
+                  >
+                  <Typography variant="body2">
+                    {token?.owner.slice(0, 24) + "..."}
+                  </Typography>
+                  <IconButton
+                    className={classes.copyButton}
+                    sx={{ padding: "0rem" }}
+                  >
+                    <ContentCopyIcon
+                      sx={{ fontSize: "1rem", margin: "0rem" }}
+                    ></ContentCopyIcon>
+                  </IconButton>
                 </Grid>
               </Grid>
             </CardContent>
@@ -367,23 +429,28 @@ export const TokenDetail = () => {
                 sx={{ fontWeight: "bold" }}
                 variant="subtitle1"
                 marginBottom={"0.5rem"}
+                className={classes.info}
               >
                 Market Overview
               </Typography>
-              <Grid container>
-                <Grid container width={"30%"}>
+              <Grid container className={classes.info}>
+                <Grid container width={"40%"}>
                   <Typography variant="body2">Current Supply:</Typography>
                 </Grid>
-                <Grid container width={"70%"}>
-                  <Typography variant="body2">{token?.supply.value.uiAmount}</Typography>
+                <Grid container width={"60%"}>
+                  <Typography variant="body2">
+                    {token?.supply.value.uiAmount}
+                  </Typography>
                 </Grid>
               </Grid>
-              <Grid container>
-                <Grid container width={"30%"}>
+              <Grid container className={classes.info}>
+                <Grid container width={"40%"}>
                   <Typography variant="body2">Balance:</Typography>
                 </Grid>
-                <Grid container width={"70%"}>
-                  <Typography variant="body2">{token?.amount / Math.pow(10, token?.decimal)}</Typography>
+                <Grid container width={"60%"}>
+                  <Typography variant="body2">
+                    {token && token?.amount / Math.pow(10, token?.decimal)}
+                  </Typography>
                 </Grid>
               </Grid>
             </CardContent>
@@ -391,19 +458,20 @@ export const TokenDetail = () => {
         </Grid>
       </Grid>
 
-      <Grid item marginTop={"1rem"} height={"80vh"}>
+      <Grid item marginTop={"1rem"} xl={6} lg={6} md={6} sm={12} xs={12} maxWidth={"90vw !important"}>
         <Card>
           <CardContent>
-            <Box sx={{ width: "100%", typography: "body1" }}>
+            <Box>
               <TabContext value={value}>
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                   <TabList
                     onChange={handleChange}
                     aria-label="lab API tabs example"
+                    className={classes.tabTitle}
                   >
-                    <Tab label="Transfer" value="1" />
-                    <Tab label="Mint & Burn" value="2" />
-                    <Tab label="Holders" value="3" />
+                    <Tab className={classes.tabTitle} label="Transfer" value="1" />
+                    <Tab className={classes.tabTitle} label="Mint & Burn" value="2" />
+                    <Tab className={classes.tabTitle} label="Holders" value="3" />
                   </TabList>
                 </Box>
                 <TabPanel value="1">
@@ -544,7 +612,9 @@ export const TokenDetail = () => {
                         {holders.map((e: any) => (
                           <TableRow>
                             <TableCell>{e.address.toBase58()}</TableCell>
-                            <TableCell align="right">{e.amount / Math.pow(10, e.decimals)}</TableCell>
+                            <TableCell align="right">
+                              {e.amount / Math.pow(10, e.decimals)}
+                            </TableCell>
                             {/* <TableCell align="right">{e.metadata.name}</TableCell> */}
                             {/* <TableCell align="right">{e.metadata.symbol}</TableCell> */}
                             {/* <TableCell align="right">{e.decimal}</TableCell> */}
