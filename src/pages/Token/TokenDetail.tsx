@@ -89,12 +89,9 @@ export const TokenDetail = () => {
   useEffect(() => {
     const init = async () => {
       if (publicKey && tokenHex) {
-        const data = await fetchUserTokens(connection, publicKey);
-        data.filter((e: any) => {
-          if (e.hex == tokenHex) {
-            setToken(e);
-          }
-        });
+        const data = await fetchUserTokens(connection, publicKey, new PublicKey(tokenHex));
+        console.log(data);
+        setToken(data[0]);
       }
     };
     init();
@@ -129,7 +126,7 @@ export const TokenDetail = () => {
   }, [connection, publicKey, token]);
 
   // console.log(holders);
-  console.log(token);
+  // console.log(token);
   // console.log(destinationPubkey);
   // console.log(transferAmount);
 
