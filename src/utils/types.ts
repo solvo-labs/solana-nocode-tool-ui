@@ -20,3 +20,8 @@ export type TokenData = {
   supply: RpcResponseAndContext<TokenAmount>;
   owner: string;
 };
+
+export type ToolTips = {
+  hexToolTip?: boolean,
+  ownerToolTip?: boolean,
+}
