@@ -50,12 +50,28 @@ const useStyles = makeStyles((_theme: Theme) => ({
       border: 0,
     },
   },
-  paginaton: {
+  paginatonContainer: {
     display: "flex !important",
     justifyContent: "end",
     borderBottomLeftRadius: "8px",
     borderBottomRightRadius: "8px",
     backgroundColor: "purple",
+  },
+  pagination: {
+    color: "white !important",
+    "& .css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon": {
+      color: "white",
+      marginRight: "-10px"
+    },
+    "& .css-1mf6u8l-MuiSvgIcon-root-MuiSelect-icon": {
+      color: "white",
+      marginRight: "-10px"
+    },
+    "& .css-zylse7-MuiButtonBase-root-MuiIconButton-root.Mui-disabled":{
+      color: "#f5f5f566"
+    },
+    "& .makeStyles-pagination-18 .css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon":{
+    }
   },
 }));
 
@@ -237,10 +253,11 @@ export const VestingList = () => {
             </Table>
           </TableContainer>
         </Grid>
-        <Grid container className={classes.paginaton} sx={{}}>
+        <Grid container className={classes.paginatonContainer} sx={{}}>
           <TableFooter>
             <TableCell colSpan={8} padding={"none"} sx={{ border: "none" }}>
               <TablePagination
+                className={classes.pagination}
                 rowsPerPageOptions={[1, 5, 10]}
                 component="div"
                 colSpan={4}
