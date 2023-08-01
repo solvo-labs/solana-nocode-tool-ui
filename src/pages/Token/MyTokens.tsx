@@ -21,6 +21,7 @@ import {
 import { Theme } from "@emotion/react";
 import { makeStyles } from "@mui/styles";
 import { TokenData } from "../../utils/types";
+import { useNavigate } from "react-router-dom";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
@@ -40,6 +41,10 @@ const useStyles = makeStyles((_theme: Theme) => ({
   tableRow: {
     "&:nth-of-type(odd)": {
       backgroundColor: "whitesmoke",
+    },
+    '&:hover': {
+      cursor: 'pointer',
+      backgroundColor:"#f9dbff",
     },
     // hide last border
     "&:last-child td, &:last-child th": {
@@ -75,6 +80,7 @@ export const MyTokens = () => {
   const classes = useStyles();
   const [allToken, setAllToken] = useState<Array<TokenData>>([]);
   const [actionLoader, setActionLoader] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -106,7 +112,7 @@ export const MyTokens = () => {
     return allToken
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
       .map((a: any, index: number) => (
-        <TableRow className={classes.tableRow} key={index}>
+        <TableRow className={classes.tableRow} key={index} onClick={()=> navigate(`/token/${a.hex}`)}>
           <TableCell>{a.metadata.name}</TableCell>
           <TableCell>{a.metadata.symbol}</TableCell>
           <TableCell>{a.supply.value.uiAmount}</TableCell>
