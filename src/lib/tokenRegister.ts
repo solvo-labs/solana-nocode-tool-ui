@@ -61,3 +61,8 @@ export const getMetadataPDA = async (mint: PublicKey, connection: Connection) =>
     return { name: mintHex.substring(0, 3) + "..." + mintHex.slice(-3), symbol: mintHex.substring(0, 3), isRegistered: false };
   }
 };
+
+export type RegisterToken = {
+  name: string;
+  symbol: string;
+}
