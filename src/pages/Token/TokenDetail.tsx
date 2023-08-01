@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchUserTokens } from "../../lib";
-import { TokenData } from "../../utils/types";
+import { TokenData, ToolTips } from "../../utils/types";
 import {
   Box,
   Card,
@@ -24,6 +24,7 @@ import {
   TableHead,
   TableRow,
   Theme,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
@@ -73,7 +74,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     [theme.breakpoints.down("md")]: {
       fontSize: "0.7rem !important",
     },
-  }
+  },
 }));
 
 export const TokenDetail = () => {
@@ -86,6 +87,10 @@ export const TokenDetail = () => {
   const [token, setToken] = useState<TokenData>();
   const [value, setValue] = useState("1");
   const [myAddresses, setMyAddresses] = useState<any[]>([]);
+  const [copy, setCopy] = useState<ToolTips>({
+    hexToolTip: false,
+    ownerToolTip: false,
+  });
 
   //Transfer
   const [destinationPubkey, setDestinationPubkey] = useState<string>("");
@@ -144,6 +149,22 @@ export const TokenDetail = () => {
 
     fetch();
   }, [connection, publicKey, token]);
+
+
+  const handleTooltipOpen = (buttonName: keyof typeof copy, target:any) => {
+    setCopy((prevToolTipVisible) => ({
+      ...prevToolTipVisible,
+      [buttonName]: true
+    }));
+      navigator.clipboard.writeText(target);
+  };
+  
+  const handleTooltipClose = (buttonName: keyof typeof copy) => {
+    setCopy({...copy, [buttonName]: false });
+  };
+  // const handleTooltipOpen = (e: any) => {
+  //   setCopy(true);
+  // };
 
   // console.log(holders);
   // console.log(token);
@@ -323,18 +344,11 @@ export const TokenDetail = () => {
         <Grid item>
           <Typography variant="h5">Token Detail</Typography>
         </Grid>
-        <Stack direction={"row"} spacing={2}>
-          <CustomButton
-            disable={false}
-            label="My Tokens"
-            onClick={() => navigate("/my-tokens")}
-          ></CustomButton>
-          <CustomButton
-            disable={false}
-            label="Register Token"
-            onClick={() => {}}
-          ></CustomButton>
-        </Stack>
+        <CustomButton
+          disable={false}
+          label="My Tokens"
+          onClick={() => navigate("/my-tokens")}
+        ></CustomButton>
       </Grid>
       <Grid container direction={"row"} justifyContent={"center"} spacing={4}>
         <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
@@ -381,14 +395,27 @@ export const TokenDetail = () => {
                   <Typography variant="body2">
                     {token?.hex.slice(0, 24) + "..."}
                   </Typography>
-                  <IconButton
-                    className={classes.copyButton}
-                    sx={{ padding: "0rem" }}
+                  <Tooltip
+                    id="hex"
+                    PopperProps={{
+                      disablePortal: true,
+                    }}
+                    open={copy.hexToolTip}
+                    title="Copied"
+                    onClose={() => handleTooltipClose("hexToolTip")}
+                    leaveDelay={1000}
+                    placement="left"
                   >
-                    <ContentCopyIcon
-                      sx={{ fontSize: "1rem", margin: "0rem" }}
-                    ></ContentCopyIcon>
-                  </IconButton>
+                    <IconButton
+                      onClick={()=> handleTooltipOpen("hexToolTip", token?.hex)}
+                      className={classes.copyButton}
+                      sx={{ padding: "0rem" }}
+                    >
+                      <ContentCopyIcon
+                        sx={{ fontSize: "1rem", margin: "0rem" }}
+                      ></ContentCopyIcon>
+                    </IconButton>
+                  </Tooltip>
                 </Grid>
               </Grid>
               <Grid container className={classes.info}>
@@ -403,20 +430,31 @@ export const TokenDetail = () => {
                 <Grid container width={"20%"}>
                   <Typography variant="body2">Owner:</Typography>
                 </Grid>
-                <Grid container width={"80%"}
-                  justifyContent={"space-between"}
-                  >
+                <Grid container width={"80%"} justifyContent={"space-between"}>
                   <Typography variant="body2">
                     {token?.owner.slice(0, 24) + "..."}
                   </Typography>
-                  <IconButton
-                    className={classes.copyButton}
-                    sx={{ padding: "0rem" }}
+                  <Tooltip
+                    id="hex"
+                    PopperProps={{
+                      disablePortal: true,
+                    }}
+                    open={copy.ownerToolTip}
+                    title="Copied"
+                    onClose={()=> handleTooltipClose("ownerToolTip")}
+                    leaveDelay={1000}
+                    placement="left"
                   >
-                    <ContentCopyIcon
-                      sx={{ fontSize: "1rem", margin: "0rem" }}
-                    ></ContentCopyIcon>
-                  </IconButton>
+                    <IconButton
+                      onClick={() => handleTooltipOpen("ownerToolTip", token?.owner)}
+                      className={classes.copyButton}
+                      sx={{ padding: "0rem" }}
+                    >
+                      <ContentCopyIcon
+                        sx={{ fontSize: "1rem", margin: "0rem" }}
+                      ></ContentCopyIcon>
+                    </IconButton>
+                  </Tooltip>
                 </Grid>
               </Grid>
             </CardContent>
@@ -458,7 +496,16 @@ export const TokenDetail = () => {
         </Grid>
       </Grid>
 
-      <Grid item marginTop={"1rem"} xl={6} lg={6} md={6} sm={12} xs={12} maxWidth={"90vw !important"}>
+      <Grid
+        item
+        marginTop={"1rem"}
+        xl={6}
+        lg={6}
+        md={6}
+        sm={12}
+        xs={12}
+        maxWidth={"90vw !important"}
+      >
         <Card>
           <CardContent>
             <Box>
@@ -469,9 +516,21 @@ export const TokenDetail = () => {
                     aria-label="lab API tabs example"
                     className={classes.tabTitle}
                   >
-                    <Tab className={classes.tabTitle} label="Transfer" value="1" />
-                    <Tab className={classes.tabTitle} label="Mint & Burn" value="2" />
-                    <Tab className={classes.tabTitle} label="Holders" value="3" />
+                    <Tab
+                      className={classes.tabTitle}
+                      label="Transfer"
+                      value="1"
+                    />
+                    <Tab
+                      className={classes.tabTitle}
+                      label="Mint & Burn"
+                      value="2"
+                    />
+                    <Tab
+                      className={classes.tabTitle}
+                      label="Holders"
+                      value="3"
+                    />
                   </TabList>
                 </Box>
                 <TabPanel value="1">
