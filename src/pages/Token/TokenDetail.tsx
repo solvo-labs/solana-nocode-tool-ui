@@ -45,6 +45,8 @@ import {
   getAccount,
 } from "@solana/spl-token";
 import toastr from "toastr";
+import RegisterTokenForm from "../../components/RegisterTokenForm";
+import { RegisterToken } from "../../lib/tokenRegister";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -87,6 +89,10 @@ export const TokenDetail = () => {
   const [token, setToken] = useState<TokenData>();
   const [value, setValue] = useState("1");
   const [myAddresses, setMyAddresses] = useState<any[]>([]);
+  const [registerData, setRegisterData] = useState<RegisterToken>({
+    name: "",
+    symbol: "",
+  });
   const [copy, setCopy] = useState<ToolTips>({
     hexToolTip: false,
     ownerToolTip: false,
@@ -115,7 +121,7 @@ export const TokenDetail = () => {
           publicKey,
           new PublicKey(tokenHex)
         );
-        console.log(data);
+        // console.log(data);
         setToken(data[0]);
       }
     };
@@ -150,26 +156,17 @@ export const TokenDetail = () => {
     fetch();
   }, [connection, publicKey, token]);
 
-
-  const handleTooltipOpen = (buttonName: keyof typeof copy, target:any) => {
+  const handleTooltipOpen = (buttonName: keyof typeof copy, target: any) => {
     setCopy((prevToolTipVisible) => ({
       ...prevToolTipVisible,
-      [buttonName]: true
+      [buttonName]: true,
     }));
-      navigator.clipboard.writeText(target);
+    navigator.clipboard.writeText(target);
   };
-  
-  const handleTooltipClose = (buttonName: keyof typeof copy) => {
-    setCopy({...copy, [buttonName]: false });
-  };
-  // const handleTooltipOpen = (e: any) => {
-  //   setCopy(true);
-  // };
 
-  // console.log(holders);
-  // console.log(token);
-  // console.log(destinationPubkey);
-  // console.log(transferAmount);
+  const handleTooltipClose = (buttonName: keyof typeof copy) => {
+    setCopy({ ...copy, [buttonName]: false });
+  };
 
   const transfer = async () => {
     try {
@@ -407,7 +404,9 @@ export const TokenDetail = () => {
                     placement="left"
                   >
                     <IconButton
-                      onClick={()=> handleTooltipOpen("hexToolTip", token?.hex)}
+                      onClick={() =>
+                        handleTooltipOpen("hexToolTip", token?.hex)
+                      }
                       className={classes.copyButton}
                       sx={{ padding: "0rem" }}
                     >
@@ -441,12 +440,14 @@ export const TokenDetail = () => {
                     }}
                     open={copy.ownerToolTip}
                     title="Copied"
-                    onClose={()=> handleTooltipClose("ownerToolTip")}
+                    onClose={() => handleTooltipClose("ownerToolTip")}
                     leaveDelay={1000}
                     placement="left"
                   >
                     <IconButton
-                      onClick={() => handleTooltipOpen("ownerToolTip", token?.owner)}
+                      onClick={() =>
+                        handleTooltipOpen("ownerToolTip", token?.owner)
+                      }
                       className={classes.copyButton}
                       sx={{ padding: "0rem" }}
                     >
@@ -511,11 +512,7 @@ export const TokenDetail = () => {
             <Box>
               <TabContext value={value}>
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                  <TabList
-                    onChange={handleChange}
-                    aria-label="lab API tabs example"
-                    className={classes.tabTitle}
-                  >
+                  <TabList onChange={handleChange} className={classes.tabTitle}>
                     <Tab
                       className={classes.tabTitle}
                       label="Transfer"
@@ -531,6 +528,13 @@ export const TokenDetail = () => {
                       label="Holders"
                       value="3"
                     />
+                    {!token?.metadata.isRegistered && (
+                      <Tab
+                        className={classes.tabTitle}
+                        label="Register"
+                        value="4"
+                      ></Tab>
+                    )}
                   </TabList>
                 </Box>
                 <TabPanel value="1">
@@ -682,6 +686,21 @@ export const TokenDetail = () => {
                       </TableBody>
                     </Table>
                   </TableContainer>
+                </TabPanel>
+                <TabPanel value="4">
+                  <Grid
+                    item
+                    display={"flex"}
+                    justifyContent={"center"}
+                    marginY={"1rem"}
+                  >
+                    <RegisterTokenForm
+                      inputs={registerData}
+                      inputOnChange={(data) => {
+                        setRegisterData(data);
+                      }}
+                    ></RegisterTokenForm>
+                  </Grid>
                 </TabPanel>
               </TabContext>
             </Box>
