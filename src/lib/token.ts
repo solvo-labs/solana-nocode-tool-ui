@@ -62,7 +62,6 @@ export const getTokensWithAccount = async (connection: Connection, payer: Public
 
   const promises = tokenAccounts.value.map((tokenAccount: { account: { data: any } }) => {
     const accountData = AccountLayout.decode(tokenAccount.account.data);
-
     return connection.getTokenSupply(accountData.mint);
   });
 
@@ -71,8 +70,7 @@ export const getTokensWithAccount = async (connection: Connection, payer: Public
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = tokenAccounts.value.map((tokenAccount: { account: { data: any } }, index) => {
     const accountData = AccountLayout.decode(tokenAccount.account.data);
-
-    return { token: accountData.mint, amount: accountData.amount, supply: supplyData[index] };
+    return { token: accountData.mint, amount: accountData.amount, supply: supplyData[index], owner: accountData.owner.toBase58() };
   });
 
   return data;
