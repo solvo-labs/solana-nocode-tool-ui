@@ -123,7 +123,7 @@ export const TokenDetail = () => {
           publicKey,
           new PublicKey(tokenHex)
         );
-        console.log(data);
+        // console.log(data);
         setToken(data[0]);
       }
     };
