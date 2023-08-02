@@ -46,7 +46,7 @@ import {
 } from "@solana/spl-token";
 import toastr from "toastr";
 import RegisterTokenForm from "../../components/RegisterTokenForm";
-import { RegisterToken } from "../../lib/tokenRegister";
+import { RegisterToken, register } from "../../lib/tokenRegister";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -99,8 +99,10 @@ export const TokenDetail = () => {
   });
 
   //Transfer
-  const [destinationPubkey, setDestinationPubkey] = useState<string>("");
-  const [transferAmount, setTransferAmount] = useState<number>(0);
+  const [transferData, setTransferData] = useState({
+    destinationPubkey: "",
+    amount: 0,
+  })
 
   //Mint&Burn
   const [amountToMB, setAmountToMB] = useState<number>(0);
@@ -121,7 +123,7 @@ export const TokenDetail = () => {
           publicKey,
           new PublicKey(tokenHex)
         );
-        // console.log(data);
+        console.log(data);
         setToken(data[0]);
       }
     };
@@ -176,7 +178,7 @@ export const TokenDetail = () => {
           value: { blockhash, lastValidBlockHeight },
         } = await connection.getLatestBlockhashAndContext();
 
-        const destination = new PublicKey(destinationPubkey);
+        const destination = new PublicKey(transferData.destinationPubkey);
         const selectedTokenPubkey = new PublicKey(token.hex);
 
         const { associatedToken } = await getOrCreateAssociatedTokenAccount(
@@ -208,7 +210,7 @@ export const TokenDetail = () => {
               fromAccount.address,
               associatedTokenTo,
               publicKey,
-              transferAmount * Math.pow(10, token.decimal)
+              transferData.amount * Math.pow(10, token.decimal)
             )
           );
 
@@ -222,6 +224,7 @@ export const TokenDetail = () => {
             signature,
           });
 
+          setTransferData({destinationPubkey: "", amount: 0})
           toastr.success("Transfer completed successfully.");
         } else {
           const transaction = new Transaction().add(
@@ -229,7 +232,7 @@ export const TokenDetail = () => {
               fromAccount.address,
               toAccount.address,
               publicKey,
-              transferAmount * Math.pow(10, token.decimal)
+              transferData.amount * Math.pow(10, token.decimal)
             )
           );
 
@@ -286,6 +289,7 @@ export const TokenDetail = () => {
           lastValidBlockHeight,
           signature: burnSignature,
         });
+        
 
         toastr.success("Mint completed Successfully");
       } catch (error) {
@@ -328,10 +332,37 @@ export const TokenDetail = () => {
           signature: burnSignature,
         });
 
+
+        // setAmountToMB(0);
+        // selectedHolder("");
         toastr.success("Burn completed Successfully");
       } catch (error) {
         console.log(error);
       }
+    }
+  };
+
+  const registerTransaction = async () => {
+    if (publicKey && token) {
+      const {
+        context: { slot: minContextSlot },
+        value: { blockhash, lastValidBlockHeight },
+      } = await connection.getLatestBlockhashAndContext();
+
+      try {
+        const transaction = register(token?.hex,publicKey, {name: registerData.name, symbol: registerData.symbol});
+        const registertransaction = new Transaction();
+        registertransaction.add(transaction);
+        const signature = await sendTransaction(registertransaction, connection, { minContextSlot, signers: [] });
+        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+
+        setRegisterData({name: "", symbol: ""});
+        toastr.success("Token register completed successfully");
+      } catch (error) {
+        console.log(error);
+      }
+
+
     }
   };
 
@@ -549,19 +580,19 @@ export const TokenDetail = () => {
                         label="Destination Publickey"
                         name="destinationpublickey"
                         onChange={(e: any) =>
-                          setDestinationPubkey(e.target.value)
+                          setTransferData({...transferData, destinationPubkey: e.target.value})
                         }
                         placeHolder="Destination Publickey"
                         type="text"
-                        value={destinationPubkey}
+                        value={transferData.destinationPubkey}
                       ></CustomInput>
                       <CustomInput
                         label="Amount"
                         name="Amount"
-                        onChange={(e: any) => setTransferAmount(e.target.value)}
+                        onChange={(e: any) => setTransferData({...transferData, amount: e.target.value})}
                         placeHolder="Amount"
                         type="text"
-                        value={transferAmount}
+                        value={transferData.amount}
                       ></CustomInput>
 
                       <Grid
@@ -695,6 +726,8 @@ export const TokenDetail = () => {
                     marginY={"1rem"}
                   >
                     <RegisterTokenForm
+                      disable={false}
+                      register={registerTransaction}
                       inputs={registerData}
                       inputOnChange={(data) => {
                         setRegisterData(data);
