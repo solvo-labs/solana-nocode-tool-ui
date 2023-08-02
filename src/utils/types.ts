@@ -1,4 +1,4 @@
-import {  RpcResponseAndContext, TokenAmount } from "@solana/web3.js";
+import { RpcResponseAndContext, TokenAmount } from "@solana/web3.js";
 
 export type Token = {
   name: string;
@@ -23,6 +23,6 @@ export type TokenData = {
 };
 
 export type ToolTips = {
-  hexToolTip?: boolean,
-  ownerToolTip?: boolean,
-}
+  hexToolTip?: boolean;
+  ownerToolTip?: boolean;
+};
