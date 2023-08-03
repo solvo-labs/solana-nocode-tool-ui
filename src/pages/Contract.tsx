@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AnchorProvider, Program, Idl } from "@project-serum/anchor";
-import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 import { getIdl } from "../lib/contract";
@@ -9,6 +9,7 @@ import { Box, CircularProgress, Divider, FormControl, Grid, Modal, Table, TableB
 import { makeStyles } from "@mui/styles";
 import { CustomInput } from "../components/CustomInput";
 import { CustomButton } from "../components/CustomButton";
+import { IdlInstruction } from "@project-serum/anchor/dist/cjs/idl";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -26,18 +27,25 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2),
-    position: "relative", // Modal içeriği için göreceli konumlandırma
+    position: "relative",
   },
 }));
 
 export const ContractPage = () => {
   const { connection } = useConnection();
+  const { publicKey } = useWallet();
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState<boolean>(false);
   const [program, setProgram] = useState<Program>();
   const [programId, setProgramId] = useState<string>("3MYQ4iEZC2XcRmB7U2XuasWxQPGKmorGBiuwBqJcHBni");
   const [provider, setProvider] = useState<AnchorProvider>();
-  const [actionModal, setActionModal] = useState<{ show: boolean; readAction?: { address: string; account: string; data?: any } }>({ show: false });
+  const [actionModal, setActionModal] = useState<{
+    show: boolean;
+    readAction?: { address: string; account: string; data?: any };
+    writeAction?: { instruction: IdlInstruction; accountInputs: { index: number; value: string }[] };
+  }>({
+    show: false,
+  });
   const classes = useStyles();
 
   useEffect(() => {
@@ -84,6 +92,18 @@ export const ContractPage = () => {
           }
 
           setActionModal({ ...actionModal, readAction: { ...actionModal.readAction, data } });
+        }
+
+        if (actionModal.writeAction) {
+          const methods = program?.methods;
+          const currentMethod = methods[actionModal.writeAction.instruction.name];
+
+          const accountData = actionModal.writeAction.instruction.accounts.reduce((acc: any, obj: any, index: number) => {
+            acc[obj.name] = new PublicKey(actionModal.writeAction?.accountInputs[index].value || "");
+            return acc;
+          }, {});
+
+          currentMethod().accounts(accountData).rpc();
         }
       }
     } catch {
@@ -139,7 +159,11 @@ export const ContractPage = () => {
                             label={"Run"}
                             disable={false}
                             onClick={() => {
-                              setActionModal({ show: true });
+                              const inputs = row.accounts.map((ac: any, index: number) => {
+                                return { index, value: ac.isSigner ? publicKey!.toBase58() : "" };
+                              });
+
+                              setActionModal({ show: true, writeAction: { instruction: row, accountInputs: inputs } });
                             }}
                           />
                         </TableCell>
@@ -286,6 +310,37 @@ export const ContractPage = () => {
                   </Table>
                 </TableContainer>
               )}
+
+              {actionModal.writeAction && <h3 style={{ color: "black" }}>Accounts for {actionModal.writeAction.instruction.name}() function</h3>}
+
+              {actionModal.writeAction &&
+                actionModal.writeAction.instruction.accounts.map((act: any, index: number) => {
+                  return (
+                    <div key={"div" + index} style={{ marginBottom: "1rem" }}>
+                      <CustomInput
+                        key={"input" + index}
+                        placeHolder={act.name}
+                        label={act.name + " (Public key)"}
+                        required={false}
+                        id={act.name}
+                        name={act.name}
+                        type="text"
+                        value={actionModal.writeAction?.accountInputs[index].value || ""}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const clone = { ...actionModal, ...(actionModal.writeAction ? { writeAction: { ...actionModal.writeAction } } : {}) };
+                          const currentData = clone.writeAction?.accountInputs.find((ai) => ai.index === index);
+
+                          if (currentData) {
+                            currentData.value = e.target.value;
+                          }
+
+                          setActionModal(clone);
+                        }}
+                        disable={act.isSigner}
+                      />
+                    </div>
+                  );
+                })}
 
               <div style={{ textAlign: "center" }}>
                 <CustomButton label="Run" onClick={exec} disable={false} />
