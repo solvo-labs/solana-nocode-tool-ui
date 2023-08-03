@@ -1,9 +1,9 @@
 import { utf8 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { inflate } from "pako";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { decodeIdlAccount } from "@project-serum/anchor/dist/cjs/idl";
+import { Idl, decodeIdlAccount } from "@project-serum/anchor/dist/cjs/idl";
 
-export const getIdl = async (connection: Connection, programId: PublicKey) => {
+export const getIdl = async (connection: Connection, programId: PublicKey): Promise<Idl> => {
   const base = PublicKey.findProgramAddressSync([], programId)[0];
 
   const idlAddress = await PublicKey.createWithSeed(base, "anchor:idl", programId);
@@ -14,7 +14,7 @@ export const getIdl = async (connection: Connection, programId: PublicKey) => {
 
   const inflatedIdl = inflate(idlAccount.data);
 
-  const idlJson = JSON.parse(utf8.decode(inflatedIdl));
-  console.log("idlJson", idlJson);
+  const idlJson: Idl = JSON.parse(utf8.decode(inflatedIdl));
+
   return idlJson;
 };
