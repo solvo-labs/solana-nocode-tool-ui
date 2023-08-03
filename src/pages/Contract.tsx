@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AnchorProvider, Program, Idl } from "@project-serum/anchor";
 import { useConnection, useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 import { getIdl } from "../lib/contract";
 import toastr from "toastr";
@@ -76,6 +76,8 @@ export const ContractPage = () => {
     }
   };
 
+  console.log(SystemProgram.programId.toBase58());
+
   const exec = async () => {
     try {
       if (program) {
@@ -104,11 +106,11 @@ export const ContractPage = () => {
           }, {});
 
           const args = actionModal.writeAction.instruction.args.reduce((acc: any, obj: any, index: number) => {
-            acc[obj.name] = new PublicKey(actionModal.writeAction?.accountInputs[index].value || "");
+            acc[obj.name] = actionModal.writeAction?.accountInputs[index].value || "";
             return acc;
           }, {});
 
-          currentMethod().accounts(accountData).rpc();
+          currentMethod(args).accounts(accountData).rpc();
         }
       }
     } catch {
