@@ -42,7 +42,7 @@ export const ContractPage = () => {
   const [actionModal, setActionModal] = useState<{
     show: boolean;
     readAction?: { address: string; account: string; data?: any };
-    writeAction?: { instruction: IdlInstruction; accountInputs: { index: number; value: string }[] };
+    writeAction?: { instruction: IdlInstruction; accountInputs: { index: number; value: string }[]; argInputs: { index: number; value: string }[] };
   }>({
     show: false,
   });
@@ -103,6 +103,11 @@ export const ContractPage = () => {
             return acc;
           }, {});
 
+          const args = actionModal.writeAction.instruction.args.reduce((acc: any, obj: any, index: number) => {
+            acc[obj.name] = new PublicKey(actionModal.writeAction?.accountInputs[index].value || "");
+            return acc;
+          }, {});
+
           currentMethod().accounts(accountData).rpc();
         }
       }
@@ -127,6 +132,7 @@ export const ContractPage = () => {
     );
   }
 
+  console.log(program?.idl);
   return (
     <Grid container className={classes.container} direction={"column"}>
       <h3 style={{ textAlign: "center" }}>Contract Iteration</h3>
@@ -163,7 +169,11 @@ export const ContractPage = () => {
                                 return { index, value: ac.isSigner ? publicKey!.toBase58() : "" };
                               });
 
-                              setActionModal({ show: true, writeAction: { instruction: row, accountInputs: inputs } });
+                              const argInputs = row.accounts.map((ac: any, index: number) => {
+                                return { index, value: "" };
+                              });
+
+                              setActionModal({ show: true, writeAction: { instruction: row, accountInputs: inputs, argInputs } });
                             }}
                           />
                         </TableCell>
@@ -311,7 +321,9 @@ export const ContractPage = () => {
                 </TableContainer>
               )}
 
-              {actionModal.writeAction && <h3 style={{ color: "black" }}>Accounts for {actionModal.writeAction.instruction.name}() function</h3>}
+              {actionModal.writeAction && actionModal.writeAction.instruction.accounts.length > 0 && (
+                <h3 style={{ color: "black" }}>Accounts for {actionModal.writeAction.instruction.name}() function</h3>
+              )}
 
               {actionModal.writeAction &&
                 actionModal.writeAction.instruction.accounts.map((act: any, index: number) => {
@@ -329,6 +341,39 @@ export const ContractPage = () => {
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           const clone = { ...actionModal, ...(actionModal.writeAction ? { writeAction: { ...actionModal.writeAction } } : {}) };
                           const currentData = clone.writeAction?.accountInputs.find((ai) => ai.index === index);
+
+                          if (currentData) {
+                            currentData.value = e.target.value;
+                          }
+
+                          setActionModal(clone);
+                        }}
+                        disable={act.isSigner}
+                      />
+                    </div>
+                  );
+                })}
+
+              {actionModal.writeAction && actionModal.writeAction.instruction.args.length > 0 && (
+                <h3 style={{ color: "black" }}>Args for {actionModal.writeAction.instruction.name}() function</h3>
+              )}
+
+              {actionModal.writeAction &&
+                actionModal.writeAction.instruction.args.map((act: any, index: number) => {
+                  return (
+                    <div key={"div" + index} style={{ marginBottom: "1rem" }}>
+                      <CustomInput
+                        key={"input" + index}
+                        placeHolder={act.name}
+                        label={act.name}
+                        required={false}
+                        id={act.name}
+                        name={act.name}
+                        type="text"
+                        value={actionModal.writeAction?.argInputs[index].value || ""}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const clone = { ...actionModal, ...(actionModal.writeAction ? { writeAction: { ...actionModal.writeAction } } : {}) };
+                          const currentData = clone.writeAction?.argInputs.find((ai) => ai.index === index);
 
                           if (currentData) {
                             currentData.value = e.target.value;
