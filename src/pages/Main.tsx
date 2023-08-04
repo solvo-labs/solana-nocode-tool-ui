@@ -14,6 +14,8 @@ import ActiveStake from "../components/ActiveStake";
 import { useNavigate } from "react-router-dom";
 import { getVestingMyOwn } from "../lib/vesting";
 import ActiveVesting from "../components/ActiveVesting";
+import { ToolTips } from "../utils/types";
+import { Stream } from "@streamflow/stream/dist/solana";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -38,10 +40,24 @@ const Main: React.FC = () => {
   const [stakeClassInstance, setStakeClassInstance] = useState<StakeClass>();
   const [balance, setBalance] = useState<number>();
   const [vestingList, setVestingList] = useState<[string, Stream][]>([]);
-
+  const [copy, setCopy] = useState<ToolTips>({
+    walletToolTop: false,
+  });
 
   const [walletConnection, setWalletConnection] =
     useState<string>("not connected");
+
+  const handleTooltipOpen = (buttonName: keyof typeof copy, target: any) => {
+    setCopy((prevToolTipVisible) => ({
+      ...prevToolTipVisible,
+      [buttonName]: true,
+    }));
+    navigator.clipboard.writeText(target);
+  };
+
+  const handleTooltipClose = (buttonName: keyof typeof copy) => {
+    setCopy({ ...copy, [buttonName]: false });
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -71,12 +87,13 @@ const Main: React.FC = () => {
     };
   }, [connection, publicKey]);
 
-  
   useEffect(() => {
     const init = async () => {
       if (publicKey) {
         const data = await getVestingMyOwn(publicKey.toBase58());
-        const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
+        const sortedData = data?.sort(
+          (a, b) => a[1].createdAt - b[1].createdAt
+        );
         setVestingList(sortedData || []);
         // setLoading(false);
       }
@@ -100,6 +117,9 @@ const Main: React.FC = () => {
         <Grid container spacing={2}>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <Profile
+              open={copy.walletToolTop}
+              handleTooltipClose={()=> handleTooltipClose("walletToolTop")}
+              handleTooltipOpen={()=>handleTooltipOpen("walletToolTop", publicKey?.toBase58())}
               walletConnection={walletConnection}
               balance={balance ? balance : 0}
               publicKey={
@@ -127,15 +147,20 @@ const Main: React.FC = () => {
       {/* --------------------------------------------------------------------------------------------- en dis grid */}
       <Grid item xl={8} lg={8} md={8} sm={12} xs={12}>
         <Grid container spacing={2}>
-         
           {/* <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <LastCard></LastCard>
           </Grid> */}
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            <ActiveStake navigate={()=> navigate("/stake")} stakes={stakes}></ActiveStake>
+            <ActiveStake
+              navigate={() => navigate("/stake")}
+              stakes={stakes}
+            ></ActiveStake>
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            <ActiveVesting navigate={()=> navigate("/vesting-list")} vestings={vestingList}></ActiveVesting>
+            <ActiveVesting
+              navigate={() => navigate("/vesting-list")}
+              vestings={vestingList}
+            ></ActiveVesting>
           </Grid>
         </Grid>
       </Grid>

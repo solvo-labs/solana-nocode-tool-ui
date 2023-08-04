@@ -25,4 +25,5 @@ export type TokenData = {
 export type ToolTips = {
   hexToolTip?: boolean;
   ownerToolTip?: boolean;
+  walletToolTop?: boolean;
 };
