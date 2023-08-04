@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: "black !important",
     backgroundColor: "#26ea9a99 !important",
   },
-  network: {
+  container: {
     [theme.breakpoints.down("sm")]: {
       justifyContent: "center",
       textAlign: "center",
@@ -44,7 +44,7 @@ const SolSupply = () => {
   return (
     <Card className={classes.card}>
       <CardContent className={classes.content}>
-        <Grid container className={classes.network}>
+        <Grid container className={classes.container}>
           <Grid item>
             <Stack spacing={0} direction={"column"}>
               <Typography className={classes.title}>SOL Supply</Typography>

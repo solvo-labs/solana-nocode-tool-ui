@@ -22,8 +22,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: "black !important",
     backgroundColor: "#26ea9a99 !important",
   },
-  network: {
-    [theme.breakpoints.down("md")]: {
+  container: {
+    [theme.breakpoints.down("sm")]: {
       justifyContent: "center",
       textAlign: "center",
     },
@@ -44,7 +44,7 @@ const SolTotalStake = () => {
   return (
     <Card className={classes.card}>
       <CardContent className={classes.content}>
-        <Grid container>
+        <Grid container className={classes.container}>
           <Grid item>
             <Stack spacing={0} direction={"column"}>
               <Typography className={classes.title}>
