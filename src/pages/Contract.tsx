@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AnchorProvider, Program, Idl } from "@project-serum/anchor";
+import { AnchorProvider, Program, Idl, BN } from "@project-serum/anchor";
 import { useConnection, useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { useEffect, useState } from "react";
@@ -105,12 +105,26 @@ export const ContractPage = () => {
             return acc;
           }, {});
 
-          const args = actionModal.writeAction.instruction.args.reduce((acc: any, obj: any, index: number) => {
-            acc[obj.name] = actionModal.writeAction?.accountInputs[index].value || "";
-            return acc;
-          }, {});
+          console.log("here", actionModal.writeAction);
 
-          currentMethod(args).accounts(accountData).rpc();
+          const args = actionModal.writeAction.argInputs.map((vl: any, index: number) => {
+            const dataType = actionModal.writeAction!.instruction.args[index].type;
+            console.log(dataType);
+
+            if (dataType === "publicKey") {
+              return new PublicKey(vl.value);
+            }
+
+            if (dataType === "u64") {
+              return new BN(vl.value);
+            }
+
+            return vl.value;
+          });
+
+          currentMethod(...args)
+            .accounts(accountData)
+            .rpc();
         }
       }
     } catch {
@@ -171,7 +185,7 @@ export const ContractPage = () => {
                                 return { index, value: ac.isSigner ? publicKey!.toBase58() : "" };
                               });
 
-                              const argInputs = row.accounts.map((ac: any, index: number) => {
+                              const argInputs = row.args.map((_ac: any, index: number) => {
                                 return { index, value: "" };
                               });
 
