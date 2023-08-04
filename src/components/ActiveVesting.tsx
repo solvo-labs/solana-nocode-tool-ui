@@ -95,6 +95,7 @@ const ActiveVesting: React.FC<Props> = ({ vestings, navigate }) => {
                     <TableCell>Name</TableCell>
                     <TableCell align="left">Status</TableCell>
                     <TableCell align="left">Deposited Amount</TableCell>
+                    <TableCell align="left"></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
