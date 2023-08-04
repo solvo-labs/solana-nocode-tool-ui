@@ -13,53 +13,66 @@ import { makeStyles } from "@mui/styles";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
+  title: {
+    fontSize: "28px !important",
+    display: "flex !important",
+    alignItems: "center !important",
+    fontWeight: "bold !important",
+  },
   card: {
     borderRadius: "16px !important",
-    height: "200px",
+    height: "160px",
   },
+  content: {
+    padding: "1rem !important",
+  },
+  priceText: {
+    fontSize: "2rem !important",
+    [theme.breakpoints.down("lg")]: {
+      fontSize: "1.5rem !important",
+    },
+  }
 }));
 
 const SolPrice = () => {
   const classes = useStyles();
   return (
     <Card className={classes.card}>
-      <CardContent>
-        <Stack direction={"row"} spacing={4}>
-          <Avatar
-            alt="Remy Sharp"
-            src="https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png"
-            sx={{ width: 64, height: 64 }}
-          />
-          <Grid container>
-            <Stack direction={"column"}>
-              <Grid container direction={"row"}>
-                <Typography
-                  height={64}
-                  variant="h6"
-                  color="text.secondary"
-                  display={"flex"}
-                  alignItems={"center"}
-                  sx={{ fontWeight: "bold" }}
-                >
-                  Solana
-                </Typography>
-                <Grid item paddingTop={"4px"} paddingLeft={"8px"}>
-                  <Chip size="small" label="#10" />
+      <CardContent className={classes.content}>
+        <Grid container>
+          <Stack direction={"row"} spacing={2}>
+            <Avatar
+              alt="sol"
+              src="https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png"
+              sx={{ width: 64, height: 64 }}
+            />
+            <Typography className={classes.title} color="text.secondary">
+              Solana
+            </Typography>
+            <Grid item paddingTop={"4px"}>
+              <Chip size="small" label="#10" />
+            </Grid>
+            {/* <Grid container>
+              <Stack direction={"column"}>
+                <Grid container direction={"row"}>
+                  <Typography className={classes.title} color="text.secondary">
+                    Solana
+                  </Typography>
                 </Grid>
-              </Grid>
-              <Grid container direction={"row"}>
-                <Typography variant="h4">$23.00</Typography>
-                <Typography
-                  variant="button"
-                  sx={{ color: "green", paddingLeft: "10px" }}
-                >
-                  {" "}
-                  ^ %0.5{" "}
-                </Typography>
-              </Grid>
-            </Stack>
+              </Stack>
+            </Grid> */}
+          </Stack>
+          <Grid container paddingLeft={"80px"}>
+            <Typography className={classes.priceText}>$23.00</Typography>
+            <Typography
+              variant="button"
+              sx={{ color: "green", paddingLeft: "10px" }}
+            >
+              {" "}
+              ^ %0.5{" "}
+            </Typography>
           </Grid>
-        </Stack>
+        </Grid>
       </CardContent>
     </Card>
   );

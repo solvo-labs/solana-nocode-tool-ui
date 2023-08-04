@@ -16,6 +16,12 @@ import ContentCopy from "@mui/icons-material/ContentCopy";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
+  title: {
+    fontSize: "28px !important",
+    display: "flex !important",
+    alignItems: "center !important",
+    fontWeight: "bold !important",
+  },
   card: {
     borderRadius: "16px !important",
     height: "200px",
@@ -50,9 +56,8 @@ const Profile: React.FC<Props> = ({ publicKey, balance, walletConnection }) => {
               sx={{ width: 64, height: 64 }}
             ></Avatar>
             <Typography
-              sx={{ fontSize: 28, display: "flex", alignItems: "center" }}
+              className={classes.title}
               color="text.secondary"
-              gutterBottom
             >
               Wallet
             </Typography>

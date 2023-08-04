@@ -6,11 +6,12 @@ import CurrentBlock from "../components/CurrentBlock";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { makeStyles } from "@mui/styles";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import WalletDetail from "../components/WalletDetail";
 import SolNetwork from "../components/SolNetwork";
 import SolTotalStake from "../components/SolTotalStake";
 import SolSupply from "../components/SolSupply";
-import LastCard from "../components/LastCards";
+import StakeClass from "../lib/stakeClass";
+import ActiveStake from "../components/ActiveStake";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -27,10 +28,14 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const Main: React.FC = () => {
-  const { publicKey } = useWallet();
   const classes = useStyles();
+  const { publicKey } = useWallet();
   const { connection } = useConnection();
+  const [stakes, setStakes] = useState<any[]>([]);
+  const [stakeClassInstance, setStakeClassInstance] = useState<StakeClass>();
   const [balance, setBalance] = useState<number>();
+  const navigate = useNavigate();
+
   const [walletConnection, setWalletConnection] =
     useState<string>("not connected");
 
@@ -46,10 +51,36 @@ const Main: React.FC = () => {
     init();
   }, [connection, publicKey]);
 
+  useEffect(() => {
+    const init = async () => {
+      if (publicKey) {
+        const stakeClass = new StakeClass(connection, publicKey);
+        setStakeClassInstance(stakeClass);
+
+        // const validatorsData = await stakeClass.getValidators();
+        // setValidators(validatorsData);
+
+        const allStakes = await stakeClass.fetchAllStakes();
+        setStakes(allStakes);
+
+        // setLoading(false);
+      }
+    };
+
+    init();
+    const interval = setInterval(() => init(), 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [connection, publicKey]);
+
+  console.log(stakes);
+
   return (
     <Grid container spacing={2} className={classes.container}>
       {/* --------------------------------------------------------------------------------------------- en dis grid */}
-      <Grid item xl={4} lg={4} md={6} sm={12} xs={12}>
+      <Grid item xl={4} lg={4} md={4} sm={12} xs={12}>
         <Grid container spacing={2}>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <Profile
@@ -61,19 +92,16 @@ const Main: React.FC = () => {
             ></Profile>
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            <WalletDetail></WalletDetail>
+            <SolPrice />
+          </Grid>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+            <CurrentBlock></CurrentBlock>
           </Grid>
         </Grid>
       </Grid>
       {/* --------------------------------------------------------------------------------------------- en dis grid */}
-      <Grid item xl={8} lg={8} md={6} sm={12} xs={12}>
+      <Grid item xl={8} lg={8} md={8} sm={12} xs={12}>
         <Grid container spacing={2}>
-          <Grid item xl={6} lg={6} md={12} sm={12} xs={12}>
-            <SolPrice />
-          </Grid>
-          <Grid item xl={6} lg={6} md={12} sm={12} xs={12}>
-            <CurrentBlock></CurrentBlock>
-          </Grid>
           <Grid item xl={4} lg={4} md={12} sm={12} xs={12}>
             <SolNetwork></SolNetwork>
           </Grid>
@@ -83,8 +111,11 @@ const Main: React.FC = () => {
           <Grid item xl={4} lg={4} md={12} sm={12} xs={12}>
             <SolSupply></SolSupply>
           </Grid>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+          {/* <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <LastCard></LastCard>
+          </Grid> */}
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+            <ActiveStake navigate={()=> navigate("/stake")} stakes={stakes}></ActiveStake>
           </Grid>
         </Grid>
       </Grid>

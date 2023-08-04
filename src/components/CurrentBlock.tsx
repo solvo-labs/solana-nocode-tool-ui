@@ -15,7 +15,7 @@ import { makeStyles } from "@mui/styles";
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
     borderRadius: "16px !important",
-    height: "200px",
+    height: "160px",
   },
   content: {
     padding: "1rem !important",
@@ -23,6 +23,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   button: {
     color: "black !important",
     backgroundColor: "#26ea9a99 !important"
+  },
+  title: {
+    fontSize: "1.75rem !important",
+    [theme.breakpoints.down("xl")]: {
+      fontSize: "1.5rem !important",
+    },
   }
 }));
 
@@ -39,7 +45,7 @@ const CurrentBlock = () => {
           </Grid>
         </Stack>
         <Stack direction={"row"} spacing={4} marginTop={"1.5rem"}>
-          <Typography variant="h4">200,000,000</Typography>
+          <Typography className={classes.title}>200,000,000</Typography>
           <Button variant="contained" className={classes.button}>
             View
           </Button>
