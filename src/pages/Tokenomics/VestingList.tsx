@@ -61,17 +61,17 @@ const useStyles = makeStyles((_theme: Theme) => ({
     color: "white !important",
     "& .css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon": {
       color: "white",
-      marginRight: "-10px"
+      marginRight: "-10px",
     },
     "& .css-1mf6u8l-MuiSvgIcon-root-MuiSelect-icon": {
       color: "white",
-      marginRight: "-10px"
+      marginRight: "-10px",
     },
-    "& .css-zylse7-MuiButtonBase-root-MuiIconButton-root.Mui-disabled":{
-      color: "#f5f5f566"
+    "& .css-zylse7-MuiButtonBase-root-MuiIconButton-root.Mui-disabled": {
+      color: "#f5f5f566",
     },
-    "& .makeStyles-pagination-18 .css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon":{
-    }
+    "& .makeStyles-pagination-18 .css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon":
+      {},
   },
 }));
 
@@ -86,7 +86,16 @@ const timestampToDate = (timestamp: number) => {
     value.length < 2 ? (value = 0 + "" + value) : value;
     return value;
   };
-  const date = formatter(dayFormat) + "/" + formatter(monthFormat) + "/" + dateFormat.getFullYear() + " " + formatter(hourFormat) + ":" + formatter(minutesFormat);
+  const date =
+    formatter(dayFormat) +
+    "/" +
+    formatter(monthFormat) +
+    "/" +
+    dateFormat.getFullYear() +
+    " " +
+    formatter(hourFormat) +
+    ":" +
+    formatter(minutesFormat);
   return timestamp == 0 ? "-" : date;
 };
 
@@ -103,7 +112,9 @@ export const VestingList = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
@@ -112,7 +123,9 @@ export const VestingList = () => {
     const init = async () => {
       if (publicKey) {
         const data = await getVestingMyOwn(publicKey.toBase58());
-        const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
+        const sortedData = data?.sort(
+          (a, b) => a[1].createdAt - b[1].createdAt
+        );
         setVestingList(sortedData || []);
         setLoading(false);
       }
@@ -165,22 +178,35 @@ export const VestingList = () => {
   };
 
   const listVesting = () => {
-    return vestingList?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)?.map((e: any, index: number) => (
-      <TableRow className={classes.tableRow} key={index}>
-        <TableCell>{e[1].name}</TableCell>
-        <TableCell align="center">{getStatusIcon(e[1].start, e[1].end)}</TableCell>
-        <TableCell>{timestampToDate(e[1].start)}</TableCell>
-        <TableCell>{timestampToDate(e[1].end)}</TableCell>
-        <TableCell>{timestampToDate(e[1].lastWithdrawnAt)}</TableCell>
-        <TableCell>{e[1].mint.slice(0, 8)}</TableCell>
-        <TableCell align="center">{e[1].period}</TableCell>
-        <TableCell align="center">{e[1].withdrawnAmount.toNumber() / 10000000}</TableCell>
-        <TableCell align="center">{e[1].depositedAmount.toNumber() / 10000000}</TableCell>
-        <TableCell>{timestampToDate(e[1].cliff)}</TableCell>
-        <TableCell align="center">{e[1].cliffAmount.toNumber() / Math.pow(10, e[1].cliffAmount.length)}</TableCell>
-        <TableCell align="center">{String(e[1].automaticWithdrawal)}</TableCell>
-      </TableRow>
-    ));
+    return vestingList
+      ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+      ?.map((e: any, index: number) => (
+        <TableRow className={classes.tableRow} key={index}>
+          <TableCell>{e[1].name}</TableCell>
+          <TableCell align="center">
+            {getStatusIcon(e[1].start, e[1].end)}
+          </TableCell>
+          <TableCell>{timestampToDate(e[1].start)}</TableCell>
+          <TableCell>{timestampToDate(e[1].end)}</TableCell>
+          <TableCell>{timestampToDate(e[1].lastWithdrawnAt)}</TableCell>
+          <TableCell>{e[1].mint.slice(0, 8)}</TableCell>
+          <TableCell align="center">{e[1].period}</TableCell>
+          <TableCell align="center">
+            {e[1].withdrawnAmount.toNumber() / 10000000}
+          </TableCell>
+          <TableCell align="center">
+            {e[1].depositedAmount.toNumber() / 10000000}
+          </TableCell>
+          <TableCell>{timestampToDate(e[1].cliff)}</TableCell>
+          <TableCell align="center">
+            {e[1].cliffAmount.toNumber() /
+              Math.pow(10, e[1].cliffAmount.length)}
+          </TableCell>
+          <TableCell align="center">
+            {String(e[1].automaticWithdrawal)}
+          </TableCell>
+        </TableRow>
+      ));
   };
 
   if (loading) {
@@ -254,21 +280,17 @@ export const VestingList = () => {
           </TableContainer>
         </Grid>
         <Grid container className={classes.paginatonContainer} sx={{}}>
-          <TableFooter>
-            <TableCell colSpan={8} padding={"none"} sx={{ border: "none" }}>
-              <TablePagination
-                className={classes.pagination}
-                rowsPerPageOptions={[1, 5, 10]}
-                component="div"
-                colSpan={4}
-                count={vestingList.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </TableCell>
-          </TableFooter>
+          <TablePagination
+            className={classes.pagination}
+            rowsPerPageOptions={[1, 5, 10]}
+            component="div"
+            colSpan={4}
+            count={vestingList.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Grid>
       </Grid>
     )
