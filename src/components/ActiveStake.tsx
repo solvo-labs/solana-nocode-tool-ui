@@ -78,9 +78,9 @@ const ActiveStake: React.FC<Props> = ({ stakes, navigate }) => {
                           <IconButton
                             className={classes.detailButton}
                             sx={{ padding: "0rem" }}
-                            >
+                            onClick={navigate}
+                          >
                             <ArrowForwardIosIcon
-                              onClick={navigate}
                               sx={{ fontSize: "0.75rem", margin: "0rem" }}
                             ></ArrowForwardIosIcon>
                           </IconButton>
