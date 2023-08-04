@@ -12,6 +12,8 @@ import SolSupply from "../components/SolSupply";
 import StakeClass from "../lib/stakeClass";
 import ActiveStake from "../components/ActiveStake";
 import { useNavigate } from "react-router-dom";
+import { getVestingMyOwn } from "../lib/vesting";
+import ActiveVesting from "../components/ActiveVesting";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -29,12 +31,14 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const Main: React.FC = () => {
   const classes = useStyles();
+  const navigate = useNavigate();
   const { publicKey } = useWallet();
   const { connection } = useConnection();
   const [stakes, setStakes] = useState<any[]>([]);
   const [stakeClassInstance, setStakeClassInstance] = useState<StakeClass>();
   const [balance, setBalance] = useState<number>();
-  const navigate = useNavigate();
+  const [vestingList, setVestingList] = useState<[string, Stream][]>([]);
+
 
   const [walletConnection, setWalletConnection] =
     useState<string>("not connected");
@@ -56,26 +60,38 @@ const Main: React.FC = () => {
       if (publicKey) {
         const stakeClass = new StakeClass(connection, publicKey);
         setStakeClassInstance(stakeClass);
-
-        // const validatorsData = await stakeClass.getValidators();
-        // setValidators(validatorsData);
-
         const allStakes = await stakeClass.fetchAllStakes();
         setStakes(allStakes);
-
-        // setLoading(false);
       }
     };
-
     init();
     const interval = setInterval(() => init(), 10000);
-
     return () => {
       clearInterval(interval);
     };
   }, [connection, publicKey]);
 
-  console.log(stakes);
+  
+  useEffect(() => {
+    const init = async () => {
+      if (publicKey) {
+        const data = await getVestingMyOwn(publicKey.toBase58());
+        const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
+        setVestingList(sortedData || []);
+        // setLoading(false);
+      }
+    };
+
+    init();
+    const interval = setInterval(() => {
+      init();
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [publicKey]);
+  console.log(vestingList);
 
   return (
     <Grid container spacing={2} className={classes.container}>
@@ -97,25 +113,29 @@ const Main: React.FC = () => {
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <CurrentBlock></CurrentBlock>
           </Grid>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+            <SolNetwork></SolNetwork>
+          </Grid>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+            <SolTotalStake></SolTotalStake>
+          </Grid>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+            <SolSupply></SolSupply>
+          </Grid>
         </Grid>
       </Grid>
       {/* --------------------------------------------------------------------------------------------- en dis grid */}
       <Grid item xl={8} lg={8} md={8} sm={12} xs={12}>
         <Grid container spacing={2}>
-          <Grid item xl={4} lg={4} md={12} sm={12} xs={12}>
-            <SolNetwork></SolNetwork>
-          </Grid>
-          <Grid item xl={4} lg={4} md={12} sm={12} xs={12}>
-            <SolTotalStake></SolTotalStake>
-          </Grid>
-          <Grid item xl={4} lg={4} md={12} sm={12} xs={12}>
-            <SolSupply></SolSupply>
-          </Grid>
+         
           {/* <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <LastCard></LastCard>
           </Grid> */}
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <ActiveStake navigate={()=> navigate("/stake")} stakes={stakes}></ActiveStake>
+          </Grid>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+            <ActiveVesting navigate={()=> navigate("/vesting-list")} vestings={vestingList}></ActiveVesting>
           </Grid>
         </Grid>
       </Grid>
