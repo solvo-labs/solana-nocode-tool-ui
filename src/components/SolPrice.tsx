@@ -6,12 +6,23 @@ import {
   Chip,
   Grid,
   Stack,
+  Theme,
   Typography,
 } from "@mui/material";
+import { makeStyles } from "@mui/styles";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const useStyles = makeStyles((theme: Theme) => ({
+  card: {
+    borderRadius: "16px !important",
+    height: "200px",
+  },
+}));
 
 const SolPrice = () => {
+  const classes = useStyles();
   return (
-    <Card sx={{ borderRadius: "12px" }}>
+    <Card className={classes.card}>
       <CardContent>
         <Stack direction={"row"} spacing={4}>
           <Avatar
