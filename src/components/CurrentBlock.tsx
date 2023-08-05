@@ -22,31 +22,60 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   button: {
     color: "black !important",
-    backgroundColor: "#26ea9a99 !important"
+    backgroundColor: "#26ea9a99 !important",
   },
   title: {
-    fontSize: "1.75rem !important",
+    fontSize: "1.25rem !important",
+    fontWeight: "bold !important",
+
     [theme.breakpoints.down("xl")]: {
-      fontSize: "1.5rem !important",
+      fontSize: "1rem !important",
     },
-  }
+  },
+  currentBlock: {
+    fontSize: "1.25rem !important",
+    [theme.breakpoints.down("xl")]: {
+      fontSize: "1rem !important",
+    },
+  },
 }));
 
-const CurrentBlock = () => {
+type Props = {
+  lastBlock: number;
+};
+
+const CurrentBlock: React.FC<Props> = ({ lastBlock }) => {
   const classes = useStyles();
   return (
     <Card className={classes.card}>
       <CardContent className={classes.content}>
         <Stack direction={"row"} spacing={2}>
-          <Typography>Current Block</Typography>
+          <Typography className={classes.title} color="text.secondary">
+            Current Block
+          </Typography>
           <Grid item>
             <Chip size="small" label="Live" color="success" />
-            <Chip sx={{marginLeft:"8px"}} size="small" label="Devnet" color="success" />
+            <Chip
+              sx={{ marginLeft: "8px" }}
+              size="small"
+              label="Devnet"
+              color="success"
+            />
           </Grid>
         </Stack>
-        <Stack direction={"row"} spacing={4} marginTop={"1.5rem"}>
-          <Typography className={classes.title}>200,000,000</Typography>
-          <Button variant="contained" className={classes.button}>
+        <Stack
+          direction={"row"}
+          spacing={4}
+          marginTop={"1.5rem"}
+          alignItems={"center"}
+        >
+          <Typography className={classes.currentBlock}>{lastBlock}</Typography>
+          <Button
+            sx={{ maxHeight: "2rem" }}
+            size="small"
+            variant="contained"
+            className={classes.button}
+          >
             View
           </Button>
         </Stack>
