@@ -22,13 +22,19 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
     borderRadius: "16px !important",
-    // height: "200px",
+    height: "260px",
   },
   detailButton: {
     "& .css-nixcjy-MuiSvgIcon-root": {
       fontSize: "1rem !important",
       padding: "0rem !important",
     },
+  },
+  title: {
+    fontSize: "1rem !important",
+    display: "flex !important",
+    alignItems: "center !important",
+    fontWeight: "bold !important",
   },
 }));
 
@@ -43,13 +49,20 @@ const ActiveStake: React.FC<Props> = ({ stakes, navigate }) => {
   return (
     <Card className={classes.card}>
       <CardContent>
-        <Grid container direction={"column"} padding={"0.75rem"}>
-          <Grid item marginBottom={"1rem"}>
-            <Typography>My Stake's</Typography>
+        <Grid
+          container
+          direction={"column"}
+          paddingX={"1rem"}
+          paddingTop={"0.5rem"}
+        >
+          <Grid item marginBottom={"0.5rem"}>
+            <Typography className={classes.title} color="text.secondary">
+              My Stake's
+            </Typography>
           </Grid>
           <Grid item>
-            <TableContainer>
-              <Table size="small">
+            <TableContainer sx={{ maxHeight: "180px" }}>
+              <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
                     <TableCell>Active Stake</TableCell>
@@ -60,10 +73,7 @@ const ActiveStake: React.FC<Props> = ({ stakes, navigate }) => {
                 </TableHead>
                 <TableBody>
                   {stakes.map((e: any, index: number) => (
-                    <TableRow
-                      key={index}
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                    >
+                    <TableRow key={index}>
                       <TableCell align="left">
                         {e.account.data.parsed.info.stake.delegation.stake /
                           LAMPORTS_PER_SOL}{" "}

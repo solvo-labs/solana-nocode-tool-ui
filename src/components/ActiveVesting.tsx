@@ -26,13 +26,19 @@ import PendingIcon from "@mui/icons-material/Pending";
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
     borderRadius: "16px !important",
-    // height: "200px",
+    height: "260px",
   },
   detailButton: {
     "& .css-nixcjy-MuiSvgIcon-root": {
       fontSize: "1rem !important",
       padding: "0rem !important",
     },
+  },
+  title: {
+    fontSize: "1rem !important",
+    display: "flex !important",
+    alignItems: "center !important",
+    fontWeight: "bold !important",
   },
 }));
 
@@ -52,7 +58,10 @@ const ActiveVesting: React.FC<Props> = ({ vestings, navigate }) => {
         <Tooltip title="Process is completed">
           {
             <span>
-              <DoneIcon color="success" sx={{ zIndex: "-10px" }} />
+              <DoneIcon
+                color="success"
+                sx={{ zIndex: "-10px", fontSize: "1.25rem", margin: "0rem" }}
+              />
             </span>
           }
         </Tooltip>
@@ -62,7 +71,10 @@ const ActiveVesting: React.FC<Props> = ({ vestings, navigate }) => {
         <Tooltip title="Vesting is processing">
           {
             <span>
-              <AutorenewIcon color="success" sx={{ zIndex: "-10px" }} />
+              <AutorenewIcon
+                color="success"
+                sx={{ zIndex: "-10px", fontSize: "1.25rem", margin: "0rem" }}
+              />
             </span>
           }
         </Tooltip>
@@ -73,7 +85,10 @@ const ActiveVesting: React.FC<Props> = ({ vestings, navigate }) => {
       <Tooltip title="Process is waiting">
         {
           <span>
-            <PendingIcon color="warning" sx={{ zIndex: "-10px" }} />
+            <PendingIcon
+              color="warning"
+              sx={{ zIndex: "-10px", fontSize: "1.25rem", margin: "0rem" }}
+            />
           </span>
         }
       </Tooltip>
@@ -83,13 +98,20 @@ const ActiveVesting: React.FC<Props> = ({ vestings, navigate }) => {
   return (
     <Card className={classes.card}>
       <CardContent>
-        <Grid container direction={"column"} padding={"0.75rem"}>
-          <Grid item marginBottom={"1rem"}>
-            <Typography>My Vesting's</Typography>
+        <Grid
+          container
+          direction={"column"}
+          paddingX={"1rem"}
+          paddingTop={"0.5rem"}
+        >
+          <Grid item marginBottom={"0.5rem"}>
+            <Typography className={classes.title} color="text.secondary">
+              My Vesting's
+            </Typography>
           </Grid>
           <Grid item>
-            <TableContainer>
-              <Table size="small">
+            <TableContainer sx={{ maxHeight: "180px" }}>
+              <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
                     <TableCell>Name</TableCell>
@@ -100,13 +122,14 @@ const ActiveVesting: React.FC<Props> = ({ vestings, navigate }) => {
                 </TableHead>
                 <TableBody>
                   {vestings.map((e: any, index: number) => (
-                    <TableRow
-                      key={index}
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                    >
+                    <TableRow key={index}>
                       <TableCell align="left">{e[1].name}</TableCell>
-                      <TableCell align="left">{getStatusIcon(e[1].start, e[1].end)}</TableCell>
-                      <TableCell align="left">{e[1].depositedAmount.toNumber() / 10000000}</TableCell>
+                      <TableCell align="left">
+                        {getStatusIcon(e[1].start, e[1].end)}
+                      </TableCell>
+                      <TableCell align="left">
+                        {e[1].depositedAmount.toNumber() / 10000000}
+                      </TableCell>
                       <TableCell>
                         <Tooltip title="detail">
                           <IconButton
