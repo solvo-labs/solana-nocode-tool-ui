@@ -42,9 +42,9 @@ const useStyles = makeStyles((_theme: Theme) => ({
     "&:nth-of-type(odd)": {
       backgroundColor: "whitesmoke",
     },
-    '&:hover': {
-      cursor: 'pointer',
-      backgroundColor:"#f9dbff",
+    "&:hover": {
+      cursor: "pointer",
+      backgroundColor: "#f9dbff",
     },
     // hide last border
     "&:last-child td, &:last-child th": {
@@ -62,14 +62,14 @@ const useStyles = makeStyles((_theme: Theme) => ({
     color: "white !important",
     "& .css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon": {
       color: "white",
-      marginRight: "-10px"
+      marginRight: "-10px",
     },
     "& .css-1mf6u8l-MuiSvgIcon-root-MuiSelect-icon": {
       color: "white",
-      marginRight: "-10px"
+      marginRight: "-10px",
     },
-    "& .css-zylse7-MuiButtonBase-root-MuiIconButton-root.Mui-disabled":{
-      color: "#f5f5f566"
+    "& .css-zylse7-MuiButtonBase-root-MuiIconButton-root.Mui-disabled": {
+      color: "#f5f5f566",
     },
   },
 }));
@@ -112,7 +112,11 @@ export const MyTokens = () => {
     return allToken
       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
       .map((a: any, index: number) => (
-        <TableRow className={classes.tableRow} key={index} onClick={()=> navigate(`/token/${a.hex}`)}>
+        <TableRow
+          className={classes.tableRow}
+          key={index}
+          onClick={() => navigate(`/token/${a.hex}`)}
+        >
           <TableCell>{a.metadata.name}</TableCell>
           <TableCell>{a.metadata.symbol}</TableCell>
           <TableCell>{a.supply.value.uiAmount}</TableCell>
@@ -203,21 +207,17 @@ export const MyTokens = () => {
         </TableContainer>
       </Grid>
       <Grid container className={classes.paginatonContainer}>
-        <TableFooter>
-          <TableCell colSpan={8} padding={"none"} sx={{ border: "none" }}>
-            <TablePagination
-              className={classes.pagination}
-              rowsPerPageOptions={[1, 5, 10]}
-              component="div"
-              colSpan={4}
-              count={allToken.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </TableCell>
-        </TableFooter>
+        <TablePagination
+          className={classes.pagination}
+          rowsPerPageOptions={[1, 5, 10]}
+          component="div"
+          colSpan={4}
+          count={allToken.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </Grid>
     </Grid>
   );
