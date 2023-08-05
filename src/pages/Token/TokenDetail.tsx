@@ -113,7 +113,7 @@ export const TokenDetail = () => {
   // Holders
   const [holders, setHolders] = useState<any>([]);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
 

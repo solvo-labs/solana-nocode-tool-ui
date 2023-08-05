@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -58,7 +57,7 @@ const SolSupply = () => {
           container
           display={"flex"}
           justifyContent={"center"}
-          className={classes.network}
+          className={classes.container}
         >
           <Grid item display={"flex"}>
             <Stack marginTop={"0.5rem"} direction={"column"} spacing={2}>

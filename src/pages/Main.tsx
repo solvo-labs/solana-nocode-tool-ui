@@ -16,9 +16,9 @@ import { getVestingMyOwn } from "../lib/vesting";
 import ActiveVesting from "../components/ActiveVesting";
 import { ChainInfo, MarketInfo, TokenData, ToolTips } from "../utils/types";
 import { Stream } from "@streamflow/stream/dist/solana";
-import RegisterToken from "../components/RegisterToken";
 import { fetchUserTokens } from "../lib";
 import { lastBlock, marketInfo, networkInfo } from "../api/solscan";
+import RegisterToken from "../components/NonRegisteredToken";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -43,7 +43,7 @@ const Main: React.FC = () => {
     Array<TokenData>
   >([]);
   const [stakes, setStakes] = useState<any[]>([]);
-  const [stakeClassInstance, setStakeClassInstance] = useState<StakeClass>();
+  const [, setStakeClassInstance] = useState<StakeClass>();
   const [balance, setBalance] = useState<number>();
   const [vestingList, setVestingList] = useState<[string, Stream][]>([]);
   const [copy, setCopy] = useState<ToolTips>({

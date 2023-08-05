@@ -16,7 +16,7 @@ import { makeStyles } from "@mui/styles";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles((_theme: Theme) => ({
   title: {
     fontSize: "1.25rem !important",
     display: "flex !important",
