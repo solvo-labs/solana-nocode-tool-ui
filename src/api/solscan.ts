@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ChainInfo, MarketInfo } from "../utils/types";
 
-const access_token;
+const access_token = import.meta.env.VITE_API_KEY;
 
 export const networkInfo = async (): Promise<ChainInfo> => {
   const returnValue = await axios.get(
