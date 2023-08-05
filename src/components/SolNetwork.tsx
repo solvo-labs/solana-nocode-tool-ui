@@ -2,12 +2,14 @@ import React from "react";
 import {
   Card,
   CardContent,
+  Divider,
   Grid,
   Stack,
   Theme,
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import { ChainInfo } from "../utils/types";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
@@ -39,7 +41,11 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const SolNetwork = () => {
+type Props = {
+  data: ChainInfo | undefined;
+};
+
+const SolNetwork: React.FC<Props> = ({ data }) => {
   const classes = useStyles();
 
   return (
@@ -48,8 +54,12 @@ const SolNetwork = () => {
         <Grid container className={classes.network}>
           <Grid item>
             <Stack spacing={1} direction={"column"}>
-              <Typography className={classes.title}>Network(Transaction)</Typography>
-              <Typography className={classes.subtitle}>205,086,899,920</Typography>
+              <Typography className={classes.title}>
+                Network(Transaction)
+              </Typography>
+              <Typography className={classes.subtitle}>
+                {data?.transactionCount}
+              </Typography>
             </Stack>
           </Grid>
         </Grid>
@@ -63,14 +73,23 @@ const SolNetwork = () => {
             <Stack marginTop={"1rem"} direction={"row"} spacing={2}>
               <Grid item>
                 <Stack direction={"column"}>
-                  <Typography className={classes.context}>Block Height</Typography>
-                  <Typography className={classes.context}>191,686,120</Typography>
+                  <Typography className={classes.context}>
+                    Block Height
+                  </Typography>
+                  <Typography className={classes.context}>
+                    {data?.blockHeight}
+                  </Typography>
                 </Stack>
               </Grid>
+              <Divider orientation="vertical"></Divider>
               <Grid item>
                 <Stack direction={"column"}>
-                  <Typography className={classes.context}>Slot Height</Typography>
-                  <Typography className={classes.context}>209,220,086</Typography>
+                  <Typography className={classes.context}>
+                    Slot Height
+                  </Typography>
+                  <Typography className={classes.context}>
+                    {data?.absoluteSlot}
+                  </Typography>
                 </Stack>
               </Grid>
             </Stack>

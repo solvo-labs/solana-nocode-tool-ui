@@ -10,11 +10,12 @@ import {
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import { MarketInfo } from "../utils/types";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
   title: {
-    fontSize: "28px !important",
+    fontSize: "1.25rem !important",
     display: "flex !important",
     alignItems: "center !important",
     fontWeight: "bold !important",
@@ -31,10 +32,22 @@ const useStyles = makeStyles((theme: Theme) => ({
     [theme.breakpoints.down("lg")]: {
       fontSize: "1.5rem !important",
     },
-  }
+  },
+  priceChangePositive: {
+    color: "green !important",
+    paddingLeft: "10px",
+  },
+  priceChangeNegative: {
+    color: "red !important",
+    paddingLeft: "10px",
+  },
 }));
 
-const SolPrice = () => {
+type Props = {
+  data: MarketInfo | undefined;
+};
+
+const SolPrice: React.FC<Props> = ({ data }) => {
   const classes = useStyles();
   return (
     <Card className={classes.card}>
@@ -50,26 +63,23 @@ const SolPrice = () => {
               Solana
             </Typography>
             <Grid item paddingTop={"4px"}>
-              <Chip size="small" label="#10" />
+              <Chip size="small" label={"#" + data?.marketCapRank} />
             </Grid>
-            {/* <Grid container>
-              <Stack direction={"column"}>
-                <Grid container direction={"row"}>
-                  <Typography className={classes.title} color="text.secondary">
-                    Solana
-                  </Typography>
-                </Grid>
-              </Stack>
-            </Grid> */}
           </Stack>
           <Grid container paddingLeft={"80px"}>
-            <Typography className={classes.priceText}>$23.00</Typography>
+            <Typography className={classes.priceText}>
+              ${data?.priceUsdt}
+            </Typography>
             <Typography
               variant="button"
               sx={{ color: "green", paddingLeft: "10px" }}
+              className={
+                data?.marketCapRank != undefined && data?.marketCapRank < 0
+                  ? classes.priceChangePositive
+                  : classes.priceChangeNegative
+              }
             >
-              {" "}
-              ^ %0.5{" "}
+              %{data?.priceChange24h.toFixed(2)}
             </Typography>
           </Grid>
         </Grid>
