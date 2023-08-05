@@ -8,6 +8,7 @@ import {
   Box,
   Card,
   CardContent,
+  CircularProgress,
   FormControl,
   Grid,
   IconButton,
@@ -97,12 +98,13 @@ export const TokenDetail = () => {
     hexToolTip: false,
     ownerToolTip: false,
   });
+  const [loading, setLoading] = useState<boolean>(true);
 
   //Transfer
   const [transferData, setTransferData] = useState({
     destinationPubkey: "",
     amount: 0,
-  })
+  });
 
   //Mint&Burn
   const [amountToMB, setAmountToMB] = useState<number>(0);
@@ -123,8 +125,8 @@ export const TokenDetail = () => {
           publicKey,
           new PublicKey(tokenHex)
         );
-        // console.log(data);
         setToken(data[0]);
+        setLoading(false);
       }
     };
     init();
@@ -224,7 +226,7 @@ export const TokenDetail = () => {
             signature,
           });
 
-          setTransferData({destinationPubkey: "", amount: 0})
+          setTransferData({ destinationPubkey: "", amount: 0 });
           toastr.success("Transfer completed successfully.");
         } else {
           const transaction = new Transaction().add(
@@ -283,14 +285,11 @@ export const TokenDetail = () => {
             signers: [],
           }
         );
-
         await connection.confirmTransaction({
           blockhash,
           lastValidBlockHeight,
           signature: burnSignature,
         });
-        
-
         toastr.success("Mint completed Successfully");
       } catch (error) {
         console.log(error);
@@ -332,7 +331,6 @@ export const TokenDetail = () => {
           signature: burnSignature,
         });
 
-
         // setAmountToMB(0);
         // selectedHolder("");
         toastr.success("Burn completed Successfully");
@@ -350,21 +348,46 @@ export const TokenDetail = () => {
       } = await connection.getLatestBlockhashAndContext();
 
       try {
-        const transaction = register(token?.hex,publicKey, {name: registerData.name, symbol: registerData.symbol});
+        const transaction = register(token?.hex, publicKey, {
+          name: registerData.name,
+          symbol: registerData.symbol,
+        });
         const registertransaction = new Transaction();
         registertransaction.add(transaction);
-        const signature = await sendTransaction(registertransaction, connection, { minContextSlot, signers: [] });
-        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        const signature = await sendTransaction(
+          registertransaction,
+          connection,
+          { minContextSlot, signers: [] }
+        );
+        await connection.confirmTransaction({
+          blockhash,
+          lastValidBlockHeight,
+          signature: signature,
+        });
 
-        setRegisterData({name: "", symbol: ""});
+        setRegisterData({ name: "", symbol: "" });
         toastr.success("Token register completed successfully");
       } catch (error) {
         console.log(error);
       }
-
-
     }
   };
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "50vh",
+          minWidth: "50vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -580,7 +603,10 @@ export const TokenDetail = () => {
                         label="Destination Publickey"
                         name="destinationpublickey"
                         onChange={(e: any) =>
-                          setTransferData({...transferData, destinationPubkey: e.target.value})
+                          setTransferData({
+                            ...transferData,
+                            destinationPubkey: e.target.value,
+                          })
                         }
                         placeHolder="Destination Publickey"
                         type="text"
@@ -589,7 +615,12 @@ export const TokenDetail = () => {
                       <CustomInput
                         label="Amount"
                         name="Amount"
-                        onChange={(e: any) => setTransferData({...transferData, amount: e.target.value})}
+                        onChange={(e: any) =>
+                          setTransferData({
+                            ...transferData,
+                            amount: e.target.value,
+                          })
+                        }
                         placeHolder="Amount"
                         type="text"
                         value={transferData.amount}
@@ -703,7 +734,7 @@ export const TokenDetail = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {holders.map((e: any,index:number) => (
+                        {holders.map((e: any, index: number) => (
                           <TableRow key={index}>
                             <TableCell>{e.address.toBase58()}</TableCell>
                             <TableCell align="right">
