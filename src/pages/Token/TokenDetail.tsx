@@ -703,8 +703,8 @@ export const TokenDetail = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {holders.map((e: any) => (
-                          <TableRow>
+                        {holders.map((e: any,index:number) => (
+                          <TableRow key={index}>
                             <TableCell>{e.address.toBase58()}</TableCell>
                             <TableCell align="right">
                               {e.amount / Math.pow(10, e.decimals)}
