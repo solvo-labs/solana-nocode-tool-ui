@@ -27,3 +27,16 @@ export type ToolTips = {
   ownerToolTip?: boolean;
   walletToolTop?: boolean;
 };
+
+export type ChainInfo = {
+  absoluteSlot: number;
+  blockHeight: number;
+  currentEpoch: number;
+  transactionCount: number;
+};
+
+export type MarketInfo = {
+  marketCapRank: number;
+  priceChange24h: number;
+  priceUsdt: number;
+};
