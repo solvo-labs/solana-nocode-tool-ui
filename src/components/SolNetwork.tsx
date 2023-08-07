@@ -2,6 +2,7 @@ import React from "react";
 import {
   Card,
   CardContent,
+  CircularProgress,
   Divider,
   Grid,
   Stack,
@@ -96,6 +97,29 @@ const SolNetwork: React.FC<Props> = ({ data }) => {
           </Grid>
         </Grid>
       </CardContent>
+    </Card>
+  );
+};
+
+export const SolNetworkLoading = () => {
+  return (
+    <Card
+      sx={{
+        borderRadius: "16px !important",
+        height: "200px",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
     </Card>
   );
 };
