@@ -1,0 +1,434 @@
+import React from "react";
+import {
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  MenuItem,
+  Modal,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  Switch,
+  Tab,
+  Theme,
+  Typography,
+} from "@mui/material";
+import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { makeStyles } from "@mui/styles";
+// import { TokenData } from "../utils/types";
+import {
+  Durations,
+  VestParamsData,
+  UnlockSchedule,
+  RecipientFormInput,
+} from "../lib/models/Vesting";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { CustomInput } from "./CustomInput";
+import dayjs from "dayjs";
+import { CustomButton } from "./CustomButton";
+import { RecipientModal } from "../utils/types";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import RecipientComponent from "./RecipientComponent";
+import DeleteIcon from "@mui/icons-material/Delete";
+import toastr from "toastr";
+
+const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    minWidth: "30vw",
+    [theme.breakpoints.down("sm")]: {
+      minWidth: "80vw",
+    },
+  },
+  title: {
+    textAlign: "center",
+  },
+  subTitle: {
+    textAlign: "start",
+  },
+  input: {
+    width: "100%",
+    // maxHeight: "44px !important",
+    [theme.breakpoints.up("sm")]: {
+      // minWidth: "18rem !important",
+    },
+    [theme.breakpoints.down("sm")]: {
+      // minWidth: "12rem !important",
+    },
+  },
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2),
+    position: "relative", // Modal içeriği için göreceli konumlandırma
+  },
+  backButton: {
+    top: theme.spacing(1),
+    left: theme.spacing(1),
+    color: "black",
+    cursor: "pointer",
+  },
+}));
+
+const recipientDefaultState = {
+  name: "",
+  amount: 0,
+  cliffAmount: 0,
+  recipientAddress: "",
+};
+
+type Props = {
+  vestParams: VestParamsData;
+  inputOnChange: (newInputs: VestParamsData) => void;
+  activateCliff: boolean;
+  setActiveCliff: (param: boolean) => void;
+  recipientModal: RecipientModal;
+  setRecipientModal: (recipientModal: RecipientModal) => void;
+  recipient: RecipientFormInput;
+  setRecipient: (recipient: RecipientFormInput) => void;
+  recipients: RecipientFormInput[];
+  setRecipients: (recipients: RecipientFormInput[]) => void;
+};
+
+const VestingForm: React.FC<Props> = ({
+  vestParams,
+  activateCliff,
+  recipientModal,
+  recipients,
+  recipient,
+  setRecipient,
+  setRecipients,
+  inputOnChange,
+  setActiveCliff,
+  setRecipientModal,
+}) => {
+  const classes = useStyles();
+
+  return (
+    <Grid container className={classes.container} direction={"column"}>
+      <Grid item className={classes.title}>
+        <Typography variant="h5">Vesting</Typography>
+        <Divider sx={{ marginTop: "1rem", background: "white" }} />
+      </Grid>
+      <Grid item marginTop={"1.2rem"}>
+        <Stack direction={"column"} width={"100%"} spacing={4}>
+          <FormControl fullWidth>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              {
+                <DateTimePicker
+                  value={vestParams.startDate}
+                  disablePast
+                  label="Start Date"
+                  onChange={(value: dayjs.Dayjs | null) => {
+                    if (value) {
+                      inputOnChange({ ...vestParams, startDate: value });
+                    }
+                  }}
+                />
+              }
+            </LocalizationProvider>
+          </FormControl>
+          <Grid container>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <CustomInput
+                  placeHolder="Duration"
+                  label="Duration"
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={vestParams.period}
+                  onChange={(e: any) => {
+                    inputOnChange({ ...vestParams, period: e.target.value });
+                  }}
+                  disable={false}
+                ></CustomInput>
+              </FormControl>
+            </Grid>
+            <Grid item xs={8}>
+              <FormControl fullWidth>
+                <InputLabel id="selectLabel">Durations</InputLabel>
+                <Select
+                  value={vestParams.selectedDuration.toString()}
+                  label="Durations"
+                  onChange={(e: SelectChangeEvent<string>) => {
+                    inputOnChange({
+                      ...vestParams,
+                      selectedDuration: Number(e.target.value),
+                    });
+                  }}
+                  className={classes.input}
+                  id={"durations"}
+                >
+                  {Object.keys(Durations).map((tk) => {
+                    return (
+                      <MenuItem
+                        key={tk}
+                        value={Durations[tk as keyof DurationsType]}
+                      >
+                        {tk}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+          <FormControl fullWidth>
+            <InputLabel id="selectLabel">Unlock Schedule</InputLabel>
+            <Select
+              value={vestParams.selectedUnlockSchedule.toString()}
+              label="Unlock Schedule"
+              onChange={(e: SelectChangeEvent<string>) => {
+                inputOnChange({
+                  ...vestParams,
+                  selectedUnlockSchedule: Number(e.target.value),
+                });
+              }}
+              className={classes.input}
+              id={"Unlock Schedule"}
+            >
+              {Object.keys(UnlockSchedule).map((tk) => {
+                return (
+                  <MenuItem
+                    key={tk}
+                    value={UnlockSchedule[tk as keyof UnlockScheduleType]}
+                  >
+                    {tk}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
+
+          <FormControlLabel
+            control={<Switch value={true} defaultChecked></Switch>}
+            label="Automatic Withdraw"
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                value={activateCliff}
+                onChange={() => setActiveCliff(!activateCliff)}
+              />
+            }
+            label="Activate Cliff"
+          />
+
+          {activateCliff && (
+            <FormControl fullWidth>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                {
+                  <DateTimePicker
+                    defaultValue={vestParams.cliff}
+                    disablePast
+                    label="Cliff Date"
+                    minDate={vestParams.startDate}
+                    onChange={(value: dayjs.Dayjs | null) => {
+                      if (value) {
+                        inputOnChange({ ...vestParams, cliff: value });
+                      }
+                    }}
+                  />
+                }
+              </LocalizationProvider>
+            </FormControl>
+          )}
+        </Stack>
+      </Grid>
+      <Grid
+        item
+        marginTop={2}
+        display={"flex"}
+        justifyContent={"center"}
+        alignItems={"center"}
+        flexDirection={"column"}
+      >
+        <CustomButton
+          label="Add Recipient"
+          disable={false}
+          onClick={() => setRecipientModal({ ...recipientModal, show: true })}
+        />
+      </Grid>
+      <Grid
+        item
+        marginTop={2}
+        marginBottom={5}
+        display={"flex"}
+        justifyContent={"center"}
+        alignItems={"center"}
+        flexDirection={"column"}
+      >
+        <CustomButton
+          label="Create Vesting Contract"
+          disable={vestParams.period <= 0 || recipients.length <= 0}
+          onClick={() => console.log("aaaa")}
+        />
+      </Grid>
+
+      <Modal
+        className={classes.modal}
+        open={recipientModal.show}
+        onClose={() => {
+          setRecipientModal({ ...recipientModal, show: false });
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            borderRadius: "8px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 800,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 1,
+          }}
+        >
+          <div className={classes.modalContent}>
+            <Typography
+              id="modal-modal-title"
+              variant="h6"
+              component="h2"
+              color={"black"}
+              align="center"
+              marginBottom={"1rem"}
+            >
+              Manage The Recipient's
+            </Typography>
+            <Divider />
+            <TabContext value={recipientModal?.activeTab || "1"}>
+              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                <TabList
+                  onChange={(
+                    _event: React.SyntheticEvent,
+                    newValue: string
+                  ) => {
+                    setRecipientModal({
+                      ...recipientModal,
+                      activeTab: newValue,
+                    });
+                  }}
+                >
+                  <Tab label="Add New Recipient" value="1" />
+                  <Tab label="Recipient List" value="2" />
+                </TabList>
+              </Box>
+              <TabPanel value="1">
+                <RecipientComponent
+                  inputs={recipient}
+                  inputOnChange={(data) => {
+                    setRecipient(data);
+                  }}
+                />
+                <Grid
+                  item
+                  marginTop={2}
+                  display={"flex"}
+                  justifyContent={"center"}
+                  alignItems={"center"}
+                  flexDirection={"column"}
+                >
+                  <CustomButton
+                    label="Save Recipient"
+                    disable={
+                      recipient.amount <= 0 ||
+                      recipient.name === "" ||
+                      recipient.recipientAddress === ""
+                    }
+                    onClick={() => {
+                      const lastRecipients = [...recipients, recipient];
+                      setRecipients(lastRecipients);
+                      setRecipient(recipientDefaultState);
+                      toastr.success("Recipient added succesfully.");
+                    }}
+                  />
+                </Grid>
+              </TabPanel>
+              <TabPanel value="2">
+                {recipients.length > 0 ? (
+                  <List dense sx={{ width: "100%", maxWidth: 800 }}>
+                    {recipients.map((value:any, index:number) => {
+                      const labelId = `checkbox-list-secondary-label-${value}`;
+                      return (
+                        <>
+                          <ListItem
+                            key={index}
+                            secondaryAction={
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                onClick={() => {
+                                  const clonedState = [...recipients];
+                                  clonedState.splice(index, 1);
+
+                                  setRecipients(clonedState);
+                                }}
+                              >
+                                <DeleteIcon />
+                              </Button>
+                            }
+                            disablePadding
+                          >
+                            <ListItemButton>
+                              <ListItemText
+                                style={{ color: "black" }}
+                                id={labelId}
+                                primary={
+                                  "Name : " +
+                                  value.name +
+                                  ", Address : " +
+                                  value.recipientAddress +
+                                  ", Amount : " +
+                                  value.amount +
+                                  (value.cliffAmount > 0
+                                    ? ",Cliff Amount : " + value.cliffAmount
+                                    : "")
+                                }
+                              />
+                            </ListItemButton>
+                          </ListItem>
+                          <Divider
+                            sx={{
+                              marginTop: "0.5rem",
+                              marginBottom: "0.5rem",
+                              background: "black",
+                            }}
+                          />
+                        </>
+                      );
+                    })}
+                  </List>
+                ) : (
+                  <span style={{ color: "black" }}>
+                    There are no recipients
+                  </span>
+                )}
+              </TabPanel>
+            </TabContext>
+          </div>
+        </Box>
+      </Modal>
+    </Grid>
+  );
+};
+
+export default VestingForm;
