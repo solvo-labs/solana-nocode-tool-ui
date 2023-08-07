@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
-import { TokenData } from "../../utils/types";
+import { RecipientModal, TokenData } from "../../utils/types";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {
   Box,
@@ -104,7 +104,7 @@ export const Vesting = () => {
   });
 
   const [activateCliff, setActivateCliff] = useState<boolean>(false);
-  const [recipientModal, setRecipientModal] = useState<{ show: boolean; activeTab?: string }>({ show: false, activeTab: "1" });
+  const [recipientModal, setRecipientModal] = useState<RecipientModal>({ show: false, activeTab: "1" });
   const [recipients, setRecipients] = useState<RecipientFormInput[]>([]);
   const [recipient, setRecipient] = useState<RecipientFormInput>(recipientDefaultState);
   const navigate = useNavigate();
@@ -313,7 +313,7 @@ export const Vesting = () => {
         </Stack>
       </Grid>
       <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-        <CustomButton label="Add Recipient" disable={false} onClick={() => setRecipientModal({ show: true })} />
+        <CustomButton label="Add Recipient" disable={false} onClick={() => setRecipientModal({...recipientModal, show: true})} />
       </Grid>
       <Grid item marginTop={2} marginBottom={5} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
         <CustomButton label="Create Vesting Contract" disable={selectedToken === undefined || vestParams.period <= 0 || recipients.length <= 0} onClick={startVesting} />
@@ -323,7 +323,7 @@ export const Vesting = () => {
         className={classes.modal}
         open={recipientModal.show}
         onClose={() => {
-          setRecipientModal({ show: false });
+          setRecipientModal({...recipientModal, show: false });
         }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
