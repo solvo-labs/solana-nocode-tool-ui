@@ -55,9 +55,14 @@ export const getMetadataPDA = async (mint: PublicKey, connection: Connection) =>
 
     const res = await Metadata.fromAccountAddress(connection, publicKey);
 
-    return { name: res.data.name, symbol: res.data.symbol };
+    return { name: res.data.name, symbol: res.data.symbol, isRegistered: true };
   } catch {
     const mintHex = mint.toBase58();
-    return { name: mintHex.substring(0, 3) + "..." + mintHex.slice(-3), symbol: mintHex.substring(0, 3) };
+    return { name: mintHex.substring(0, 3) + "..." + mintHex.slice(-3), symbol: mintHex.substring(0, 3), isRegistered: false };
   }
 };
+
+export type RegisterToken = {
+  name: string;
+  symbol: string;
+}
