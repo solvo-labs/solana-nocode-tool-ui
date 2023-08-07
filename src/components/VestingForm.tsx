@@ -100,6 +100,7 @@ type Props = {
   setRecipient: (recipient: RecipientFormInput) => void;
   recipients: RecipientFormInput[];
   setRecipients: (recipients: RecipientFormInput[]) => void;
+  startVesting: () => void;
 };
 
 const VestingForm: React.FC<Props> = ({
@@ -108,6 +109,7 @@ const VestingForm: React.FC<Props> = ({
   recipientModal,
   recipients,
   recipient,
+  startVesting,
   setRecipient,
   setRecipients,
   inputOnChange,
@@ -275,7 +277,7 @@ const VestingForm: React.FC<Props> = ({
         <CustomButton
           label="Create Vesting Contract"
           disable={vestParams.period <= 0 || recipients.length <= 0}
-          onClick={() => console.log("aaaa")}
+          onClick={startVesting}
         />
       </Grid>
 
@@ -368,7 +370,7 @@ const VestingForm: React.FC<Props> = ({
                     {recipients.map((value:any, index:number) => {
                       const labelId = `checkbox-list-secondary-label-${value}`;
                       return (
-                        <>
+                        <div key={index}>
                           <ListItem
                             key={index}
                             secondaryAction={
@@ -413,7 +415,7 @@ const VestingForm: React.FC<Props> = ({
                               background: "black",
                             }}
                           />
-                        </>
+                        </div>
                       );
                     })}
                   </List>
