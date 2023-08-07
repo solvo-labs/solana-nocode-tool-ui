@@ -40,3 +40,8 @@ export type MarketInfo = {
   priceChange24h: number;
   priceUsdt: number;
 };
+
+export type RecipientModal = {
+  show: boolean;
+  activeTab: string;
+}
