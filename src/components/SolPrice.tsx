@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Grid,
   Stack,
   Theme,
@@ -85,6 +86,29 @@ const SolPrice: React.FC<Props> = ({ data }) => {
         </Grid>
       </CardContent>
     </Card>
+  );
+};
+
+export const SolPriceLoading = () => {
+  return (
+    <Card
+    sx={{
+      borderRadius: "16px !important",
+      height: "160px",
+    }}
+  >
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <CircularProgress />
+    </div>
+  </Card>
   );
 };
 
