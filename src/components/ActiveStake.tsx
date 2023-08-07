@@ -2,6 +2,7 @@ import React from "react";
 import {
   Card,
   CardContent,
+  CircularProgress,
   Grid,
   IconButton,
   Table,
@@ -104,6 +105,31 @@ const ActiveStake: React.FC<Props> = ({ stakes, navigate }) => {
           </Grid>
         </Grid>
       </CardContent>
+    </Card>
+  );
+};
+
+export const StakesLoading = () => {
+  const classes = useStyles();
+
+  return (
+    <Card
+      sx={{
+        borderRadius: "16px !important",
+        height: "260px",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
     </Card>
   );
 };
