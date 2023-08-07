@@ -5,8 +5,9 @@ export enum APP_NAME {
 export enum PAGES_NAME {
   STAKE = "STAKE",
   RAFFLE = "RAFFLE",
-  VESTING = "VESTING",
+  VESTING = "TOKENOMICS",
   TOKEN = "TOKEN",
+  DYNAMIC_CONTRACT = "Dynamic Contract",
 }
 
 export enum ACCOUNT_STATE {

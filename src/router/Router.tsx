@@ -16,6 +16,7 @@ import { Vesting } from "../pages/Tokenomics/Vesting";
 import { Multisignature } from "../pages/Token/Multisignature";
 import { VestingList } from "../pages/Tokenomics/VestingList";
 import { TokenDetail } from "../pages/Token/TokenDetail";
+import { ContractPage } from "../pages/Contract";
 
 const Router: React.FC = () => {
   return (
@@ -36,6 +37,7 @@ const Router: React.FC = () => {
             <Route path="/raffle" index element={<Raffle />} />
             <Route path="/vesting" index element={<Vesting />} />
             <Route path="/vesting-list" index element={<VestingList />} />
+            <Route path="/contract" index element={<ContractPage />} />
           </Route>
           <Route path="/login" index element={<Login />} />
           <Route path="*" index element={<NotFoundPage />} />
