@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Grid,
   IconButton,
   Stack,
@@ -106,6 +107,29 @@ const Profile: React.FC<Props> = ({ publicKey, balance, walletConnection, open, 
           </Grid>
         </Grid>
       </CardContent>
+    </Card>
+  );
+};
+
+export const ProfileLoading = () => {
+  return (
+    <Card
+      sx={{
+        borderRadius: "16px !important",
+        height: "200px",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
     </Card>
   );
 };
