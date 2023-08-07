@@ -190,10 +190,10 @@ const TopBar: React.FC = () => {
                 }}
               >
                 <MenuItem className={classes.menuItem} onClick={vesting}>
-                  <Typography>Vesting</Typography>
+                  <Typography>Create Tokenomics</Typography>
                 </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={vestinList}>
-                  <Typography>View Vestings</Typography>
+                  <Typography>Manage Tokenomics</Typography>
                 </MenuItem>
               </Menu>
               <Button onClick={() => navigate("/stake")}>
