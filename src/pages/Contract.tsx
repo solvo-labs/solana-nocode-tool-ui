@@ -1,11 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { AnchorProvider, Program, Idl, BN } from "@project-serum/anchor";
 import { useConnection, useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 import { getIdl } from "../lib/contract";
 import toastr from "toastr";
-import { Box, CircularProgress, Divider, FormControl, Grid, Modal, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  FormControl,
+  Grid,
+  Modal,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Theme,
+  Typography,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomInput } from "../components/CustomInput";
 import { CustomButton } from "../components/CustomButton";
@@ -42,7 +58,7 @@ export const ContractPage = () => {
   const [actionModal, setActionModal] = useState<{
     show: boolean;
     readAction?: { address: string; account: string; data?: any };
-    writeAction?: { instruction: IdlInstruction; accountInputs: { index: number; value: string }[]; argInputs: { index: number; value: string }[] };
+    writeAction?: { instruction: IdlInstruction; accountInputs: { index: number; value: string }[]; argInputs: { index: number; value: string }[]; signers?: Keypair[] };
   }>({
     show: false,
   });
@@ -76,8 +92,6 @@ export const ContractPage = () => {
     }
   };
 
-  console.log(SystemProgram.programId.toBase58());
-
   const exec = async () => {
     try {
       if (program) {
@@ -105,26 +119,28 @@ export const ContractPage = () => {
             return acc;
           }, {});
 
-          console.log("here", actionModal.writeAction);
+          if (actionModal.writeAction.argInputs.length > 0) {
+            const args = actionModal.writeAction.argInputs.map((vl: any, index: number) => {
+              const dataType = actionModal.writeAction!.instruction.args[index].type;
 
-          const args = actionModal.writeAction.argInputs.map((vl: any, index: number) => {
-            const dataType = actionModal.writeAction!.instruction.args[index].type;
-            console.log(dataType);
+              if (dataType === "publicKey") {
+                return new PublicKey(vl.value);
+              }
 
-            if (dataType === "publicKey") {
-              return new PublicKey(vl.value);
-            }
+              if (dataType === "u64") {
+                return new BN(vl.value);
+              }
 
-            if (dataType === "u64") {
-              return new BN(vl.value);
-            }
+              return vl.value;
+            });
 
-            return vl.value;
-          });
-
-          currentMethod(...args)
-            .accounts(accountData)
-            .rpc();
+            currentMethod(...args)
+              .accounts(accountData)
+              .signers(actionModal.writeAction.signers || [])
+              .rpc();
+          } else {
+            currentMethod().accounts(accountData).rpc();
+          }
         }
       }
     } catch {
@@ -148,7 +164,6 @@ export const ContractPage = () => {
     );
   }
 
-  console.log(program?.idl);
   return (
     <Grid container className={classes.container} direction={"column"}>
       <h3 style={{ textAlign: "center" }}>Contract Iteration</h3>
@@ -310,7 +325,7 @@ export const ContractPage = () => {
               )}
 
               <Divider sx={{ margin: 1 }} />
-              {actionModal.readAction && actionModal.readAction.data && (
+              {actionModal.readAction && actionModal.readAction.data && actionModal.readAction.data.length > 0 && (
                 <TableContainer>
                   <Table aria-label="simple table">
                     <TableHead>
@@ -364,8 +379,28 @@ export const ContractPage = () => {
 
                           setActionModal(clone);
                         }}
-                        disable={act.isSigner}
                       />
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        size="small"
+                        style={{ marginTop: "0.2rem" }}
+                        onClick={() => {
+                          const clone = { ...actionModal, ...(actionModal.writeAction ? { writeAction: { ...actionModal.writeAction } } : {}) };
+                          const currentData = clone.writeAction?.accountInputs.find((ai) => ai.index === index);
+
+                          if (currentData) {
+                            const keyPair = Keypair.generate();
+                            currentData.value = keyPair.publicKey.toBase58();
+
+                            if (clone.writeAction) clone.writeAction.signers = [...(clone.writeAction.signers || []), keyPair];
+                          }
+
+                          setActionModal(clone);
+                        }}
+                      >
+                        Generate Key
+                      </Button>
                     </div>
                   );
                 })}
@@ -397,7 +432,6 @@ export const ContractPage = () => {
 
                           setActionModal(clone);
                         }}
-                        disable={act.isSigner}
                       />
                     </div>
                   );
