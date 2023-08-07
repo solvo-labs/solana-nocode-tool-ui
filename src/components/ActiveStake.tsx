@@ -110,8 +110,6 @@ const ActiveStake: React.FC<Props> = ({ stakes, navigate }) => {
 };
 
 export const StakesLoading = () => {
-  const classes = useStyles();
-
   return (
     <Card
       sx={{
