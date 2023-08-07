@@ -105,8 +105,6 @@ export const ContractPage = () => {
             data = await currentAccount.fetch(actionModal.readAction.address);
           } else {
             data = await currentAccount.all();
-
-            console.log(data);
           }
 
           setActionModal({ ...actionModal, readAction: { ...actionModal.readAction, data } });
@@ -165,6 +163,8 @@ export const ContractPage = () => {
       </div>
     );
   }
+
+  console.log(program?.idl);
 
   return (
     <Grid container className={classes.container} direction={"column"}>
