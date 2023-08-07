@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchUserTokens } from "../../lib";
 import { RecipientModal, TokenData, ToolTips } from "../../utils/types";
@@ -51,11 +51,16 @@ import { RegisterToken, register } from "../../lib/tokenRegister";
 import VestingForm from "../../components/VestingForm";
 import {
   Durations,
+  Recipient,
   RecipientFormInput,
   UnlockSchedule,
+  VestParams,
   VestParamsData,
 } from "../../lib/models/Vesting";
 import dayjs from "dayjs";
+import { getBN } from "@streamflow/stream";
+import { vestMulti } from "../../lib/vesting";
+import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -113,6 +118,7 @@ export const TokenDetail = () => {
   const tokenHex = params.id;
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+  const wallet = useAnchorWallet();
   const [token, setToken] = useState<TokenData>();
   const [value, setValue] = useState("1");
   const [myAddresses, setMyAddresses] = useState<any[]>([]);
@@ -414,6 +420,50 @@ export const TokenDetail = () => {
       } catch (error) {
         console.log(error);
       }
+    }
+  };
+
+  const startVesting = async () => {
+    if (wallet && token && recipients.length > 0) {
+      const amountPer =
+        (vestParams.period * vestParams.selectedDuration) /
+        vestParams.selectedUnlockSchedule;
+
+      const params: VestParams = {
+        startDate: vestParams.startDate.unix(),
+        cliff: activateCliff ? vestParams.cliff?.unix() : 0,
+        period: (vestParams.period * vestParams.selectedDuration) / amountPer,
+      };
+
+      const recipientList: Recipient[] = recipients.map((data) => {
+        return {
+          recipient: data.recipientAddress, // Recipient address (base58 string for Solana)
+          amount: getBN(data.amount, token.decimal), // Deposited amount of tokens (using smallest denomination).
+          name: data.name, // The stream name or subject.
+          cliffAmount: getBN(data.cliffAmount, token.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(data.amount / amountPer, token.decimal), // Release rate: how many tokens are unlocked per each period.
+        };
+      });
+
+      const data = await vestMulti(
+        wallet as SignerWalletAdapter,
+        token,
+        params,
+        recipientList
+      );
+
+      toastr.success("Contract Deployed Successfully");
+
+      console.log(data);
+
+      data?.txs.forEach((tx) => {
+        window.open(
+          "https://explorer.solana.com/tx/" + tx + "?cluster=devnet",
+          "_blank"
+        );
+      });
+
+      navigate("/vesting-list");
     }
   };
 
@@ -817,6 +867,7 @@ export const TokenDetail = () => {
                 </TabPanel>
                 <TabPanel value="5">
                   <VestingForm
+                    startVesting={startVesting}
                     recipient={recipient}
                     setRecipient={(data) => setRecipient(data)}
                     recipients={recipients}
