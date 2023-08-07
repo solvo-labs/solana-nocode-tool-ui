@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Grid,
   Stack,
   Theme,
@@ -80,6 +81,29 @@ const CurrentBlock: React.FC<Props> = ({ lastBlock }) => {
           </Button>
         </Stack>
       </CardContent>
+    </Card>
+  );
+};
+
+export const CurrentBlockLoading = () => {
+  return (
+    <Card
+      sx={{
+        borderRadius: "16px !important",
+        height: "160px",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
     </Card>
   );
 };
