@@ -15,7 +15,28 @@ export type TokenData = {
   metadata: {
     name: string;
     symbol: string;
+    isRegistered: boolean;
   };
   decimal: number;
   supply: RpcResponseAndContext<TokenAmount>;
+  owner: string;
+};
+
+export type ToolTips = {
+  hexToolTip?: boolean;
+  ownerToolTip?: boolean;
+  walletToolTop?: boolean;
+};
+
+export type ChainInfo = {
+  absoluteSlot: number;
+  blockHeight: number;
+  currentEpoch: number;
+  transactionCount: number;
+};
+
+export type MarketInfo = {
+  marketCapRank: number;
+  priceChange24h: number;
+  priceUsdt: number;
 };

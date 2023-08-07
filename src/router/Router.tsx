@@ -25,7 +25,7 @@ const Router: React.FC = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/" index element={<Main />} />
             <Route path="/token-create" index element={<TokenMint />} />
-            <Route path="/token:id" index element={<TokenDetail />} />
+            <Route path="/token/:id" index element={<TokenDetail />} />
             <Route path="/my-tokens" index element={<MyTokens />} />
             <Route path="/token-transfer" index element={<TokenTransfer />} />
             <Route path="/stake" index element={<Stake />} />

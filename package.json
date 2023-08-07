@@ -29,6 +29,7 @@
     "@solana/wallet-adapter-wallets": "^0.19.19",
     "@solana/web3.js": "^1.78.0",
     "@streamflow/stream": "^4.1.0-beta.10",
+    "axios": "^1.4.0",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.9",
     "moment": "^2.29.4",
