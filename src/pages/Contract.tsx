@@ -105,6 +105,8 @@ export const ContractPage = () => {
             data = await currentAccount.fetch(actionModal.readAction.address);
           } else {
             data = await currentAccount.all();
+
+            console.log(data);
           }
 
           setActionModal({ ...actionModal, readAction: { ...actionModal.readAction, data } });
@@ -166,7 +168,7 @@ export const ContractPage = () => {
 
   return (
     <Grid container className={classes.container} direction={"column"}>
-      <h3 style={{ textAlign: "center" }}>Contract Iteration</h3>
+      <h3 style={{ textAlign: "center" }}>Dynamic Contract</h3>
 
       {program ? (
         <Grid item textAlign={"center"}>
