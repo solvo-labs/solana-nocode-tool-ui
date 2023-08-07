@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchUserTokens } from "../../lib";
-import { TokenData, ToolTips } from "../../utils/types";
+import { RecipientModal, TokenData, ToolTips } from "../../utils/types";
 import {
   Box,
   Card,
@@ -48,20 +48,32 @@ import {
 import toastr from "toastr";
 import RegisterTokenForm from "../../components/RegisterTokenForm";
 import { RegisterToken, register } from "../../lib/tokenRegister";
+import VestingForm from "../../components/VestingForm";
+import {
+  Durations,
+  RecipientFormInput,
+  UnlockSchedule,
+  VestParamsData,
+} from "../../lib/models/Vesting";
+import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
     minWidth: "80vw",
+    maxWidth: "80vw",
     [theme.breakpoints.down("lg")]: {
       minWidth: "90vw",
+      maxWidth: "90vw",
     },
     [theme.breakpoints.down("md")]: {
       maxWidth: "90vw",
+      minWidth: "90vw",
     },
     paddingBottom: "1rem",
   },
   card: {
     minHeight: "240px",
+    borderRadius: "16px !important",
   },
   info: {
     marginTop: "0.25rem",
@@ -78,7 +90,21 @@ const useStyles = makeStyles((theme: Theme) => ({
       fontSize: "0.7rem !important",
     },
   },
+  titleContainer: {
+    marginBottom: "1rem",
+    marginTop: "1rem",
+    [theme.breakpoints.down("md")]: {
+      marginTop: "2rem",
+    },
+  },
 }));
+
+const recipientDefaultState = {
+  name: "",
+  amount: 0,
+  cliffAmount: 0,
+  recipientAddress: "",
+};
 
 export const TokenDetail = () => {
   const classes = useStyles();
@@ -116,6 +142,24 @@ export const TokenDetail = () => {
   const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
+
+  //vest
+  const [vestParams, setVestParams] = useState<VestParamsData>({
+    startDate: dayjs().add(1, "h"),
+    cliff: dayjs().add(3, "day"),
+    period: 1,
+    selectedDuration: Durations.DAY,
+    selectedUnlockSchedule: UnlockSchedule.HOURLY,
+  });
+  const [activateCliff, setActivateCliff] = useState<boolean>(false);
+  const [recipientModal, setRecipientModal] = useState<RecipientModal>({
+    show: false,
+    activeTab: "1",
+  });
+  const [recipients, setRecipients] = useState<RecipientFormInput[]>([]);
+  const [recipient, setRecipient] = useState<RecipientFormInput>(
+    recipientDefaultState
+  );
 
   useEffect(() => {
     const init = async () => {
@@ -391,7 +435,11 @@ export const TokenDetail = () => {
 
   return (
     <Grid container className={classes.container} direction={"column"}>
-      <Grid container marginY={"2rem"} justifyContent={"space-between"}>
+      <Grid
+        container
+        className={classes.titleContainer}
+        justifyContent={"space-between"}
+      >
         <Grid item>
           <Typography variant="h5">Token Detail</Typography>
         </Grid>
@@ -561,7 +609,7 @@ export const TokenDetail = () => {
         xs={12}
         maxWidth={"90vw !important"}
       >
-        <Card>
+        <Card className={classes.card}>
           <CardContent>
             <Box>
               <TabContext value={value}>
@@ -589,6 +637,11 @@ export const TokenDetail = () => {
                         value="4"
                       ></Tab>
                     )}
+                    <Tab
+                      className={classes.tabTitle}
+                      label="Vesting"
+                      value="5"
+                    />
                   </TabList>
                 </Box>
                 <TabPanel value="1">
@@ -710,7 +763,6 @@ export const TokenDetail = () => {
                           disable={false}
                           onClick={burnTransaction}
                         ></CustomButton>
-
                         <CustomButton
                           disable={false}
                           label="Mint Token"
@@ -740,9 +792,6 @@ export const TokenDetail = () => {
                             <TableCell align="right">
                               {e.amount / Math.pow(10, e.decimals)}
                             </TableCell>
-                            {/* <TableCell align="right">{e.metadata.name}</TableCell> */}
-                            {/* <TableCell align="right">{e.metadata.symbol}</TableCell> */}
-                            {/* <TableCell align="right">{e.decimal}</TableCell> */}
                           </TableRow>
                         ))}
                       </TableBody>
@@ -765,6 +814,20 @@ export const TokenDetail = () => {
                       }}
                     ></RegisterTokenForm>
                   </Grid>
+                </TabPanel>
+                <TabPanel value="5">
+                  <VestingForm
+                    recipient={recipient}
+                    setRecipient={(data) => setRecipient(data)}
+                    recipients={recipients}
+                    setRecipients={(data) => setRecipients(data)}
+                    recipientModal={recipientModal}
+                    setRecipientModal={(data) => setRecipientModal(data)}
+                    activateCliff={activateCliff}
+                    setActiveCliff={() => setActivateCliff(!activateCliff)}
+                    inputOnChange={(data) => setVestParams(data)}
+                    vestParams={vestParams}
+                  ></VestingForm>
                 </TabPanel>
               </TabContext>
             </Box>
