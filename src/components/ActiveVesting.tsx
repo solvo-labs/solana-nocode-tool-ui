@@ -2,6 +2,7 @@ import React from "react";
 import {
   Card,
   CardContent,
+  CircularProgress,
   Grid,
   IconButton,
   Table,
@@ -151,6 +152,29 @@ const ActiveVesting: React.FC<Props> = ({ vestings, navigate }) => {
           </Grid>
         </Grid>
       </CardContent>
+    </Card>
+  );
+};
+
+export const VestingLoading = () => {
+  return (
+    <Card
+      sx={{
+        borderRadius: "16px !important",
+        height: "260px",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
     </Card>
   );
 };
