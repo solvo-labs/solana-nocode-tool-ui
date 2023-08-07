@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Grid, Theme } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Profile, { ProfileLoading } from "../components/Profile";
@@ -18,9 +19,7 @@ import { ChainInfo, MarketInfo, TokenData, ToolTips } from "../utils/types";
 import { Stream } from "@streamflow/stream/dist/solana";
 import { fetchUserTokens } from "../lib";
 import { lastBlock, marketInfo, networkInfo } from "../api/solscan";
-import RegisterToken, {
-  RegisterTokenLoading,
-} from "../components/NonRegisteredToken";
+import RegisterToken, { RegisterTokenLoading } from "../components/NonRegisteredToken";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -44,9 +43,7 @@ const Main: React.FC = () => {
   const navigate = useNavigate();
   const { publicKey } = useWallet();
   const { connection } = useConnection();
-  const [nonRegisteredToken, setNonRegisteredToken] = useState<
-    Array<TokenData>
-  >([]);
+  const [nonRegisteredToken, setNonRegisteredToken] = useState<Array<TokenData>>([]);
   const [stakes, setStakes] = useState<any[]>([]);
   const [, setStakeClassInstance] = useState<StakeClass>();
   const [balance, setBalance] = useState<number>();
@@ -66,11 +63,9 @@ const Main: React.FC = () => {
   const [networkLoading, setNetworkLoading] = useState<boolean>(true);
   const [stakesLoading, setStakesLoading] = useState<boolean>(true);
   const [vestingsLoading, setVestingsLoading] = useState<boolean>(true);
-  const [nonRegisteredTokenLoading, setNonRegisteredTokenLoading] =
-    useState<boolean>(true);
+  const [nonRegisteredTokenLoading, setNonRegisteredTokenLoading] = useState<boolean>(true);
 
-  const [walletConnection, setWalletConnection] =
-    useState<string>("not connected");
+  const [walletConnection, setWalletConnection] = useState<string>("not connected");
 
   const handleTooltipOpen = (buttonName: keyof typeof copy, target: any) => {
     setCopy((prevToolTipVisible) => ({
@@ -118,9 +113,7 @@ const Main: React.FC = () => {
     const vestingListFunction = async () => {
       if (publicKey) {
         const data = await getVestingMyOwn(publicKey.toBase58());
-        const sortedData = data?.sort(
-          (a, b) => a[1].createdAt - b[1].createdAt
-        );
+        const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
         setVestingList(sortedData || []);
         setVestingsLoading(false);
       }
@@ -209,39 +202,21 @@ const Main: React.FC = () => {
               <Profile
                 open={copy.walletToolTop}
                 handleTooltipClose={() => handleTooltipClose("walletToolTop")}
-                handleTooltipOpen={() =>
-                  handleTooltipOpen("walletToolTop", publicKey?.toBase58())
-                }
+                handleTooltipOpen={() => handleTooltipOpen("walletToolTop", publicKey?.toBase58())}
                 walletConnection={walletConnection}
                 balance={balance ? balance : 0}
-                publicKey={
-                  publicKey?.toBase58()
-                    ? publicKey.toBase58()
-                    : "Connect wallet"
-                }
+                publicKey={publicKey?.toBase58() ? publicKey.toBase58() : "Connect wallet"}
               ></Profile>
             )}
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            {priceLoading ? (
-              <SolPriceLoading />
-            ) : (
-              <SolPrice data={solInfo ? solInfo : undefined} />
-            )}
+            {priceLoading ? <SolPriceLoading /> : <SolPrice data={solInfo ? solInfo : undefined} />}
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            {currentBlockLoading ? (
-              <CurrentBlockLoading />
-            ) : (
-              <CurrentBlock lastBlock={lastBlockData}></CurrentBlock>
-            )}
+            {currentBlockLoading ? <CurrentBlockLoading /> : <CurrentBlock lastBlock={lastBlockData}></CurrentBlock>}
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            {networkLoading ? (
-              <SolNetworkLoading />
-            ) : (
-              <SolNetwork data={chain}></SolNetwork>
-            )}
+            {networkLoading ? <SolNetworkLoading /> : <SolNetwork data={chain}></SolNetwork>}
           </Grid>
           {/* <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <SolTotalStake/>
@@ -255,31 +230,13 @@ const Main: React.FC = () => {
       <Grid item xl={8} lg={8} md={8} sm={12} xs={12}>
         <Grid container spacing={2}>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            {stakesLoading ? (
-              <StakesLoading />
-            ) : (
-              <ActiveStake
-                navigate={() => navigate("/stake")}
-                stakes={stakes}
-              ></ActiveStake>
-            )}
+            {stakesLoading ? <StakesLoading /> : <ActiveStake navigate={() => navigate("/stake")} stakes={stakes}></ActiveStake>}
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            {vestingsLoading ? (
-              <VestingLoading />
-            ) : (
-              <ActiveVesting
-                navigate={() => navigate("/vesting-list")}
-                vestings={vestingList}
-              ></ActiveVesting>
-            )}
+            {vestingsLoading ? <VestingLoading /> : <ActiveVesting navigate={() => navigate("/vesting-list")} vestings={vestingList}></ActiveVesting>}
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            {nonRegisteredTokenLoading ? (
-              <RegisterTokenLoading />
-            ) : (
-              <RegisterToken tokens={nonRegisteredToken}></RegisterToken>
-            )}
+            {nonRegisteredTokenLoading ? <RegisterTokenLoading /> : <RegisterToken tokens={nonRegisteredToken}></RegisterToken>}
           </Grid>
         </Grid>
       </Grid>

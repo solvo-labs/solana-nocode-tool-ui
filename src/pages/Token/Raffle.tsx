@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeEvent, useEffect, useState } from "react";
 import { getLotteryAddress, getMasterAddress, getProgram, getTicketAddress } from "../../lib/raffles/program";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
