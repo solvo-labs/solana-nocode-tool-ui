@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { LAMPORTS_PER_SOL, PublicKey, Transaction, VoteAccountInfo } from "@solana/web3.js";
@@ -138,9 +139,11 @@ export const Stake = () => {
         setStakeClassInstance(stakeClass);
 
         const validatorsData = await stakeClass.getValidators();
+
         setValidators(validatorsData);
 
         const allStakes = await stakeClass.fetchAllStakes();
+
         setStakes(allStakes);
         setLoading(false);
       }
@@ -452,7 +455,7 @@ export const Stake = () => {
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: 400,
+              width: 800,
               bgcolor: "background.paper",
               border: "2px solid #000",
               boxShadow: 24,
@@ -473,15 +476,15 @@ export const Stake = () => {
                 />
               )}
 
-              <List sx={{ width: "100%", maxWidth: 400, maxHeight: 500, color: "black", margin: 0, padding: 0, cursor: "pointer", overflowY: "auto" }} key={"list"}>
+              <List sx={{ width: "100%", maxWidth: 800, maxHeight: 500, color: "black", margin: 0, padding: 0, cursor: "pointer", overflowY: "auto" }} key={"list"}>
                 {selectedValidator && (
                   <div key={"stakeModal"}>
-                    <span key={"validator"}>Validator : {selectedValidator.votePubkey.slice(0, 16)} </span>
-                    <Divider sx={{ margin: 1 }} key={"divider1"}/>
+                    <span key={"validator"}>Validator : {selectedValidator.votePubkey} </span>
+                    <Divider sx={{ margin: 1 }} key={"divider1"} />
                     <span key={"activeSol"}>Activated SOL : {(selectedValidator.activatedStake / LAMPORTS_PER_SOL).toFixed(2)}SOL </span>
-                    <Divider sx={{ margin: 1 }} key={"divider2"}/>
+                    <Divider sx={{ margin: 1 }} key={"divider2"} />
                     <span key={"commision"}>Commision : {selectedValidator.commission}% </span>
-                    <Divider sx={{ margin: 1 }} key={"divider3"}/>
+                    <Divider sx={{ margin: 1 }} key={"divider3"} />
                     <CustomInput
                       placeHolder="Sol Amount"
                       label="Sol Amount"
@@ -493,7 +496,7 @@ export const Stake = () => {
                       disable={false}
                       key={"stakeAmount"}
                     ></CustomInput>
-                    <Divider sx={{ margin: 1 }} key={"divider4"}/>
+                    <Divider sx={{ margin: 1 }} key={"divider4"} />
                     <div style={{ textAlign: "center" }} key={"buttonDiv"}>
                       <Button disabled={stakeAmount <= 0} variant="contained" color="primary" size="small" onClick={() => startStake()} key={"stakeButton"}>
                         STAKE SOL
@@ -503,20 +506,16 @@ export const Stake = () => {
                 )}
 
                 {selectedValidator === undefined &&
-                  validators.map((vl, index:number) => {
+                  validators.map((vl, index: number) => {
                     return (
                       <div key={index}>
                         <ListItem onClick={() => setSelectedValidator(vl)} key={index}>
-                          <ListItemAvatar key={"listItemAvatar"+index}>
+                          <ListItemAvatar key={"listItemAvatar" + index}>
                             <Avatar key={index}>{vl.votePubkey.slice(0, 2)}</Avatar>
                           </ListItemAvatar>
-                          <ListItemText
-                            key={index}
-                            primary={vl.votePubkey.slice(0, 10) + "..." + vl.votePubkey.slice(-3)}
-                            secondary={(vl.activatedStake / LAMPORTS_PER_SOL).toFixed(2) + " SOL"}
-                          />
+                          <ListItemText key={index} primary={vl.votePubkey} secondary={(vl.activatedStake / LAMPORTS_PER_SOL).toFixed(0) + " SOL"} />
                         </ListItem>
-                        <Divider key={"divider5"}/>
+                        <Divider key={"divider5"} />
                       </div>
                     );
                   })}
