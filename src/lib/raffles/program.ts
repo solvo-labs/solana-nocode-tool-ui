@@ -16,16 +16,16 @@ export const getProgram = (connection: Connection, wallet: Wallet) => {
   return program;
 };
 
-export const getMasterAddress = async () => {
-  return (await PublicKey.findProgramAddress([Buffer.from(MASTER_SEED)], PROGRAM_ID))[0];
+export const getMasterAddress = () => {
+  return PublicKey.findProgramAddressSync([Buffer.from(MASTER_SEED)], PROGRAM_ID)[0];
 };
 
-export const getLotteryAddress = async (id: string | number | Uint8Array | number[] | BN | Buffer) => {
-  return (await PublicKey.findProgramAddress([Buffer.from(LOTTERY_SEED), new BN(id).toArrayLike(Buffer, "le", 4)], PROGRAM_ID))[0];
+export const getLotteryAddress = (id: string | number | Uint8Array | number[] | BN | Buffer) => {
+  return PublicKey.findProgramAddressSync([Buffer.from(LOTTERY_SEED), new BN(id).toArrayLike(Buffer, "le", 4)], PROGRAM_ID)[0];
 };
 
-export const getTicketAddress = async (lotteryPk: { toBuffer: () => Uint8Array | Buffer }, id: string | number | Uint8Array | number[] | BN | Buffer) => {
-  return (await PublicKey.findProgramAddress([Buffer.from(TICKET_SEED), lotteryPk.toBuffer(), new BN(id).toArrayLike(Buffer, "le", 4)], PROGRAM_ID))[0];
+export const getTicketAddress = (lotteryPk: { toBuffer: () => Uint8Array | Buffer }, id: string | number | Uint8Array | number[] | BN | Buffer) => {
+  return PublicKey.findProgramAddressSync([Buffer.from(TICKET_SEED), lotteryPk.toBuffer(), new BN(id).toArrayLike(Buffer, "le", 4)], PROGRAM_ID)[0];
 };
 
 // Return the lastTicket ID and multiply the ticket price and convert LAMPORTS PER SOL and convert it to String
