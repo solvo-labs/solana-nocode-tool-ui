@@ -44,4 +44,9 @@ export type MarketInfo = {
 export type RecipientModal = {
   show: boolean;
   activeTab: string;
-}
+};
+
+export type Section = {
+  name: string;
+  amount: number;
+};
