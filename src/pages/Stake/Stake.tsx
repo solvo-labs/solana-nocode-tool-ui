@@ -9,13 +9,18 @@ import {
   Card,
   CircularProgress,
   Divider,
+  FormControl,
   Grid,
+  InputLabel,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  MenuItem,
   Modal,
   Paper,
+  Select,
+  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
@@ -31,12 +36,13 @@ import { makeStyles } from "@mui/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CustomInput } from "../../components/CustomInput";
 import toastr from "toastr";
+import { Durations, DurationsType } from "../../lib/models/Vesting";
+import { getTimestamp } from "../../lib/utils";
 
 const useStyles = makeStyles((theme: Theme) => ({
   cardContainer: {
     justifyContent: "center",
-    marginTop: "1rem",
-    padding: "1rem !important",
+
     [theme.breakpoints.down("sm")]: {
       padding: "1rem",
     },
@@ -113,6 +119,11 @@ export const Stake = () => {
   const [showStakeModal, setShowStakeModal] = useState<boolean>(false);
   const [selectedValidator, setSelectedValidator] = useState<VoteAccountInfo>();
   const [stakeAmount, setStakeAmount] = useState<number>(0);
+  const [timeParams, setTimeParams] = useState<{ period: number; selectedDuration: number; epoch: 0 }>({
+    period: 0,
+    selectedDuration: Durations.DAY,
+    epoch: 0,
+  });
 
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
@@ -160,7 +171,13 @@ export const Stake = () => {
   const startStake = async () => {
     try {
       if (publicKey && stakeClassInstance && selectedValidator) {
-        const transaction1 = await stakeClassInstance.createStakeAccount(stakeAmount);
+        let currentTime = 0;
+
+        if (timeParams.period > 0) {
+          currentTime = getTimestamp() + timeParams.period * timeParams.selectedDuration;
+        }
+
+        const transaction1 = await stakeClassInstance.createStakeAccount(stakeAmount, currentTime, timeParams.epoch);
         const transaction2 = stakeClassInstance.delegateStake(selectedValidator);
 
         if (transaction2) {
@@ -362,7 +379,7 @@ export const Stake = () => {
                                 stake.state === "inactive" ? withdrawStake(stake.pubkey) : deactivateStake(stake.pubkey);
                               }}
                             >
-                              {stake.state === "inactive" ? "Withdraw" : "Deactivate"}
+                              {stake.state === "inactive" ? "Withdraw" : "UNSTAKE"}
                             </Button>
                           </div>
                         </TableCell>
@@ -476,7 +493,7 @@ export const Stake = () => {
                 />
               )}
 
-              <List sx={{ width: "100%", maxWidth: 800, maxHeight: 500, color: "black", margin: 0, padding: 0, cursor: "pointer", overflowY: "auto" }} key={"list"}>
+              <List sx={{ width: "100%", maxWidth: 800, maxHeight: 600, color: "black", margin: 0, padding: 0, cursor: "pointer", overflowY: "auto" }} key={"list"}>
                 {selectedValidator && (
                   <div key={"stakeModal"}>
                     <span key={"validator"}>Validator : {selectedValidator.votePubkey} </span>
@@ -484,7 +501,62 @@ export const Stake = () => {
                     <span key={"activeSol"}>Activated SOL : {(selectedValidator.activatedStake / LAMPORTS_PER_SOL).toFixed(2)}SOL </span>
                     <Divider sx={{ margin: 1 }} key={"divider2"} />
                     <span key={"commision"}>Commision : {selectedValidator.commission}% </span>
-                    <Divider sx={{ margin: 1 }} key={"divider3"} />
+                    <Divider sx={{ margin: 2 }} key={"divider3"} />
+                    <Grid container gap={1}>
+                      <Grid item xs={4}>
+                        <FormControl fullWidth>
+                          <CustomInput
+                            placeHolder="Time Period"
+                            label="Time Period"
+                            id="period"
+                            name="period"
+                            type="text"
+                            value={timeParams.period}
+                            onChange={(e: any) => {
+                              setTimeParams({ ...timeParams, period: e.target.value });
+                            }}
+                            disable={false}
+                          ></CustomInput>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <FormControl fullWidth>
+                          <InputLabel id="selectLabel">Period</InputLabel>
+                          <Select
+                            value={timeParams.selectedDuration.toString()}
+                            label="Period"
+                            onChange={(e: SelectChangeEvent<string>) => {
+                              setTimeParams({ ...timeParams, selectedDuration: Number(e.target.value) });
+                            }}
+                            id={"durations"}
+                          >
+                            {Object.keys(Durations).map((tk) => {
+                              return (
+                                <MenuItem key={tk} value={Durations[tk as keyof DurationsType]}>
+                                  {tk}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                    <Divider sx={{ margin: 3 }} key={"divider3"} />
+
+                    <CustomInput
+                      placeHolder="Epoch (Optional)"
+                      label="Epoch (Optional)"
+                      id="epoch"
+                      name="epoch"
+                      type="text"
+                      value={timeParams.epoch}
+                      onChange={(e: any) => setTimeParams({ ...timeParams, epoch: e.target.value })}
+                      disable={false}
+                      required={false}
+                      key={"stakeAmount"}
+                    />
+                    <Divider sx={{ margin: 3 }} key={"divider3"} />
+
                     <CustomInput
                       placeHolder="Sol Amount"
                       label="Sol Amount"
@@ -495,7 +567,7 @@ export const Stake = () => {
                       onChange={(e: any) => setStakeAmount(e.target.value)}
                       disable={false}
                       key={"stakeAmount"}
-                    ></CustomInput>
+                    />
                     <Divider sx={{ margin: 1 }} key={"divider4"} />
                     <div style={{ textAlign: "center" }} key={"buttonDiv"}>
                       <Button disabled={stakeAmount <= 0} variant="contained" color="primary" size="small" onClick={() => startStake()} key={"stakeButton"}>
@@ -513,7 +585,7 @@ export const Stake = () => {
                           <ListItemAvatar key={"listItemAvatar" + index}>
                             <Avatar key={index}>{vl.votePubkey.slice(0, 2)}</Avatar>
                           </ListItemAvatar>
-                          <ListItemText key={index} primary={vl.votePubkey} secondary={(vl.activatedStake / LAMPORTS_PER_SOL).toFixed(0) + " SOL"} />
+                          <ListItemText key={index} primary={vl.votePubkey} secondary={"Balance : " + (vl.activatedStake / LAMPORTS_PER_SOL).toFixed(0) + " SOL"} />
                         </ListItem>
                         <Divider key={"divider5"} />
                       </div>
