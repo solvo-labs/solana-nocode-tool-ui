@@ -10,6 +10,7 @@ import TokenSelector from "../../components/TokenSelector";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { CustomInput } from "../../components/CustomInput";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -71,6 +72,8 @@ export const Tokenomics = () => {
       percent: 0,
     },
   ]);
+
+  const navigate = useNavigate();
 
   const addInput = () => {
     setSections([...sections, { name: "", amount: 0, percent: 0 }]);
@@ -224,7 +227,7 @@ export const Tokenomics = () => {
           </CardContent>
           {selectedToken && (
             <Stack direction={"column"} justifyContent={"space-around"} spacing={2}>
-              {sections.map((e: any, index: number) => (
+              {sections.map((section: Section, index: number) => (
                 <Stack direction={"row"} spacing={2} key={index}>
                   <Grid item display={"flex"} alignContent={"center"}>
                     {index > sections.length - 2 ? (
@@ -243,12 +246,12 @@ export const Tokenomics = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "name")}
                     placeHolder="Section Name"
                     type="text"
-                    value={sections[index].name}
+                    value={section.name}
                   ></CustomInput>
                   <TextField
                     label="%"
                     placeholder="percent"
-                    value={sections[index].percent}
+                    value={section.percent}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "percent")}
                     type="text"
                   ></TextField>
@@ -257,10 +260,15 @@ export const Tokenomics = () => {
                     placeholder="Amount"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "amount")}
                     type="text"
-                    value={sections[index].amount}
+                    value={section.amount}
                   ></TextField>
                   <Grid item display={"flex"} alignContent={"center"}>
-                    <Button variant="contained" onClick={() => {}}>
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        navigate("/create-vesting/" + selectedToken.hex + "/" + section.name + "/" + section.amount);
+                      }}
+                    >
                       Vesting
                     </Button>
                   </Grid>
