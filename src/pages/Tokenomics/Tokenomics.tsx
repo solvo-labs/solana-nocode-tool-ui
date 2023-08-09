@@ -12,7 +12,6 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import { CustomInput } from "../../components/CustomInput";
 import { useNavigate } from "react-router-dom";
 import { getVestingMyOwn } from "../../lib/vesting";
-import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -93,8 +92,6 @@ export const Tokenomics = () => {
   const limits = useMemo(() => {
     if (selectedToken) {
       const totalBalance = selectedToken.amount / Math.pow(10, selectedToken.decimal);
-      console.log(sections);
-      console.log("2", selectedToken.supply.value.uiAmount);
 
       let availableBalance = selectedToken.supply.value.uiAmount! - sections.reduce((acc, cur) => acc + cur.amount, 0);
 
@@ -166,9 +163,11 @@ export const Tokenomics = () => {
     const getVestingAboutThisToken = async () => {
       if (publicKey && selectedToken) {
         const allVestings = await getVestingMyOwn(publicKey?.toBase58());
+        const filteredVesting = allVestings?.filter((all) => all[1].mint === selectedToken.hex);
 
-        if (allVestings) {
-          const contracts = allVestings.map((av) => av[1]);
+        if (filteredVesting && filteredVesting.length > 0) {
+          console.log("1");
+          const contracts = filteredVesting.map((av) => av[1]);
 
           const oldVestings = contracts.filter((ct) => ct.mint === selectedToken.hex);
 
@@ -193,7 +192,17 @@ export const Tokenomics = () => {
             };
           });
 
-          setSections(oldSections);
+          setSections([...oldSections, ...sections]);
+        } else {
+          console.log("2");
+          setSections([
+            {
+              name: "",
+              amount: 0,
+              percent: 0,
+              isOldSection: false,
+            },
+          ]);
         }
       }
     };
