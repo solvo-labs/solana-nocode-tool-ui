@@ -11,6 +11,7 @@ export type VestParamsData = {
   startDate: Dayjs;
   period: number;
   cliff?: Dayjs;
+  cliffAmount?: number;
   selectedDuration: number;
   selectedUnlockSchedule: number;
 };
@@ -65,7 +66,5 @@ export const UnlockSchedule: UnlockScheduleType = {
 
 export type RecipientFormInput = {
   amount: number;
-  name: string;
-  cliffAmount: number;
   recipientAddress: string;
 };

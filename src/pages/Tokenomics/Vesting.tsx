@@ -96,6 +96,7 @@ export const Vesting = () => {
   const [vestParams, setVestParams] = useState<VestParamsData>({
     startDate: dayjs().add(1, "h"),
     cliff: dayjs().add(3, "day"),
+    cliffAmount: 0,
     period: 1,
     selectedDuration: Durations.DAY,
     selectedUnlockSchedule: UnlockSchedule.HOURLY,
@@ -113,7 +114,7 @@ export const Vesting = () => {
 
   const classes = useStyles();
 
-  const queryParams = useParams();
+  const queryParams = useParams<{ tokenid: string; name: string; amount: string }>();
 
   useEffect(() => {
     const init = async () => {
@@ -144,12 +145,12 @@ export const Vesting = () => {
         period: (vestParams.period * vestParams.selectedDuration) / amountPer,
       };
 
-      const recipientList: Recipient[] = recipients.map((data) => {
+      const recipientList: Recipient[] = recipients.map((data: RecipientFormInput) => {
         return {
           recipient: data.recipientAddress, // Recipient address (base58 string for Solana)
           amount: getBN(data.amount, decimal), // Deposited amount of tokens (using smallest denomination).
-          name: data.name, // The stream name or subject.
-          cliffAmount: getBN(data.cliffAmount, decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          name: queryParams.name || "", // The stream name or subject.
+          cliffAmount: getBN(vestParams.cliffAmount || 0, decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
           amountPerPeriod: getBN(data.amount / amountPer, decimal), // Release rate: how many tokens are unlocked per each period.
         };
       });
@@ -157,8 +158,6 @@ export const Vesting = () => {
       const data = await vestMulti(wallet as SignerWalletAdapter, queryParams.tokenid || "", params, recipientList);
 
       toastr.success("Contract Deployed Successfully");
-
-      console.log(data);
 
       data?.txs.forEach((tx) => {
         window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
@@ -214,6 +213,7 @@ export const Vesting = () => {
       </Grid>
       <Grid item marginTop={"1.2rem"}>
         <Stack direction={"column"} width={"100%"} spacing={4}>
+          <span>Token Total Balance : {queryParams.amount}</span>
           <FormControl fullWidth>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {
@@ -296,23 +296,38 @@ export const Vesting = () => {
           <FormControlLabel control={<Switch value={activateCliff} onChange={() => setActivateCliff(!activateCliff)} />} label="Activate Cliff" />
 
           {activateCliff && (
-            <FormControl fullWidth>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                {
-                  <DateTimePicker
-                    defaultValue={vestParams.cliff}
-                    disablePast
-                    label="Cliff Date"
-                    minDate={vestParams.startDate}
-                    onChange={(value: dayjs.Dayjs | null) => {
-                      if (value) {
-                        setVestParams({ ...vestParams, cliff: value });
-                      }
-                    }}
-                  />
-                }
-              </LocalizationProvider>
-            </FormControl>
+            <>
+              <FormControl fullWidth>
+                <CustomInput
+                  label="Cliff Amount (Optional)"
+                  name="cliffAmount"
+                  onChange={(e: any) => setVestParams({ ...vestParams, cliffAmount: e.target.value })}
+                  placeHolder={"Cliff Amount"}
+                  type="text"
+                  value={vestParams.cliffAmount || 0}
+                  disable={false}
+                  required={false}
+                  id=""
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  {
+                    <DateTimePicker
+                      defaultValue={vestParams.cliff}
+                      disablePast
+                      label="Cliff Date"
+                      minDate={vestParams.startDate}
+                      onChange={(value: dayjs.Dayjs | null) => {
+                        if (value) {
+                          setVestParams({ ...vestParams, cliff: value });
+                        }
+                      }}
+                    />
+                  }
+                </LocalizationProvider>
+              </FormControl>
+            </>
           )}
         </Stack>
       </Grid>
@@ -372,13 +387,19 @@ export const Vesting = () => {
                 <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
                   <CustomButton
                     label="Save Recipient"
-                    disable={recipient.amount <= 0 || recipient.name === "" || recipient.recipientAddress === ""}
+                    disable={recipient.amount <= 0 || recipient.recipientAddress === ""}
                     onClick={() => {
-                      const lastRecipients = [...recipients, recipient];
+                      const totalShare = recipients.reduce((acc, cur) => acc + Number(cur.amount), 0);
 
-                      setRecipients(lastRecipients);
-                      setRecipient(recipientDefaultState);
-                      toastr.success("Recipient added succesfully.");
+                      if (totalShare + Number(recipient.amount) > Number(queryParams.amount)) {
+                        toastr.error("Please check your input because total balance is exceed");
+                      } else {
+                        const lastRecipients = [...recipients, recipient];
+
+                        setRecipients(lastRecipients);
+                        setRecipient(recipientDefaultState);
+                        toastr.success("Recipient added succesfully.");
+                      }
                     }}
                   />
                 </Grid>
@@ -410,19 +431,7 @@ export const Vesting = () => {
                             disablePadding
                           >
                             <ListItemButton>
-                              <ListItemText
-                                style={{ color: "black" }}
-                                id={labelId}
-                                primary={
-                                  "Name : " +
-                                  value.name +
-                                  ", Address : " +
-                                  value.recipientAddress +
-                                  ", Amount : " +
-                                  value.amount +
-                                  (value.cliffAmount > 0 ? ",Cliff Amount : " + value.cliffAmount : "")
-                                }
-                              />
+                              <ListItemText style={{ color: "black" }} id={labelId} primary={"Address : " + value.recipientAddress + ", Amount : " + value.amount} />
                             </ListItemButton>
                           </ListItem>
                           <Divider sx={{ marginTop: "0.5rem", marginBottom: "0.5rem", background: "black" }} />
