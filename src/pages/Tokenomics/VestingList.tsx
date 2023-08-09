@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useState } from "react";
-import { getVestingMyIncoming } from "../../lib/vesting";
+import { getVestingMyIncoming, unlock, withdraw } from "../../lib/vesting";
 import { Stream } from "@streamflow/stream/dist/solana";
 import {
   CircularProgress,
@@ -27,6 +27,7 @@ import PendingIcon from "@mui/icons-material/Pending";
 import { PublicKey } from "@solana/web3.js";
 import { getMetadataPDA } from "../../lib/tokenRegister";
 import { UnlockSchedule, UnlockScheduleType } from "../../lib/models/Vesting";
+import { CustomButton } from "../../components/CustomButton";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
@@ -97,6 +98,7 @@ export const VestingList = () => {
   const [vestingList, setVestingList] = useState<[string, Stream][]>([]);
   const classes = useStyles();
   const { connection } = useConnection();
+  const wallet = useAnchorWallet();
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -151,7 +153,18 @@ export const VestingList = () => {
     };
   }, [connection, publicKey]);
 
-  console.log(vestingList);
+  const withdrawToken = async (id: string, decimal: number) => {
+    if (wallet) {
+      const unlockedData = await unlock(id, decimal);
+
+      console.log(id);
+
+      console.log(unlockedData);
+
+      withdraw(wallet as any, id, 5, decimal);
+      // unlock("2cf8zjHfUR68qUVPWWWdf3E34udtH9tDpm4L9vf2FJGx");
+    }
+  };
 
   const getStatusIcon = (startDate: number, endDate: number) => {
     const timestamp = getTimestamp();
@@ -204,6 +217,17 @@ export const VestingList = () => {
         <TableCell>{timestampToDate(e[1].cliff)}</TableCell>
         <TableCell align="center">{e[1].cliffAmount.toNumber() / Math.pow(10, e[1].cliffAmount.length)}</TableCell>
         <TableCell align="center">{e[1].automaticWithdrawal ? "YES" : "NO"}</TableCell>
+        <TableCell align="center">
+          {!e[1].automaticWithdrawal && e[1].withdrawnAmount.toNumber() !== e[1].depositedAmount.toNumber() && getTimestamp() >= e[1].start && getTimestamp() <= e[1].end && (
+            <CustomButton
+              onClick={() => {
+                withdrawToken(e[0], e.decimal);
+              }}
+              label={"Claim"}
+              disable={false}
+            />
+          )}
+        </TableCell>
       </TableRow>
     ));
   };
@@ -271,6 +295,9 @@ export const VestingList = () => {
                   </TableCell>
                   <TableCell align="center" className={classes.tableTitle}>
                     Automatic Withdrawal
+                  </TableCell>
+                  <TableCell align="center" className={classes.tableTitle}>
+                    Claim
                   </TableCell>
                 </TableRow>
               </TableHead>

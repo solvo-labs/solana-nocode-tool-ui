@@ -159,8 +159,6 @@ export const Vesting = () => {
           };
         });
 
-        console.log(params);
-
         const data = await vestMulti(wallet as SignerWalletAdapter, queryParams.tokenid || "", params, recipientList);
 
         toastr.success("Contract Deployed Successfully");
@@ -177,28 +175,6 @@ export const Vesting = () => {
       setLoading(false);
     }
   };
-
-  // const withdrawToken = async () => {
-  //   if (wallet) {
-  //     const data = await getStreamById("4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB");
-
-  //     console.log(data);
-
-  //     withdraw(wallet as any, "4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB", 100, 9);
-  //     // unlock("2cf8zjHfUR68qUVPWWWdf3E34udtH9tDpm4L9vf2FJGx");
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const init = async () => {
-  //     if (publicKey) {
-  //       const data = await getVestingMyOwn(publicKey.toBase58());
-  //       console.log(data);
-  //     }
-  //   };
-
-  //   init();
-  // }, [publicKey]);
 
   if (loading) {
     return (

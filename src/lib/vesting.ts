@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { StreamflowSolana, Types, getBN } from "@streamflow/stream";
+import { StreamflowSolana, Types, getBN, getNumberFromBN } from "@streamflow/stream";
 import { getTimestamp } from "./utils";
 import { TokenData } from "../utils/types";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
@@ -129,13 +129,12 @@ export const getStreamById = async (id: string) => {
   }
 };
 
-// export const unlock = async (id: string) => {
-//   const stream = await client.getOne(id);
+export const unlock = async (id: string, decimal: number) => {
+  const stream = await client.getOne({ id });
 
-//   const unlocked = stream.unlocked(getTimestamp(), 9); // bn amount unlocked at the tsInSeconds
+  const unlocked = stream.unlocked(Date.now()); // bn amount unlocked at the tsInSeconds
 
-//   const withdrawn = stream.withdrawnAmount; // bn amount withdrawn already
-//   console.log("wih", withdrawn.toNumber());
-//   const remaining = stream.withdrawnAmount; // bn amount of remaining funds
-//   console.log("remaining", remaining.toNumber() / Math.pow(10, 9));
-// };
+  const withdrawn = stream.withdrawnAmount; // bn amount withdrawn already
+
+  return { unlocked: getNumberFromBN(unlocked, decimal), withdrawn };
+};
