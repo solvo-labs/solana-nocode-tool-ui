@@ -100,7 +100,7 @@ const TopBar: React.FC = () => {
     setAnchorElToken(null);
   };
   const vesting = () => {
-    navigate("/vesting");
+    navigate("/tokenomics");
     setAnchorElVesting(null);
   };
   const vestinList = () => {

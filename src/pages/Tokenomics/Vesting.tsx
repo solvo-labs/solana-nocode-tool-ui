@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from "react";
-import { fetchUserTokens } from "../../lib";
-import { TokenData } from "../../utils/types";
-import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useState, useEffect } from "react";
+
+import { RecipientModal } from "../../utils/types";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import {
   Box,
   Button,
+  CircularProgress,
   Divider,
   FormControl,
   FormControlLabel,
@@ -43,7 +44,8 @@ import TabPanel from "@mui/lab/TabPanel";
 import RecipientComponent from "../../components/RecipientComponent";
 import toastr from "toastr";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { PublicKey } from "@solana/web3.js";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -90,93 +92,105 @@ const useStyles = makeStyles((theme: Theme) => ({
 const recipientDefaultState = { name: "", amount: 0, cliffAmount: 0, recipientAddress: "" };
 
 export const Vesting = () => {
-  const [tokens, setTokens] = useState<TokenData[]>([]);
-  const { publicKey } = useWallet();
   const wallet = useAnchorWallet();
-  const { connection } = useConnection();
-  const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [vestParams, setVestParams] = useState<VestParamsData>({
     startDate: dayjs().add(1, "h"),
     cliff: dayjs().add(3, "day"),
+    cliffAmount: 0,
     period: 1,
     selectedDuration: Durations.DAY,
     selectedUnlockSchedule: UnlockSchedule.HOURLY,
+    automaticWithdraw: true,
   });
 
   const [activateCliff, setActivateCliff] = useState<boolean>(false);
-  const [recipientModal, setRecipientModal] = useState<{ show: boolean; activeTab?: string }>({ show: false, activeTab: "1" });
+  const [recipientModal, setRecipientModal] = useState<RecipientModal>({ show: false, activeTab: "1" });
   const [recipients, setRecipients] = useState<RecipientFormInput[]>([]);
   const [recipient, setRecipient] = useState<RecipientFormInput>(recipientDefaultState);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { connection } = useConnection();
+  const [decimal, setDecimal] = useState<number>(0);
+
   const navigate = useNavigate();
 
   const classes = useStyles();
 
+  const queryParams = useParams<{ tokenid: string; name: string; amount: string }>();
+
   useEffect(() => {
     const init = async () => {
-      if (publicKey) {
-        const data = await fetchUserTokens(connection, publicKey);
+      if (queryParams.tokenid) {
+        const data = await connection.getTokenSupply(new PublicKey(queryParams.tokenid));
+        setDecimal(data.value.decimals);
 
-        setTokens(data);
+        setLoading(false);
       }
     };
     init();
-  }, [connection, publicKey]);
+    const interval = setInterval(() => {
+      init();
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [connection, queryParams.tokenid]);
 
   const startVesting = async () => {
-    if (wallet && selectedToken && recipients.length > 0) {
-      const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
+    setLoading(true);
+    try {
+      if (wallet && recipients.length > 0 && queryParams) {
+        const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
 
-      const params: VestParams = {
-        startDate: vestParams.startDate.unix(),
-        cliff: activateCliff ? vestParams.cliff?.unix() : 0,
-        period: (vestParams.period * vestParams.selectedDuration) / amountPer,
-      };
-
-      const recipientList: Recipient[] = recipients.map((data) => {
-        return {
-          recipient: data.recipientAddress, // Recipient address (base58 string for Solana)
-          amount: getBN(data.amount, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
-          name: data.name, // The stream name or subject.
-          cliffAmount: getBN(data.cliffAmount, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(data.amount / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+        const params: VestParams = {
+          startDate: vestParams.startDate.unix(),
+          cliff: activateCliff ? vestParams.cliff?.unix() : 0,
+          period: (vestParams.period * vestParams.selectedDuration) / amountPer,
+          automaticWithdrawal: vestParams.automaticWithdraw,
         };
-      });
 
-      const data = await vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipientList);
+        const recipientList: Recipient[] = recipients.map((data: RecipientFormInput) => {
+          return {
+            recipient: data.recipientAddress, // Recipient address (base58 string for Solana)
+            amount: getBN(data.amount, decimal), // Deposited amount of tokens (using smallest denomination).
+            name: queryParams.name || "", // The stream name or subject.
+            cliffAmount: getBN(vestParams.cliffAmount || 0, decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+            amountPerPeriod: getBN(data.amount / amountPer, decimal), // Release rate: how many tokens are unlocked per each period.
+          };
+        });
 
-      toastr.success("Contract Deployed Successfully");
+        const data = await vestMulti(wallet as SignerWalletAdapter, queryParams.tokenid || "", params, recipientList);
 
-      console.log(data);
+        toastr.success("Contract Deployed Successfully");
 
-      data?.txs.forEach((tx) => {
-        window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
-      });
+        data?.txs.forEach((tx) => {
+          window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
+        });
 
-      navigate("/vesting-list");
+        navigate("/tokenomics");
+        setLoading(false);
+      }
+    } catch {
+      toastr.error("Something went wrong");
+      setLoading(false);
     }
   };
 
-  // const withdrawToken = async () => {
-  //   if (wallet) {
-  //     const data = await getStreamById("4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB");
-
-  //     console.log(data);
-
-  //     withdraw(wallet as any, "4pGNY8WcgcrsCwniFe1bbnFwhRKKj1ECaY4fSrJf84zB", 100, 9);
-  //     // unlock("2cf8zjHfUR68qUVPWWWdf3E34udtH9tDpm4L9vf2FJGx");
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const init = async () => {
-  //     if (publicKey) {
-  //       const data = await getVestingMyOwn(publicKey.toBase58());
-  //       console.log(data);
-  //     }
-  //   };
-
-  //   init();
-  // }, [publicKey]);
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "50vh",
+          width: "50vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -186,30 +200,7 @@ export const Vesting = () => {
       </Grid>
       <Grid item marginTop={"1.2rem"}>
         <Stack direction={"column"} width={"100%"} spacing={4}>
-          <FormControl fullWidth>
-            <InputLabel id="selectLabel">Select a Token</InputLabel>
-            <Select
-              value={selectedToken?.hex || ""}
-              label=" Token"
-              onChange={(e: SelectChangeEvent<string>) => {
-                const token = tokens.find((tkn: TokenData) => tkn.hex === e.target.value);
-                if (token != undefined) {
-                  setSelectedToken(token);
-                }
-              }}
-              className={classes.input}
-              id={"custom-select"}
-            >
-              {tokens.map((tk: TokenData) => {
-                return (
-                  <MenuItem key={tk.hex} value={tk.hex}>
-                    {tk.metadata.name + "(" + tk.metadata.symbol + ")"}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-
+          <span>Token Total Balance : {queryParams.amount}</span>
           <FormControl fullWidth>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {
@@ -287,43 +278,70 @@ export const Vesting = () => {
             </Select>
           </FormControl>
 
-          <FormControlLabel control={<Switch value={true} defaultChecked></Switch>} label="Automatic Withdraw" />
+          <FormControlLabel
+            control={
+              <Switch
+                value={vestParams.automaticWithdraw}
+                checked={vestParams.automaticWithdraw}
+                onChange={() => {
+                  console.log("here");
+                  setVestParams({ ...vestParams, automaticWithdraw: !vestParams.automaticWithdraw });
+                }}
+              ></Switch>
+            }
+            label="Automatic Withdraw"
+          />
 
           <FormControlLabel control={<Switch value={activateCliff} onChange={() => setActivateCliff(!activateCliff)} />} label="Activate Cliff" />
 
           {activateCliff && (
-            <FormControl fullWidth>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                {
-                  <DateTimePicker
-                    defaultValue={vestParams.cliff}
-                    disablePast
-                    label="Cliff Date"
-                    minDate={vestParams.startDate}
-                    onChange={(value: dayjs.Dayjs | null) => {
-                      if (value) {
-                        setVestParams({ ...vestParams, cliff: value });
-                      }
-                    }}
-                  />
-                }
-              </LocalizationProvider>
-            </FormControl>
+            <>
+              <FormControl fullWidth>
+                <CustomInput
+                  label="Cliff Amount (Optional)"
+                  name="cliffAmount"
+                  onChange={(e: any) => setVestParams({ ...vestParams, cliffAmount: e.target.value })}
+                  placeHolder={"Cliff Amount"}
+                  type="text"
+                  value={vestParams.cliffAmount || 0}
+                  disable={false}
+                  required={false}
+                  id=""
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  {
+                    <DateTimePicker
+                      defaultValue={vestParams.cliff}
+                      disablePast
+                      label="Cliff Date"
+                      minDate={vestParams.startDate}
+                      onChange={(value: dayjs.Dayjs | null) => {
+                        if (value) {
+                          setVestParams({ ...vestParams, cliff: value });
+                        }
+                      }}
+                    />
+                  }
+                </LocalizationProvider>
+              </FormControl>
+            </>
           )}
         </Stack>
       </Grid>
       <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-        <CustomButton label="Add Recipient" disable={false} onClick={() => setRecipientModal({ show: true })} />
+        <CustomButton label="Add Recipient" disable={false} onClick={() => setRecipientModal({ ...recipientModal, show: true })} />
       </Grid>
       <Grid item marginTop={2} marginBottom={5} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-        <CustomButton label="Create Vesting Contract" disable={selectedToken === undefined || vestParams.period <= 0 || recipients.length <= 0} onClick={startVesting} />
+        <CustomButton label="Create Vesting Contract" disable={vestParams.period <= 0 || recipients.length <= 0} onClick={startVesting} />
       </Grid>
 
       <Modal
         className={classes.modal}
         open={recipientModal.show}
         onClose={() => {
-          setRecipientModal({ show: false });
+          setRecipientModal({ ...recipientModal, show: false });
         }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
@@ -368,13 +386,19 @@ export const Vesting = () => {
                 <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
                   <CustomButton
                     label="Save Recipient"
-                    disable={recipient.amount <= 0 || recipient.name === "" || recipient.recipientAddress === ""}
+                    disable={recipient.amount <= 0 || recipient.recipientAddress === ""}
                     onClick={() => {
-                      const lastRecipients = [...recipients, recipient];
+                      const totalShare = recipients.reduce((acc, cur) => acc + Number(cur.amount), 0);
 
-                      setRecipients(lastRecipients);
-                      setRecipient(recipientDefaultState);
-                      toastr.success("Recipient added succesfully.");
+                      if (totalShare + Number(recipient.amount) > Number(queryParams.amount)) {
+                        toastr.error("Please check your input because total balance is exceed");
+                      } else {
+                        const lastRecipients = [...recipients, recipient];
+
+                        setRecipients(lastRecipients);
+                        setRecipient(recipientDefaultState);
+                        toastr.success("Recipient added succesfully.");
+                      }
                     }}
                   />
                 </Grid>
@@ -406,19 +430,7 @@ export const Vesting = () => {
                             disablePadding
                           >
                             <ListItemButton>
-                              <ListItemText
-                                style={{ color: "black" }}
-                                id={labelId}
-                                primary={
-                                  "Name : " +
-                                  value.name +
-                                  ", Address : " +
-                                  value.recipientAddress +
-                                  ", Amount : " +
-                                  value.amount +
-                                  (value.cliffAmount > 0 ? ",Cliff Amount : " + value.cliffAmount : "")
-                                }
-                              />
+                              <ListItemText style={{ color: "black" }} id={labelId} primary={"Address : " + value.recipientAddress + ", Amount : " + value.amount} />
                             </ListItemButton>
                           </ListItem>
                           <Divider sx={{ marginTop: "0.5rem", marginBottom: "0.5rem", background: "black" }} />

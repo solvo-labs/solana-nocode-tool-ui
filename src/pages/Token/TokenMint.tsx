@@ -8,7 +8,7 @@ import { register } from "../../lib/tokenRegister";
 import { Token } from "../../utils/types";
 import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
-import { Divider, Grid, Stack, Theme, Typography } from "@mui/material";
+import { CircularProgress, Divider, Grid, Stack, Theme, Typography } from "@mui/material";
 import { CustomButton } from "../../components/CustomButton";
 import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
@@ -32,6 +32,7 @@ const TokenMint: React.FC = () => {
   const classes = useStyles();
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const [tokenData, setTokenData] = useState<Token>({
@@ -45,7 +46,7 @@ const TokenMint: React.FC = () => {
 
   const createTransaction = async () => {
     if (publicKey) {
-      // @To-do set freeze authority with input
+      setLoading(true);
       const { transaction, toAccount } = await createMint(
         connection,
         publicKey,
@@ -86,13 +87,33 @@ const TokenMint: React.FC = () => {
 
         toastr.success("Token Mint completed successfully");
         navigate("/my-tokens");
+        setLoading(false);
       } catch (error: any) {
         toastr.error(error);
+        setLoading(false);
       }
     }
   };
 
   const disable = !(tokenData.name && tokenData.symbol && tokenData.amount && tokenData.decimal);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "50vh",
+          width: "50vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+        }}
+      >
+        <span style={{ position: "absolute" }}>Token is minting...</span>
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div>

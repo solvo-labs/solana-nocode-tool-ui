@@ -266,10 +266,10 @@ export const Stake = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        marginTop: "6rem",
       }}
     >
       <Grid container className={classes.tableContainer}>
+        <h2 style={{ margin: 0 }}>Active Stake's</h2>
         <Grid item className={classes.buttonItem}>
           <Button variant="contained" color="primary" size="small" onClick={() => setShowStakeModal(true)}>
             STAKE SOL

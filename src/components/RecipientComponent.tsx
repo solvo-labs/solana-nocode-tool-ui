@@ -13,7 +13,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
   return (
     <Grid container marginY={"2rem"}>
       <Stack width={"100%"} spacing={4}>
-        <CustomInput
+        {/* <CustomInput
           label="Name"
           name="name"
           onChange={(e: any) => inputOnChange({ ...inputs, name: e.target.value })}
@@ -22,7 +22,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
           value={inputs.name}
           disable={false}
           id=""
-        ></CustomInput>
+        ></CustomInput> */}
         <CustomInput
           label="Recipient Address"
           name="recipientAddress"
@@ -32,7 +32,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
           value={inputs.recipientAddress}
           disable={false}
           id=""
-        ></CustomInput>
+        />
         <CustomInput
           label="Amount"
           name="amount"
@@ -42,8 +42,8 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
           value={inputs.amount}
           disable={false}
           id=""
-        ></CustomInput>
-        <CustomInput
+        />
+        {/* <CustomInput
           label="Cliff Amount (Optional)"
           name="cliffAmount"
           onChange={(e: any) => inputOnChange({ ...inputs, cliffAmount: e.target.value })}
@@ -53,7 +53,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
           disable={false}
           required={false}
           id=""
-        ></CustomInput>
+        /> */}
       </Stack>
     </Grid>
   );
