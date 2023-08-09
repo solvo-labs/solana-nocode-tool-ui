@@ -50,4 +50,5 @@ export type Section = {
   name: string;
   amount: number;
   percent: number;
+  isOldSection: boolean;
 };

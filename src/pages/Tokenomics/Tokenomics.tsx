@@ -72,15 +72,16 @@ export const Tokenomics = () => {
       name: "",
       amount: 0,
       percent: 0,
+      isOldSection: false,
     },
   ]);
 
-  const [oldVestingList, setOldVestingList] = useState<{ date: number; value: number }[]>([]);
+  // const [oldVestingList, setOldVestingList] = useState<{ date: number; value: number; name: string }[]>([]);
 
   const navigate = useNavigate();
 
   const addInput = () => {
-    setSections([...sections, { name: "", amount: 0, percent: 0 }]);
+    setSections([...sections, { name: "", amount: 0, percent: 0, isOldSection: false }]);
   };
 
   const removeInput = (index: number) => {
@@ -92,8 +93,10 @@ export const Tokenomics = () => {
   const limits = useMemo(() => {
     if (selectedToken) {
       const totalBalance = selectedToken.amount / Math.pow(10, selectedToken.decimal);
+      console.log(sections);
+      console.log("2", selectedToken.supply.value.uiAmount);
 
-      let availableBalance = totalBalance - sections.reduce((acc, cur) => acc + cur.amount, 0);
+      let availableBalance = selectedToken.supply.value.uiAmount! - sections.reduce((acc, cur) => acc + cur.amount, 0);
 
       const availablePercent = (availableBalance / Number(selectedToken.supply.value.uiAmount)) * 100;
 
@@ -169,19 +172,28 @@ export const Tokenomics = () => {
 
           const oldVestings = contracts.filter((ct) => ct.mint === selectedToken.hex);
 
-          const total: { date: number; value: number }[] = [];
+          const total: { date: number; value: number; name: string }[] = [];
 
           oldVestings.forEach((ov) => {
             const currentIndex = total.findIndex((tl) => tl.date === ov.createdAt);
 
             if (currentIndex < 0) {
-              total.push({ date: ov.createdAt, value: ov.depositedAmount.toNumber() });
+              total.push({ date: ov.createdAt, value: ov.depositedAmount.toNumber(), name: ov.name });
             } else {
-              total[currentIndex] = { date: ov.createdAt, value: total[currentIndex].value + ov.depositedAmount.toNumber() };
+              total[currentIndex] = { date: ov.createdAt, name: ov.name, value: total[currentIndex].value + ov.depositedAmount.toNumber() };
             }
           });
 
-          setOldVestingList(total);
+          const oldSections: Section[] = total.map((ol) => {
+            return {
+              name: ol.name,
+              amount: ol.value / Math.pow(10, selectedToken.decimal),
+              percent: (ol.value / Number(selectedToken.supply.value.amount) || 1) * 100,
+              isOldSection: true,
+            };
+          });
+
+          setSections(oldSections);
         }
       }
     };
@@ -257,7 +269,7 @@ export const Tokenomics = () => {
               )}
             </Stack>
           </CardContent>
-          {oldVestingList && oldVestingList.length > 0 && (
+          {/* {oldVestingList && oldVestingList.length > 0 && (
             <>
               <h2 style={{ marginBottom: "0" }}>Vesting History</h2>
               <List dense sx={{ width: "100%" }}>
@@ -270,13 +282,13 @@ export const Tokenomics = () => {
                           style={{ color: "black", fontSize: "1rem" }}
                           id={labelId}
                           primary={
-                            "Date : " +
+                            "Date :  " +
                             dayjs.unix(value.date).format("YYYY-MM-DD HH:mm") +
-                            ", Amount : " +
+                            ", Amount :  " +
                             value.value / Math.pow(10, selectedToken?.decimal || 1) +
                             " " +
                             selectedToken?.metadata.symbol +
-                            ", Percent : " +
+                            ", Percent :  " +
                             (value.value / Number(selectedToken?.supply.value.amount) || 1) * 100 +
                             "%"
                           }
@@ -288,7 +300,7 @@ export const Tokenomics = () => {
                 })}
               </List>
             </>
-          )}
+          )} */}
           {selectedToken && (
             <Stack direction={"column"} justifyContent={"space-around"} spacing={2}>
               {sections.map((section: Section, index: number) => (
@@ -299,7 +311,7 @@ export const Tokenomics = () => {
                         <AddIcon></AddIcon>
                       </IconButton>
                     ) : (
-                      <IconButton onClick={() => removeInput(index)}>
+                      <IconButton onClick={() => removeInput(index)} disabled={section.isOldSection}>
                         <RemoveIcon />
                       </IconButton>
                     )}
@@ -310,25 +322,32 @@ export const Tokenomics = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "name")}
                     placeHolder="Section Name"
                     type="text"
+                    disable={section.isOldSection}
                     value={section.name}
                   ></CustomInput>
-                  <TextField
+                  <CustomInput
                     label="%"
-                    placeholder="percent"
+                    name="percent"
                     value={section.percent}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "percent")}
+                    disable={section.isOldSection}
                     type="text"
-                  ></TextField>
-                  <TextField
+                    placeHolder={"percent"}
+                  ></CustomInput>
+                  <CustomInput
                     label="Amount"
-                    placeholder="Amount"
+                    placeHolder="Amount"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "amount")}
+                    disable={section.isOldSection}
                     type="text"
                     value={section.amount}
-                  ></TextField>
+                    name={"amount"}
+                  />
+
                   <Grid item display={"flex"} alignContent={"center"}>
                     <Button
                       variant="contained"
+                      disabled={section.isOldSection}
                       onClick={() => {
                         navigate("/create-vesting/" + selectedToken.hex + "/" + section.name + "/" + section.amount);
                       }}
