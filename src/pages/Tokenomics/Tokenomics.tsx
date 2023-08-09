@@ -91,7 +91,7 @@ export const Tokenomics = () => {
 
   const limits = useMemo(() => {
     if (selectedToken) {
-      const totalBalance = selectedToken.amount / Math.pow(10, selectedToken.decimal);
+      // const totalBalance = selectedToken.amount / Math.pow(10, selectedToken.decimal);
 
       let availableBalance = selectedToken.supply.value.uiAmount! - sections.reduce((acc, cur) => acc + cur.amount, 0);
 
@@ -112,13 +112,14 @@ export const Tokenomics = () => {
 
     if (selectedToken) {
       let targetValue: any;
+      const supply = selectedToken.supply.value.uiAmount || 0;
 
       switch (key) {
         case "amount":
           targetValue = +e.target.value;
 
           // eslint-disable-next-line no-case-declarations
-          const newPercent: number = +((targetValue / (selectedToken?.amount / Math.pow(10, selectedToken?.decimal))) * 100).toFixed(2);
+          const newPercent: number = +((targetValue / supply) * 100).toFixed(2);
           newSection[index] = {
             ...newSection[index],
             [key]: targetValue,
@@ -129,7 +130,7 @@ export const Tokenomics = () => {
           targetValue = +e.target.value;
 
           // eslint-disable-next-line no-case-declarations
-          const newAmount: number = (selectedToken?.amount / Math.pow(10, selectedToken?.decimal) / 100) * targetValue;
+          const newAmount: number = (supply / 100) * targetValue;
           newSection[index] = {
             ...newSection[index],
             amount: newAmount,
