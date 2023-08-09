@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from "react";
-import { fetchUserTokens } from "../../lib";
+import { useState, useEffect } from "react";
+
 import { RecipientModal, TokenData } from "../../utils/types";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {
   Box,
   Button,
+  CircularProgress,
   Divider,
   FormControl,
   FormControlLabel,
@@ -43,7 +44,8 @@ import TabPanel from "@mui/lab/TabPanel";
 import RecipientComponent from "../../components/RecipientComponent";
 import toastr from "toastr";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { PublicKey } from "@solana/web3.js";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -90,11 +92,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const recipientDefaultState = { name: "", amount: 0, cliffAmount: 0, recipientAddress: "" };
 
 export const Vesting = () => {
-  const [tokens, setTokens] = useState<TokenData[]>([]);
-  const { publicKey } = useWallet();
   const wallet = useAnchorWallet();
-  const { connection } = useConnection();
-  const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [vestParams, setVestParams] = useState<VestParamsData>({
     startDate: dayjs().add(1, "h"),
     cliff: dayjs().add(3, "day"),
@@ -107,23 +105,37 @@ export const Vesting = () => {
   const [recipientModal, setRecipientModal] = useState<RecipientModal>({ show: false, activeTab: "1" });
   const [recipients, setRecipients] = useState<RecipientFormInput[]>([]);
   const [recipient, setRecipient] = useState<RecipientFormInput>(recipientDefaultState);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { connection } = useConnection();
+  const [decimal, setDecimal] = useState<number>(0);
+
   const navigate = useNavigate();
 
   const classes = useStyles();
 
+  const queryParams = useParams();
+
   useEffect(() => {
     const init = async () => {
-      if (publicKey) {
-        const data = await fetchUserTokens(connection, publicKey);
+      if (queryParams.tokenid) {
+        const data = await connection.getTokenSupply(new PublicKey(queryParams.tokenid));
+        setDecimal(data.value.decimals);
 
-        setTokens(data);
+        setLoading(false);
       }
     };
     init();
-  }, [connection, publicKey]);
+    const interval = setInterval(() => {
+      init();
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [connection, queryParams.tokenid]);
 
   const startVesting = async () => {
-    if (wallet && selectedToken && recipients.length > 0) {
+    if (wallet && recipients.length > 0 && queryParams) {
       const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
 
       const params: VestParams = {
@@ -135,14 +147,14 @@ export const Vesting = () => {
       const recipientList: Recipient[] = recipients.map((data) => {
         return {
           recipient: data.recipientAddress, // Recipient address (base58 string for Solana)
-          amount: getBN(data.amount, selectedToken.decimal), // Deposited amount of tokens (using smallest denomination).
+          amount: getBN(data.amount, decimal), // Deposited amount of tokens (using smallest denomination).
           name: data.name, // The stream name or subject.
-          cliffAmount: getBN(data.cliffAmount, selectedToken.decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(data.amount / amountPer, selectedToken.decimal), // Release rate: how many tokens are unlocked per each period.
+          cliffAmount: getBN(data.cliffAmount, decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+          amountPerPeriod: getBN(data.amount / amountPer, decimal), // Release rate: how many tokens are unlocked per each period.
         };
       });
 
-      const data = await vestMulti(wallet as SignerWalletAdapter, selectedToken, params, recipientList);
+      const data = await vestMulti(wallet as SignerWalletAdapter, queryParams.tokenid || "", params, recipientList);
 
       toastr.success("Contract Deployed Successfully");
 
@@ -178,6 +190,22 @@ export const Vesting = () => {
   //   init();
   // }, [publicKey]);
 
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "50vh",
+          width: "50vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
+
   return (
     <Grid container className={classes.container} direction={"column"}>
       <Grid item className={classes.title}>
@@ -186,30 +214,6 @@ export const Vesting = () => {
       </Grid>
       <Grid item marginTop={"1.2rem"}>
         <Stack direction={"column"} width={"100%"} spacing={4}>
-          <FormControl fullWidth>
-            <InputLabel id="selectLabel">Select a Token</InputLabel>
-            <Select
-              value={selectedToken?.hex || ""}
-              label=" Token"
-              onChange={(e: SelectChangeEvent<string>) => {
-                const token = tokens.find((tkn: TokenData) => tkn.hex === e.target.value);
-                if (token != undefined) {
-                  setSelectedToken(token);
-                }
-              }}
-              className={classes.input}
-              id={"custom-select"}
-            >
-              {tokens.map((tk: TokenData) => {
-                return (
-                  <MenuItem key={tk.hex} value={tk.hex}>
-                    {tk.metadata.name + "(" + tk.metadata.symbol + ")"}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-
           <FormControl fullWidth>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               {
@@ -313,17 +317,17 @@ export const Vesting = () => {
         </Stack>
       </Grid>
       <Grid item marginTop={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-        <CustomButton label="Add Recipient" disable={false} onClick={() => setRecipientModal({...recipientModal, show: true})} />
+        <CustomButton label="Add Recipient" disable={false} onClick={() => setRecipientModal({ ...recipientModal, show: true })} />
       </Grid>
       <Grid item marginTop={2} marginBottom={5} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-        <CustomButton label="Create Vesting Contract" disable={selectedToken === undefined || vestParams.period <= 0 || recipients.length <= 0} onClick={startVesting} />
+        <CustomButton label="Create Vesting Contract" disable={vestParams.period <= 0 || recipients.length <= 0} onClick={startVesting} />
       </Grid>
 
       <Modal
         className={classes.modal}
         open={recipientModal.show}
         onClose={() => {
-          setRecipientModal({...recipientModal, show: false });
+          setRecipientModal({ ...recipientModal, show: false });
         }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"

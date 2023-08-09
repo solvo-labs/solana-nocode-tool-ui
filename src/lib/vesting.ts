@@ -41,9 +41,9 @@ export const vestSingle = async (wallet: SignerWalletAdapter, mint: TokenData, r
   }
 };
 
-export const vestMulti = async (wallet: SignerWalletAdapter, mint: TokenData, vestParams: VestParams, recipients: Recipient[]) => {
+export const vestMulti = async (wallet: SignerWalletAdapter, mint: string, vestParams: VestParams, recipients: Recipient[]) => {
   const createMultiStreamsParams = {
-    tokenId: mint.hex, // SPL token mint or Aptos Coin type
+    tokenId: mint, // SPL token mint or Aptos Coin type
     cliff: vestParams.cliff || 0, // Vesting contract "cliff" timestamp in seconds.
     period: vestParams.period, // Time step (period) in seconds per which the unlocking occurs.
     start: vestParams.startDate, // Timestamp (in seconds) when the stream/token vesting starts.
