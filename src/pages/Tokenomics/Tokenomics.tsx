@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Button,
-  Card,
   CardContent,
   Divider,
   Grid,
@@ -74,15 +73,18 @@ export const Tokenomics = () => {
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [availableBalance, setAvailableBalance] = useState<number>();
 
+  // const [percent, setPercent] = useState<number>(100);
+
   const [sections, setSections] = useState<Section[]>([
     {
       name: "",
       amount: 0,
+      percent: 0,
     },
   ]);
 
   const addInput = () => {
-    setSections([...sections, { name: "", amount: 0 }]);
+    setSections([...sections, { name: "", amount: 0, percent: 0 }]);
   };
 
   const removeInput = (index: number) => {
@@ -99,10 +101,45 @@ export const Tokenomics = () => {
     const newSection = [...sections];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let targetValue: any;
-    key === "amount"
-      ? (targetValue = +e.target.value)
-      : (targetValue = e.target.value);
-    newSection[index] = { ...newSection[index], [key]: targetValue };
+    if (selectedToken) {
+      switch (key) {
+        case "amount":
+          targetValue = +e.target.value;
+          // eslint-disable-next-line no-case-declarations
+          const newPercent: number = +(
+            (targetValue /
+              (selectedToken?.amount / Math.pow(10, selectedToken?.decimal))) *
+            100
+          ).toFixed(2);
+          newSection[index] = {
+            ...newSection[index],
+            [key]: targetValue,
+            percent: newPercent,
+          };
+          break;
+        case "percent":
+          targetValue = +e.target.value;
+          // eslint-disable-next-line no-case-declarations
+          const newAmount: number =
+            (selectedToken?.amount /
+              Math.pow(10, selectedToken?.decimal) /
+              100) *
+            targetValue;
+          newSection[index] = {
+            ...newSection[index],
+            amount: newAmount,
+            [key]: targetValue,
+          };
+          break;
+        case "name":
+          targetValue = e.target.value;
+          newSection[index] = { ...newSection[index], [key]: targetValue };
+          break;
+        default:
+          break;
+      }
+    }
+
     setSections(newSection);
   };
 
@@ -123,17 +160,22 @@ export const Tokenomics = () => {
   }, [sections, selectedToken]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const balanceManager = useMemo(() => {
+  useMemo(() => {
     if (selectedToken) {
       const totalBalance =
         selectedToken.amount / Math.pow(10, selectedToken.decimal);
-      const availableBalance =
+      let availableBalance =
         totalBalance - sections.reduce((acc, cur) => acc + cur.amount, 0);
+
+      if (availableBalance < 0) {
+        console.log("adasdad");
+      }
+      availableBalance < 0 ? (availableBalance = 0) : availableBalance;
       setAvailableBalance(availableBalance);
     }
   }, [sections, selectedToken]);
 
-  console.log(sections);
+  // console.log(sections);
 
   return (
     <Stack spacing={4} display={"flex"} alignItems={"center"}>
@@ -156,110 +198,107 @@ export const Tokenomics = () => {
       </Grid>
       <Grid container className={classes.cardContainer}>
         <Grid item width={"100%"}>
-          <Card>
-            <CardContent className={classes.cardContent}>
-              <Card sx={{ bgcolor: "whitesmoke", width: "100%" }}>
-                <CardContent sx={{ display: "flex", justifyContent: "center" }}>
-                  <Stack
-                    direction={"row"}
-                    justifyContent={"center"}
-                    width={"100%"}
-                    spacing={4}
-                  >
-                    {selectedToken ? (
-                      <>
-                        <Typography>
-                          Selected: {selectedToken?.metadata.name}
-                        </Typography>
-                        <Divider orientation="vertical" />
-                        {availableBalance && (
-                          <Typography>
-                            Available balance: {availableBalance} (%
-                            {(
-                              (availableBalance /
-                                (selectedToken?.amount /
-                                  Math.pow(10, selectedToken.decimal))) *
-                              100
-                            ).toFixed(2)}
-                            )
-                          </Typography>
-                        )}
-                        <Divider orientation="vertical" />
-                        <Typography>
-                          Total Balance:
-                          {selectedToken?.amount /
-                            Math.pow(10, selectedToken.decimal)}
-                        </Typography>
-                      </>
+          <CardContent
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <Stack
+              direction={"row"}
+              justifyContent={"center"}
+              width={"100%"}
+              spacing={4}
+            >
+              {selectedToken ? (
+                <>
+                  <Typography>
+                    Selected: {selectedToken?.metadata.name}
+                  </Typography>
+                  <Divider orientation="vertical" />
+                  {availableBalance != 0 && availableBalance ? (
+                    <Typography>
+                      Available balance: {availableBalance} (%
+                      {(
+                        (availableBalance /
+                          (selectedToken?.amount /
+                            Math.pow(10, selectedToken.decimal))) *
+                        100
+                      ).toFixed(2)}
+                      )
+                    </Typography>
+                  ) : (
+                    <Typography>Available balance: {availableBalance} </Typography>
+                  )}
+                  <Divider orientation="vertical" />
+                  <Typography>
+                    Total Balance:
+                    {selectedToken?.amount /
+                      Math.pow(10, selectedToken.decimal)}
+                  </Typography>
+                </>
+              ) : (
+                "Not selected any Token"
+              )}
+            </Stack>
+          </CardContent>
+          {selectedToken && (
+            <Stack
+              direction={"column"}
+              justifyContent={"space-around"}
+              spacing={2}
+            >
+              {sections.map((e: any, index: number) => (
+                <Stack direction={"row"} spacing={2} key={index}>
+                  <Grid item display={"flex"} alignContent={"center"}>
+                    {index > sections.length - 2 ? (
+                      <IconButton onClick={addInput} disabled={disable}>
+                        <AddIcon></AddIcon>
+                      </IconButton>
                     ) : (
-                      "Not selected any Token"
+                      <IconButton onClick={() => removeInput(index)}>
+                        <RemoveIcon />
+                      </IconButton>
                     )}
-                  </Stack>
-                </CardContent>
-              </Card>
-            </CardContent>
-            {selectedToken && (
-              <CardContent className={classes.cardContent}>
-                <Stack
-                  direction={"column"}
-                  justifyContent={"space-around"}
-                  spacing={2}
-                >
-                  {sections.map((e: any, index: number) => (
-                    <Stack direction={"row"} spacing={2} key={index}>
-                      <Grid item display={"flex"} alignContent={"center"}>
-                        {index > sections.length - 2 ? (
-                          <IconButton onClick={addInput} disabled={disable}>
-                            <AddIcon></AddIcon>
-                          </IconButton>
-                        ) : (
-                          <IconButton onClick={() => removeInput(index)}>
-                            <RemoveIcon />
-                          </IconButton>
-                        )}
-                      </Grid>
-                      <CustomInput
-                        label="Section Name"
-                        name="sectionName"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          sectionSetter(e, index, "name")
-                        }
-                        placeHolder="Section Name"
-                        type="text"
-                        value={sections[index].name}
-                      ></CustomInput>
-                      <TextField
-                        placeholder="aaa"
-                        value={
-                          "%" +
-                          (
-                            (sections[index].amount /
-                              (selectedToken?.amount /
-                                Math.pow(10, selectedToken.decimal))) *
-                            100
-                          ).toFixed(2)
-                        }
-                        disabled
-                      ></TextField>
-                      <TextField
-                        placeholder="Amount"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          sectionSetter(e, index, "amount")
-                        }
-                        type="text"
-                        value={sections[index].amount}
-                      ></TextField>
-                      <Grid item display={"flex"} alignContent={"center"}>
-                        <Button onClick={() => console.log(sections[index])}>
-                          Vesting
-                        </Button>
-                      </Grid>
-                    </Stack>
-                  ))}
+                  </Grid>
+                  <CustomInput
+                    label="Section Name"
+                    name="sectionName"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      sectionSetter(e, index, "name")
+                    }
+                    placeHolder="Section Name"
+                    type="text"
+                    value={sections[index].name}
+                  ></CustomInput>
+                  <TextField
+                    label="%"
+                    placeholder="percent"
+                    value={sections[index].percent}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      sectionSetter(e, index, "percent")
+                    }
+                    type="text"
+                  ></TextField>
+                  <TextField
+                    label="Amount"
+                    placeholder="Amount"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      sectionSetter(e, index, "amount")
+                    }
+                    type="text"
+                    value={sections[index].amount}
+                  ></TextField>
+                  <Grid item display={"flex"} alignContent={"center"}>
+                    <Button variant="contained" onClick={() => {}}>
+                      Vesting
+                    </Button>
+                  </Grid>
                 </Stack>
-              </CardContent>
-            )}
-          </Card>
+              ))}
+            </Stack>
+          )}
         </Grid>
       </Grid>
     </Stack>
