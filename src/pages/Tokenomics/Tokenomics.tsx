@@ -209,6 +209,7 @@ export const Tokenomics = () => {
     };
 
     getVestingAboutThisToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publicKey, selectedToken]);
 
   const disable = useMemo(() => {
