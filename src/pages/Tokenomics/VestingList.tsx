@@ -202,7 +202,7 @@ export const VestingList = () => {
         <TableCell align="center">{e[1].depositedAmount.toNumber() / Math.pow(10, e.decimal)}</TableCell>
         <TableCell>{timestampToDate(e[1].cliff)}</TableCell>
         <TableCell align="center">{e[1].cliffAmount.toNumber() / Math.pow(10, e[1].cliffAmount.length)}</TableCell>
-        <TableCell align="center">{String(e[1].automaticWithdrawal) ? "YES" : "NO"}</TableCell>
+        <TableCell align="center">{e[1].automaticWithdrawal ? "YES" : "NO"}</TableCell>
       </TableRow>
     ));
   };

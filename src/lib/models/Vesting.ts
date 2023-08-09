@@ -5,6 +5,7 @@ export type VestParams = {
   startDate: number;
   period: number;
   cliff?: number;
+  automaticWithdrawal: boolean;
 };
 
 export type VestParamsData = {
@@ -14,6 +15,7 @@ export type VestParamsData = {
   cliffAmount?: number;
   selectedDuration: number;
   selectedUnlockSchedule: number;
+  automaticWithdraw: boolean;
 };
 
 export type Recipient = {

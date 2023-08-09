@@ -100,6 +100,7 @@ export const Vesting = () => {
     period: 1,
     selectedDuration: Durations.DAY,
     selectedUnlockSchedule: UnlockSchedule.HOURLY,
+    automaticWithdraw: true,
   });
 
   const [activateCliff, setActivateCliff] = useState<boolean>(false);
@@ -136,6 +137,7 @@ export const Vesting = () => {
   }, [connection, queryParams.tokenid]);
 
   const startVesting = async () => {
+    setLoading(true);
     try {
       if (wallet && recipients.length > 0 && queryParams) {
         const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
@@ -144,6 +146,7 @@ export const Vesting = () => {
           startDate: vestParams.startDate.unix(),
           cliff: activateCliff ? vestParams.cliff?.unix() : 0,
           period: (vestParams.period * vestParams.selectedDuration) / amountPer,
+          automaticWithdrawal: vestParams.automaticWithdraw,
         };
 
         const recipientList: Recipient[] = recipients.map((data: RecipientFormInput) => {
@@ -156,6 +159,8 @@ export const Vesting = () => {
           };
         });
 
+        console.log(params);
+
         const data = await vestMulti(wallet as SignerWalletAdapter, queryParams.tokenid || "", params, recipientList);
 
         toastr.success("Contract Deployed Successfully");
@@ -165,9 +170,11 @@ export const Vesting = () => {
         });
 
         navigate("/tokenomics");
+        setLoading(false);
       }
     } catch {
       toastr.error("Something went wrong");
+      setLoading(false);
     }
   };
 
@@ -295,7 +302,19 @@ export const Vesting = () => {
             </Select>
           </FormControl>
 
-          <FormControlLabel control={<Switch value={true} defaultChecked></Switch>} label="Automatic Withdraw" />
+          <FormControlLabel
+            control={
+              <Switch
+                value={vestParams.automaticWithdraw}
+                checked={vestParams.automaticWithdraw}
+                onChange={() => {
+                  console.log("here");
+                  setVestParams({ ...vestParams, automaticWithdraw: !vestParams.automaticWithdraw });
+                }}
+              ></Switch>
+            }
+            label="Automatic Withdraw"
+          />
 
           <FormControlLabel control={<Switch value={activateCliff} onChange={() => setActivateCliff(!activateCliff)} />} label="Activate Cliff" />
 
