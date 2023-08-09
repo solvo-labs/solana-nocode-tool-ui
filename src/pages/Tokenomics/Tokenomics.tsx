@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, CardContent, CircularProgress, Divider, Grid, IconButton, Stack, TextField, Theme, Typography } from "@mui/material";
+import { Button, CardContent, CircularProgress, Divider, Grid, IconButton, List, ListItem, ListItemText, Stack, TextField, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useEffect, useMemo, useState } from "react";
 import { Section, TokenData } from "../../utils/types";
@@ -11,6 +11,8 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { CustomInput } from "../../components/CustomInput";
 import { useNavigate } from "react-router-dom";
+import { getVestingMyOwn } from "../../lib/vesting";
+import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -73,6 +75,8 @@ export const Tokenomics = () => {
     },
   ]);
 
+  const [oldVestingList, setOldVestingList] = useState<{ date: number; value: number }[]>([]);
+
   const navigate = useNavigate();
 
   const addInput = () => {
@@ -91,7 +95,7 @@ export const Tokenomics = () => {
 
       let availableBalance = totalBalance - sections.reduce((acc, cur) => acc + cur.amount, 0);
 
-      const availablePercent = (availableBalance / totalBalance) * 100;
+      const availablePercent = (availableBalance / Number(selectedToken.supply.value.uiAmount)) * 100;
 
       if (availableBalance < 0) {
         availableBalance = 0;
@@ -155,6 +159,36 @@ export const Tokenomics = () => {
     init();
   }, [connection, publicKey]);
 
+  useEffect(() => {
+    const getVestingAboutThisToken = async () => {
+      if (publicKey && selectedToken) {
+        const allVestings = await getVestingMyOwn(publicKey?.toBase58());
+
+        if (allVestings) {
+          const contracts = allVestings.map((av) => av[1]);
+
+          const oldVestings = contracts.filter((ct) => ct.mint === selectedToken.hex);
+
+          const total: { date: number; value: number }[] = [];
+
+          oldVestings.forEach((ov) => {
+            const currentIndex = total.findIndex((tl) => tl.date === ov.createdAt);
+
+            if (currentIndex < 0) {
+              total.push({ date: ov.createdAt, value: ov.depositedAmount.toNumber() });
+            } else {
+              total[currentIndex] = { date: ov.createdAt, value: total[currentIndex].value + ov.depositedAmount.toNumber() };
+            }
+          });
+
+          setOldVestingList(total);
+        }
+      }
+    };
+
+    getVestingAboutThisToken();
+  }, [publicKey, selectedToken]);
+
   const disable = useMemo(() => {
     const lenghtControl = sections.every((e: any) => e.name.length > 0);
     const disable = !(selectedToken != undefined && lenghtControl);
@@ -202,7 +236,7 @@ export const Tokenomics = () => {
             }}
           >
             <Stack direction={"row"} justifyContent={"center"} width={"100%"} spacing={4}>
-              {selectedToken ? (
+              {selectedToken && (
                 <>
                   <Typography>Selected: {selectedToken?.metadata.name}</Typography>
                   <Divider orientation="vertical" />
@@ -220,11 +254,41 @@ export const Tokenomics = () => {
                     {selectedToken?.amount / Math.pow(10, selectedToken.decimal)}
                   </Typography>
                 </>
-              ) : (
-                "Not selected any Token"
               )}
             </Stack>
           </CardContent>
+          {oldVestingList && oldVestingList.length > 0 && (
+            <>
+              <h2 style={{ marginBottom: "0" }}>Vesting History</h2>
+              <List dense sx={{ width: "100%" }}>
+                {oldVestingList.map((value, index) => {
+                  const labelId = `checkbox-list-secondary-label-${value}`;
+                  return (
+                    <>
+                      <ListItem key={index} disablePadding>
+                        <ListItemText
+                          style={{ color: "black", fontSize: "1rem" }}
+                          id={labelId}
+                          primary={
+                            "Date : " +
+                            dayjs.unix(value.date).format("YYYY-MM-DD HH:mm") +
+                            ", Amount : " +
+                            value.value / Math.pow(10, selectedToken?.decimal || 1) +
+                            " " +
+                            selectedToken?.metadata.symbol +
+                            ", Percent : " +
+                            (value.value / Number(selectedToken?.supply.value.amount) || 1) * 100 +
+                            "%"
+                          }
+                        />
+                      </ListItem>
+                      <Divider sx={{ marginTop: "0.5rem", marginBottom: "0.5rem", background: "black" }} />
+                    </>
+                  );
+                })}
+              </List>
+            </>
+          )}
           {selectedToken && (
             <Stack direction={"column"} justifyContent={"space-around"} spacing={2}>
               {sections.map((section: Section, index: number) => (

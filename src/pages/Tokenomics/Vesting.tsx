@@ -136,34 +136,38 @@ export const Vesting = () => {
   }, [connection, queryParams.tokenid]);
 
   const startVesting = async () => {
-    if (wallet && recipients.length > 0 && queryParams) {
-      const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
+    try {
+      if (wallet && recipients.length > 0 && queryParams) {
+        const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
 
-      const params: VestParams = {
-        startDate: vestParams.startDate.unix(),
-        cliff: activateCliff ? vestParams.cliff?.unix() : 0,
-        period: (vestParams.period * vestParams.selectedDuration) / amountPer,
-      };
-
-      const recipientList: Recipient[] = recipients.map((data: RecipientFormInput) => {
-        return {
-          recipient: data.recipientAddress, // Recipient address (base58 string for Solana)
-          amount: getBN(data.amount, decimal), // Deposited amount of tokens (using smallest denomination).
-          name: queryParams.name || "", // The stream name or subject.
-          cliffAmount: getBN(vestParams.cliffAmount || 0, decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
-          amountPerPeriod: getBN(data.amount / amountPer, decimal), // Release rate: how many tokens are unlocked per each period.
+        const params: VestParams = {
+          startDate: vestParams.startDate.unix(),
+          cliff: activateCliff ? vestParams.cliff?.unix() : 0,
+          period: (vestParams.period * vestParams.selectedDuration) / amountPer,
         };
-      });
 
-      const data = await vestMulti(wallet as SignerWalletAdapter, queryParams.tokenid || "", params, recipientList);
+        const recipientList: Recipient[] = recipients.map((data: RecipientFormInput) => {
+          return {
+            recipient: data.recipientAddress, // Recipient address (base58 string for Solana)
+            amount: getBN(data.amount, decimal), // Deposited amount of tokens (using smallest denomination).
+            name: queryParams.name || "", // The stream name or subject.
+            cliffAmount: getBN(vestParams.cliffAmount || 0, decimal), // Amount (smallest denomination) unlocked at the "cliff" timestamp.
+            amountPerPeriod: getBN(data.amount / amountPer, decimal), // Release rate: how many tokens are unlocked per each period.
+          };
+        });
 
-      toastr.success("Contract Deployed Successfully");
+        const data = await vestMulti(wallet as SignerWalletAdapter, queryParams.tokenid || "", params, recipientList);
 
-      data?.txs.forEach((tx) => {
-        window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
-      });
+        toastr.success("Contract Deployed Successfully");
 
-      navigate("/vesting-list");
+        data?.txs.forEach((tx) => {
+          window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
+        });
+
+        navigate("/tokenomics");
+      }
+    } catch {
+      toastr.error("Something went wrong");
     }
   };
 
