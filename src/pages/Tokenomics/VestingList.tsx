@@ -26,6 +26,7 @@ import { getTimestamp } from "../../lib/utils";
 import PendingIcon from "@mui/icons-material/Pending";
 import { PublicKey } from "@solana/web3.js";
 import { getMetadataPDA } from "../../lib/tokenRegister";
+import { UnlockSchedule, UnlockScheduleType } from "../../lib/models/Vesting";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
@@ -197,7 +198,7 @@ export const VestingList = () => {
         <TableCell>{timestampToDate(e[1].end)}</TableCell>
         <TableCell>{timestampToDate(e[1].lastWithdrawnAt)}</TableCell>
         <TableCell>{e.metadata.name}</TableCell>
-        <TableCell align="center">{e[1].period}</TableCell>
+        <TableCell align="center">{Object.keys(UnlockSchedule).find((key) => UnlockSchedule[key as keyof UnlockScheduleType] === e[1].period)}</TableCell>
         <TableCell align="center">{e[1].withdrawnAmount.toNumber() / Math.pow(10, e.decimal)}</TableCell>
         <TableCell align="center">{e[1].depositedAmount.toNumber() / Math.pow(10, e.decimal)}</TableCell>
         <TableCell>{timestampToDate(e[1].cliff)}</TableCell>
