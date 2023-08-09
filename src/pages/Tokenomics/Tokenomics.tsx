@@ -92,13 +92,9 @@ export const Tokenomics = () => {
     if (selectedToken) {
       // const totalBalance = selectedToken.amount / Math.pow(10, selectedToken.decimal);
 
-      let availableBalance = selectedToken.supply.value.uiAmount! - sections.reduce((acc, cur) => acc + cur.amount, 0);
+      const availableBalance = selectedToken.supply.value.uiAmount! - sections.reduce((acc, cur) => acc + cur.amount, 0);
 
       const availablePercent = (availableBalance / Number(selectedToken.supply.value.uiAmount)) * 100;
-
-      if (availableBalance < 0) {
-        availableBalance = 0;
-      }
 
       return { availableBalance, availablePercent };
     }
@@ -357,7 +353,7 @@ export const Tokenomics = () => {
                   <Grid item display={"flex"} alignContent={"center"}>
                     <Button
                       variant="contained"
-                      disabled={section.isOldSection}
+                      disabled={section.isOldSection || section.name === "" || limits!.availableBalance < 0}
                       onClick={() => {
                         navigate("/create-vesting/" + selectedToken.hex + "/" + section.name + "/" + section.amount);
                       }}
