@@ -18,6 +18,7 @@ import { TokenDetail } from "../pages/Token/TokenDetail";
 import { ContractPage } from "../pages/Contract";
 import { Tokenomics } from "../pages/Tokenomics/Tokenomics";
 import { Vesting } from "../pages/Tokenomics/Vesting";
+import { Airdrop } from "../pages/Token/Airdrop";
 
 const Router: React.FC = () => {
   return (
@@ -40,6 +41,7 @@ const Router: React.FC = () => {
             <Route path="/vesting-list" index element={<VestingList />} />
             <Route path="/create-vesting/:tokenid/:name/:amount" index element={<Vesting />} />
             <Route path="/contract" index element={<ContractPage />} />
+            <Route path="/airdrop" index element={<Airdrop />} />
           </Route>
           <Route path="/login" index element={<Login />} />
           <Route path="*" index element={<NotFoundPage />} />

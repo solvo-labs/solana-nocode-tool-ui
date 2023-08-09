@@ -87,6 +87,11 @@ const TopBar: React.FC = () => {
     setAnchorElToken(null);
   };
 
+  const airdrop = () => {
+    navigate("/airdrop");
+    setAnchorElToken(null);
+  };
+
   const freezeAccount = () => {
     navigate("/freeze-account");
     setAnchorElToken(null);
@@ -162,6 +167,9 @@ const TopBar: React.FC = () => {
                 </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={multisingature}>
                   <Typography>Multisignature</Typography>
+                </MenuItem>
+                <MenuItem className={classes.menuItem} onClick={airdrop}>
+                  <Typography>Airdrop</Typography>
                 </MenuItem>
               </Menu>
               <Button onClick={(e: any) => handleClick(e, setAnchorElVesting)} onMouseOver={(e: any) => handleClick(e, setAnchorElVesting)}>
