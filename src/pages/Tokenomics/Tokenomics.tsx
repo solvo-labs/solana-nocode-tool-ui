@@ -1,16 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Button,
-  CardContent,
-  CircularProgress,
-  Divider,
-  Grid,
-  IconButton,
-  Stack,
-  TextField,
-  Theme,
-  Typography,
-} from "@mui/material";
+import { Button, CardContent, CircularProgress, Divider, Grid, IconButton, Stack, TextField, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useEffect, useMemo, useState } from "react";
 import { Section, TokenData } from "../../utils/types";
@@ -72,10 +61,8 @@ export const Tokenomics = () => {
   const classes = useStyles();
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenData>();
-  const [availableBalance, setAvailableBalance] = useState<number>();
+  // const [availableBalance, setAvailableBalance] = useState<number>();
   const [loading, setLoading] = useState<boolean>(true);
-
-  // const [percent, setPercent] = useState<number>(100);
 
   const [sections, setSections] = useState<Section[]>([
     {
@@ -95,24 +82,36 @@ export const Tokenomics = () => {
     setSections(list);
   };
 
-  const sectionSetter = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number,
-    key: keyof Section
-  ) => {
-    const newSection = [...sections];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let targetValue: any;
+  const limits = useMemo(() => {
     if (selectedToken) {
+      const totalBalance = selectedToken.amount / Math.pow(10, selectedToken.decimal);
+
+      let availableBalance = totalBalance - sections.reduce((acc, cur) => acc + cur.amount, 0);
+
+      const availablePercent = (availableBalance / totalBalance) * 100;
+
+      if (availableBalance < 0) {
+        availableBalance = 0;
+      }
+
+      return { availableBalance, availablePercent };
+    }
+  }, [sections, selectedToken]);
+
+  const sectionSetter = (e: React.ChangeEvent<HTMLInputElement>, index: number, key: keyof Section) => {
+    const newSection = [...sections];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+    if (selectedToken) {
+      let targetValue: any;
+
       switch (key) {
         case "amount":
           targetValue = +e.target.value;
+
           // eslint-disable-next-line no-case-declarations
-          const newPercent: number = +(
-            (targetValue /
-              (selectedToken?.amount / Math.pow(10, selectedToken?.decimal))) *
-            100
-          ).toFixed(2);
+          const newPercent: number = +((targetValue / (selectedToken?.amount / Math.pow(10, selectedToken?.decimal))) * 100).toFixed(2);
           newSection[index] = {
             ...newSection[index],
             [key]: targetValue,
@@ -121,12 +120,9 @@ export const Tokenomics = () => {
           break;
         case "percent":
           targetValue = +e.target.value;
+
           // eslint-disable-next-line no-case-declarations
-          const newAmount: number =
-            (selectedToken?.amount /
-              Math.pow(10, selectedToken?.decimal) /
-              100) *
-            targetValue;
+          const newAmount: number = (selectedToken?.amount / Math.pow(10, selectedToken?.decimal) / 100) * targetValue;
           newSection[index] = {
             ...newSection[index],
             amount: newAmount,
@@ -162,22 +158,6 @@ export const Tokenomics = () => {
     return disable;
   }, [sections, selectedToken]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  useMemo(() => {
-    if (selectedToken) {
-      const totalBalance =
-        selectedToken.amount / Math.pow(10, selectedToken.decimal);
-      let availableBalance =
-        totalBalance - sections.reduce((acc, cur) => acc + cur.amount, 0);
-
-      if (availableBalance < 0) {
-        console.log("adasdad");
-      }
-      availableBalance < 0 ? (availableBalance = 0) : availableBalance;
-      setAvailableBalance(availableBalance);
-    }
-  }, [sections, selectedToken]);
-
   if (loading) {
     return (
       <div
@@ -204,11 +184,7 @@ export const Tokenomics = () => {
               <Divider sx={{ marginTop: "1rem", background: "white" }} />
             </Grid>
             <Grid item>
-              <TokenSelector
-                selectedToken={selectedToken}
-                setSelectedToken={(data) => setSelectedToken(data)}
-                tokens={tokens}
-              ></TokenSelector>
+              <TokenSelector selectedToken={selectedToken} setSelectedToken={(data) => setSelectedToken(data)} tokens={tokens}></TokenSelector>
             </Grid>
           </Stack>
         </Grid>
@@ -222,39 +198,23 @@ export const Tokenomics = () => {
               marginBottom: "1rem",
             }}
           >
-            <Stack
-              direction={"row"}
-              justifyContent={"center"}
-              width={"100%"}
-              spacing={4}
-            >
+            <Stack direction={"row"} justifyContent={"center"} width={"100%"} spacing={4}>
               {selectedToken ? (
                 <>
-                  <Typography>
-                    Selected: {selectedToken?.metadata.name}
-                  </Typography>
+                  <Typography>Selected: {selectedToken?.metadata.name}</Typography>
                   <Divider orientation="vertical" />
-                  {availableBalance != 0 && availableBalance ? (
+                  {limits?.availableBalance ? (
                     <Typography>
-                      Available balance: {availableBalance} (%
-                      {(
-                        (availableBalance /
-                          (selectedToken?.amount /
-                            Math.pow(10, selectedToken.decimal))) *
-                        100
-                      ).toFixed(2)}
-                      )
+                      Available balance: {limits.availableBalance} (%
+                      {limits.availablePercent.toFixed(2)})
                     </Typography>
                   ) : (
-                    <Typography>
-                      Available balance: {availableBalance}{" "}
-                    </Typography>
+                    <Typography>Available balance: {limits?.availableBalance} </Typography>
                   )}
                   <Divider orientation="vertical" />
                   <Typography>
                     Total Balance:
-                    {selectedToken?.amount /
-                      Math.pow(10, selectedToken.decimal)}
+                    {selectedToken?.amount / Math.pow(10, selectedToken.decimal)}
                   </Typography>
                 </>
               ) : (
@@ -263,11 +223,7 @@ export const Tokenomics = () => {
             </Stack>
           </CardContent>
           {selectedToken && (
-            <Stack
-              direction={"column"}
-              justifyContent={"space-around"}
-              spacing={2}
-            >
+            <Stack direction={"column"} justifyContent={"space-around"} spacing={2}>
               {sections.map((e: any, index: number) => (
                 <Stack direction={"row"} spacing={2} key={index}>
                   <Grid item display={"flex"} alignContent={"center"}>
@@ -284,9 +240,7 @@ export const Tokenomics = () => {
                   <CustomInput
                     label="Section Name"
                     name="sectionName"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      sectionSetter(e, index, "name")
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "name")}
                     placeHolder="Section Name"
                     type="text"
                     value={sections[index].name}
@@ -295,17 +249,13 @@ export const Tokenomics = () => {
                     label="%"
                     placeholder="percent"
                     value={sections[index].percent}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      sectionSetter(e, index, "percent")
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "percent")}
                     type="text"
                   ></TextField>
                   <TextField
                     label="Amount"
                     placeholder="Amount"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      sectionSetter(e, index, "amount")
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "amount")}
                     type="text"
                     value={sections[index].amount}
                   ></TextField>
