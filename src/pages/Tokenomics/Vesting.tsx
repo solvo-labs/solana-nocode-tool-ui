@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 
-import { RecipientModal, TokenData } from "../../utils/types";
-import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { RecipientModal } from "../../utils/types";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import {
   Box,
   Button,
