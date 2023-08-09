@@ -43,7 +43,7 @@ class StakeClass {
     return finalData;
   };
 
-  createStakeAccount = async (balance: number) => {
+  createStakeAccount = async (balance: number, time: number = 0, epoch: number = 0) => {
     const stakeAccount = Keypair.generate();
     this.stakeAccountPubkey = stakeAccount.publicKey;
     this.stakeAccount = stakeAccount;
@@ -57,7 +57,7 @@ class StakeClass {
       authorized: new Authorized(this.owner, this.owner), // Here we set two authorities: Stake Authority and Withdrawal Authority. Both are set to our wallet.
       fromPubkey: this.owner,
       lamports: amountToStake,
-      lockup: new Lockup(0, 0, this.owner), // Optional. We'll set this to 0 for demonstration purposes.
+      lockup: new Lockup(time, epoch, this.owner), // Optional. We'll set this to 0 for demonstration purposes.
       stakePubkey: stakeAccount.publicKey,
     });
 
