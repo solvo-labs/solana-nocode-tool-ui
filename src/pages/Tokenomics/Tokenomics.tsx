@@ -2,6 +2,7 @@
 import {
   Button,
   CardContent,
+  CircularProgress,
   Divider,
   Grid,
   IconButton,
@@ -72,6 +73,7 @@ export const Tokenomics = () => {
   const [tokens, setTokens] = useState<TokenData[]>([]);
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [availableBalance, setAvailableBalance] = useState<number>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   // const [percent, setPercent] = useState<number>(100);
 
@@ -148,6 +150,7 @@ export const Tokenomics = () => {
       if (publicKey) {
         const data = await fetchUserTokens(connection, publicKey);
         setTokens(data);
+        setLoading(false);
       }
     };
     init();
@@ -175,7 +178,21 @@ export const Tokenomics = () => {
     }
   }, [sections, selectedToken]);
 
-  // console.log(sections);
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "50vh",
+          width: "50vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <Stack spacing={4} display={"flex"} alignItems={"center"}>
@@ -229,7 +246,9 @@ export const Tokenomics = () => {
                       )
                     </Typography>
                   ) : (
-                    <Typography>Available balance: {availableBalance} </Typography>
+                    <Typography>
+                      Available balance: {availableBalance}{" "}
+                    </Typography>
                   )}
                   <Divider orientation="vertical" />
                   <Typography>
