@@ -25,6 +25,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import { getTimestamp } from "../../lib/utils";
 import PendingIcon from "@mui/icons-material/Pending";
 import { PublicKey } from "@solana/web3.js";
+import { getMetadataPDA } from "../../lib/tokenRegister";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
@@ -115,16 +116,23 @@ export const VestingList = () => {
 
         const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
 
+        const decimalPromises: any[] = [];
+        const metadataPromises: any[] = [];
+
         if (sortedData) {
-          const promises = sortedData.map((dt) => {
-            return connection.getTokenSupply(new PublicKey(dt[1].mint));
+          sortedData.forEach((dt) => {
+            decimalPromises.push(connection.getTokenSupply(new PublicKey(dt[1].mint)));
+            metadataPromises.push(getMetadataPDA(new PublicKey(dt[1].mint), connection));
           });
 
-          const decimalsData = await Promise.all(promises);
+          const decimalsData = await Promise.all(decimalPromises);
+          const metadata = await Promise.all(metadataPromises);
 
           const finalData = sortedData.map((st: any, index: number) => {
-            return { ...st, decimal: decimalsData[index].value.decimals };
+            return { ...st, decimal: decimalsData[index].value.decimals, metadata: metadata[index] };
           });
+
+          console.log(finalData);
 
           setVestingList(finalData || []);
           setLoading(false);
@@ -188,7 +196,7 @@ export const VestingList = () => {
         <TableCell>{timestampToDate(e[1].start)}</TableCell>
         <TableCell>{timestampToDate(e[1].end)}</TableCell>
         <TableCell>{timestampToDate(e[1].lastWithdrawnAt)}</TableCell>
-        <TableCell>{e[1].mint.slice(0, 8)}</TableCell>
+        <TableCell>{e.metadata.name}</TableCell>
         <TableCell align="center">{e[1].period}</TableCell>
         <TableCell align="center">{e[1].withdrawnAmount.toNumber() / Math.pow(10, e.decimal)}</TableCell>
         <TableCell align="center">{e[1].depositedAmount.toNumber() / Math.pow(10, e.decimal)}</TableCell>

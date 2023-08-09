@@ -6,7 +6,6 @@ import { Section, TokenData } from "../../utils/types";
 import { fetchUserTokens } from "../../lib";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import TokenSelector from "../../components/TokenSelector";
-// import VestingForm from "../../components/VestingForm";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { CustomInput } from "../../components/CustomInput";
