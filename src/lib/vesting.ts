@@ -70,12 +70,26 @@ export const vestMulti = async (wallet: SignerWalletAdapter, mint: string, vestP
   }
 };
 
+export const getVestingMyIncoming = async (address: string) => {
+  try {
+    const streams = await client.get({
+      address, // Wallet signing the transaction.
+      type: StreamType.Vesting, // (optional) Type, default is StreamType.All
+      direction: StreamDirection.Incoming, // (optional) Direction, default is StreamDirection.All)
+    });
+
+    return streams;
+  } catch (exception) {
+    // handle exception
+  }
+};
+
 export const getVestingMyOwn = async (address: string) => {
   try {
     const streams = await client.get({
       address, // Wallet signing the transaction.
-      type: StreamType.All, // (optional) Type, default is StreamType.All
-      direction: StreamDirection.All, // (optional) Direction, default is StreamDirection.All)
+      type: StreamType.Vesting, // (optional) Type, default is StreamType.All
+      direction: StreamDirection.Outgoing, // (optional) Direction, default is StreamDirection.All)
     });
 
     return streams;

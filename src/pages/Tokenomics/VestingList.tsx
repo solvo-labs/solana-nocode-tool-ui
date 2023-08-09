@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useState } from "react";
-import { getVestingMyOwn } from "../../lib/vesting";
+import { getVestingMyIncoming } from "../../lib/vesting";
 import { Stream } from "@streamflow/stream/dist/solana";
 import {
   CircularProgress,
@@ -24,6 +24,7 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import DoneIcon from "@mui/icons-material/Done";
 import { getTimestamp } from "../../lib/utils";
 import PendingIcon from "@mui/icons-material/Pending";
+import { PublicKey } from "@solana/web3.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
@@ -93,6 +94,7 @@ export const VestingList = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [vestingList, setVestingList] = useState<[string, Stream][]>([]);
   const classes = useStyles();
+  const { connection } = useConnection();
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -109,10 +111,24 @@ export const VestingList = () => {
   useEffect(() => {
     const init = async () => {
       if (publicKey) {
-        const data = await getVestingMyOwn(publicKey.toBase58());
+        const data = await getVestingMyIncoming(publicKey.toBase58());
+
         const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
-        setVestingList(sortedData || []);
-        setLoading(false);
+
+        if (sortedData) {
+          const promises = sortedData.map((dt) => {
+            return connection.getTokenSupply(new PublicKey(dt[1].mint));
+          });
+
+          const decimalsData = await Promise.all(promises);
+
+          const finalData = sortedData.map((st: any, index: number) => {
+            return { ...st, decimal: decimalsData[index].value.decimals };
+          });
+
+          setVestingList(finalData || []);
+          setLoading(false);
+        }
       }
     };
 
@@ -124,7 +140,9 @@ export const VestingList = () => {
     return () => {
       clearInterval(interval);
     };
-  }, [publicKey]);
+  }, [connection, publicKey]);
+
+  console.log(vestingList);
 
   const getStatusIcon = (startDate: number, endDate: number) => {
     const timestamp = getTimestamp();
@@ -172,11 +190,11 @@ export const VestingList = () => {
         <TableCell>{timestampToDate(e[1].lastWithdrawnAt)}</TableCell>
         <TableCell>{e[1].mint.slice(0, 8)}</TableCell>
         <TableCell align="center">{e[1].period}</TableCell>
-        <TableCell align="center">{e[1].withdrawnAmount.toNumber() / 10000000}</TableCell>
-        <TableCell align="center">{e[1].depositedAmount.toNumber() / 10000000}</TableCell>
+        <TableCell align="center">{e[1].withdrawnAmount.toNumber() / Math.pow(10, e.decimal)}</TableCell>
+        <TableCell align="center">{e[1].depositedAmount.toNumber() / Math.pow(10, e.decimal)}</TableCell>
         <TableCell>{timestampToDate(e[1].cliff)}</TableCell>
         <TableCell align="center">{e[1].cliffAmount.toNumber() / Math.pow(10, e[1].cliffAmount.length)}</TableCell>
-        <TableCell align="center">{String(e[1].automaticWithdrawal)}</TableCell>
+        <TableCell align="center">{String(e[1].automaticWithdrawal) ? "YES" : "NO"}</TableCell>
       </TableRow>
     ));
   };
@@ -201,7 +219,7 @@ export const VestingList = () => {
     vestingList && (
       <Grid container direction={"row"} className={classes.container}>
         <Grid item className={classes.titleContainer}>
-          <Typography variant="h5">Vesting List</Typography>
+          <Typography variant="h5">My Incoming Vesting's</Typography>
           <Divider sx={{ marginTop: "1rem", background: "white" }} />
         </Grid>
         <Grid container marginTop={"2rem"}>
