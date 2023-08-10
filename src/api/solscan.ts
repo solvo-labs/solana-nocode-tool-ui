@@ -31,7 +31,7 @@ export const lastBlock = async (): Promise<number> => {
 
 export const marketInfo = async ():Promise<MarketInfo> => {
   const returnValue = await axios.get(
-    "https://public-api.solscan.io/market/token/So11111111111111111111111111111111111111112",
+    "https://api.solscan.io/market?symbol=SOL&cluster=devnet",
     {
       headers: {
         accept: "application/json",
@@ -39,5 +39,5 @@ export const marketInfo = async ():Promise<MarketInfo> => {
       },
     }
   );
-  return { marketCapRank: returnValue.data.marketCapRank, priceChange24h: returnValue.data.priceChange24h, priceUsdt: returnValue.data.priceUsdt};
+  return { priceUsdt : returnValue.data.data.priceUsdt,marketCapRank: returnValue.data.data.marketCapRank, priceChange24h: returnValue.data.data.priceChange24h }
 };
