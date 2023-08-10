@@ -13,7 +13,7 @@ import SolNetwork, { SolNetworkLoading } from "../components/SolNetwork";
 import StakeClass from "../lib/stakeClass";
 import ActiveStake, { StakesLoading } from "../components/ActiveStake";
 import { useNavigate } from "react-router-dom";
-import { getVestingMyIncoming, getVestingMyOwn } from "../lib/vesting";
+import { getVestingMyIncoming } from "../lib/vesting";
 import ActiveVesting, { VestingLoading } from "../components/ActiveVesting";
 import { ChainInfo, MarketInfo, TokenData, ToolTips } from "../utils/types";
 import { Stream } from "@streamflow/stream/dist/solana";
