@@ -418,7 +418,7 @@ export const ContractPage = () => {
                       <CustomInput
                         key={"input" + index}
                         placeHolder={act.name}
-                        label={act.name}
+                        label={act.name + "(" + act.type + ")"}
                         required={false}
                         id={act.name}
                         name={act.name}
