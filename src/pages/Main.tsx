@@ -13,7 +13,7 @@ import SolNetwork, { SolNetworkLoading } from "../components/SolNetwork";
 import StakeClass from "../lib/stakeClass";
 import ActiveStake, { StakesLoading } from "../components/ActiveStake";
 import { useNavigate } from "react-router-dom";
-import { getVestingMyOwn } from "../lib/vesting";
+import { getVestingMyIncoming, getVestingMyOwn } from "../lib/vesting";
 import ActiveVesting, { VestingLoading } from "../components/ActiveVesting";
 import { ChainInfo, MarketInfo, TokenData, ToolTips } from "../utils/types";
 import { Stream } from "@streamflow/stream/dist/solana";
@@ -112,7 +112,7 @@ const Main: React.FC = () => {
   useEffect(() => {
     const vestingListFunction = async () => {
       if (publicKey) {
-        const data = await getVestingMyOwn(publicKey.toBase58());
+        const data = await getVestingMyIncoming(publicKey.toBase58());
         const sortedData = data?.sort((a, b) => a[1].createdAt - b[1].createdAt);
         setVestingList(sortedData || []);
         setVestingsLoading(false);
