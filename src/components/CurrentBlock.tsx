@@ -54,15 +54,20 @@ const CurrentBlock: React.FC<Props> = ({ lastBlock }) => {
           <Typography className={classes.title} color="text.secondary">
             Current Block
           </Typography>
-          <Grid item>
-            <Chip size="small" label="Live" color="success" />
+          <Stack spacing={1} direction={"row"}>
             <Chip
-              sx={{ marginLeft: "8px" }}
               size="small"
+              sx={{ fontSize: "12px" }}
+              label="Live"
+              color="success"
+            />
+            <Chip
+              size="small"
+              sx={{ fontSize: "12px" }}
               label="Devnet"
               color="success"
             />
-          </Grid>
+          </Stack>
         </Stack>
         <Stack
           direction={"row"}
