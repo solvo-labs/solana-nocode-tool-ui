@@ -169,7 +169,7 @@ const TopBar: React.FC = () => {
                   <Typography>Multisignature</Typography>
                 </MenuItem>
                 <MenuItem className={classes.menuItem} onClick={airdrop}>
-                  <Typography>Airdrop</Typography>
+                  <Typography>Faucet</Typography>
                 </MenuItem>
               </Menu>
               <Button onClick={(e: any) => handleClick(e, setAnchorElVesting)} onMouseOver={(e: any) => handleClick(e, setAnchorElVesting)}>

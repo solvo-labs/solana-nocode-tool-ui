@@ -47,7 +47,7 @@ export const Airdrop = () => {
 
   return (
     <Grid container display={"flex"} key={"index"} justifyContent={"space-evenly"} marginBottom={"1rem"}>
-      <h3 style={{ textAlign: "center" }}>Airdrop for 1SOL</h3>
+      <h3 style={{ textAlign: "center" }}>Faucet for 1SOL</h3>
       <FormControl fullWidth>
         <Grid item>
           <CustomInput
@@ -65,7 +65,7 @@ export const Airdrop = () => {
       <Grid container direction={"column"} display={"flex"} justifyContent={"center"}>
         <Grid item display={"flex"} justifyContent={"center"} marginTop={"1rem"}>
           <FormControl fullWidth>
-            <CustomButton disable={key === ""} label="AIRDROP REQUEST" onClick={airdropRequest} key={"key"}></CustomButton>
+            <CustomButton disable={key === ""} label="FAUCET REQUEST" onClick={airdropRequest} key={"key"}></CustomButton>
           </FormControl>
         </Grid>
       </Grid>
