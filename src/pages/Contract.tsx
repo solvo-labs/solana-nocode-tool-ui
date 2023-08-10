@@ -53,7 +53,7 @@ export const ContractPage = () => {
   const wallet = useAnchorWallet();
   const [loading, setLoading] = useState<boolean>(false);
   const [program, setProgram] = useState<Program>();
-  const [programId, setProgramId] = useState<string>("3MYQ4iEZC2XcRmB7U2XuasWxQPGKmorGBiuwBqJcHBni");
+  const [programId, setProgramId] = useState<string>("");
   const [provider, setProvider] = useState<AnchorProvider>();
   const [actionModal, setActionModal] = useState<{
     show: boolean;
@@ -98,11 +98,19 @@ export const ContractPage = () => {
         if (actionModal.readAction) {
           const accounts = program.account;
 
-          const currentAccount = accounts[actionModal.readAction.account.toLowerCase()];
+          const letter = actionModal.readAction.account;
+
+          const firstLetter = letter.charAt(0).toLowerCase();
+          const fullLetter = firstLetter + letter.slice(1);
+
+          const currentAccount = accounts[fullLetter];
 
           let data;
           if (actionModal.readAction.address) {
-            data = await currentAccount.fetch(actionModal.readAction.address);
+            const key = new PublicKey(actionModal.readAction.address);
+            data = await currentAccount.fetch(key);
+
+            data = [{ publicKey: key, account: data }];
           } else {
             data = await currentAccount.all();
           }
