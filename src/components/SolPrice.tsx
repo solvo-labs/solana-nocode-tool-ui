@@ -80,7 +80,7 @@ const SolPrice: React.FC<Props> = ({ data }) => {
                   : classes.priceChangeNegative
               }
             >
-              %{data?.priceChange24h.toFixed(2)}
+              % {data?.priceChange24h.toFixed(2)}
             </Typography>
           </Grid>
         </Grid>
