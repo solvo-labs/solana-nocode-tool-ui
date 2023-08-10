@@ -45,7 +45,6 @@ export const TokenMintAndBurn = () => {
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const [loading, setLoading] = useState<boolean>(true);
 
-
   const [holders, setHolders] = useState<any>([]);
   const [amountToBeBurn, setAmountToBeBurn] = useState<number>(0);
   const [selectedHolder, setSelectedHolder] = useState<any>();
@@ -72,6 +71,7 @@ export const TokenMintAndBurn = () => {
 
   const mintTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
+      setLoading(true);
       const ix = new Transaction().add(
         createMintToInstruction(new PublicKey(selectedToken.hex), selectedHolder.address, publicKey, amountToBeBurn * Math.pow(10, selectedToken.decimal), [], TOKEN_PROGRAM_ID)
       );
@@ -101,12 +101,15 @@ export const TokenMintAndBurn = () => {
         navigate("/my-tokens");
       } catch (error) {
         console.log(error);
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   const burnTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
+      setLoading(true);
       const ix = await burnToken(publicKey, new PublicKey(selectedToken.hex), selectedHolder.address, amountToBeBurn * Math.pow(10, selectedToken.decimal));
 
       const {
@@ -132,8 +135,10 @@ export const TokenMintAndBurn = () => {
 
         toastr.success("Burn completed Successfully");
         navigate("/my-tokens");
-      } catch (error) {
-        console.log(error);
+      } catch (error: any) {
+        toastr.error(error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -151,7 +156,7 @@ export const TokenMintAndBurn = () => {
     init();
   }, [connection, publicKey]);
 
-  if (  loading) {
+  if (loading) {
     return (
       <div
         style={{

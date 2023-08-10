@@ -158,6 +158,7 @@ export const Raffle = () => {
 
   const create = async () => {
     const lotteryAddress = getLotteryAddress(lastRaffleId + 1);
+    setLoading(true);
 
     if (program && publicKey) {
       const tx = await program.methods
@@ -173,6 +174,7 @@ export const Raffle = () => {
       toastr.success(tx, "New raffle created Successfullx txid : ");
       setShowRaffleModal(false);
       setNewTicketPrice(0);
+      setLoading(false);
     }
   };
 

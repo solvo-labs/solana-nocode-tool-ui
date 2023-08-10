@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
@@ -52,6 +53,7 @@ export const CloseAccount = () => {
 
   const closeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
+      setLoading(true);
       const ix = await closeAccount(new PublicKey(selectedHolder), new PublicKey(destinationPubkey), publicKey);
 
       const {
@@ -79,6 +81,8 @@ export const CloseAccount = () => {
         navigate("/my-tokens");
       } catch (error: any) {
         toastr.error(error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -198,8 +202,8 @@ export const CloseAccount = () => {
                     {holders.map((holder: any) => {
                       return (
                         <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
-                        {myAddresses.includes(holder.address.toBase58()) && "My Account: "} {holder.address.toBase58()}
-                      </MenuItem>
+                          {myAddresses.includes(holder.address.toBase58()) && "My Account: "} {holder.address.toBase58()}
+                        </MenuItem>
                       );
                     })}
                   </Select>

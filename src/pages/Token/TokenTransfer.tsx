@@ -36,6 +36,7 @@ export const TokenTransfer = () => {
   const [selectedToken, setSelectedToken] = useState<TokenData>();
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+
   const classes = useStyles();
   const navigate = useNavigate();
 
