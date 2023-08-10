@@ -5,7 +5,7 @@ const access_token = import.meta.env.VITE_API_KEY;
 
 export const networkInfo = async (): Promise<ChainInfo> => {
   const returnValue = await axios.get(
-    "https://public-api.solscan.io/chaininfo/",
+    "https://public-api.solscan.io/chaininfo?cluster=devnet",
     {
       headers: {
         accept: "application/json",
