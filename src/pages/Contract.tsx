@@ -137,9 +137,28 @@ export const ContractPage = () => {
             currentMethod(...args)
               .accounts(accountData)
               .signers(actionModal.writeAction.signers || [])
-              .rpc();
+              .rpc()
+              .then((tx) => {
+                window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
+                toastr.success("Transaction completed");
+                setActionModal({ show: false });
+              })
+              .catch((error: any) => {
+                toastr.error(error);
+              });
           } else {
-            currentMethod().accounts(accountData).rpc();
+            currentMethod()
+              .accounts(accountData)
+              .signers(actionModal.writeAction.signers || [])
+              .rpc()
+              .then((tx) => {
+                window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
+                toastr.success("Transaction completed");
+                setActionModal({ show: false });
+              })
+              .catch((error) => {
+                toastr.error(error);
+              });
           }
         }
       }
