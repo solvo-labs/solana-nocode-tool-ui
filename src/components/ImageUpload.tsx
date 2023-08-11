@@ -45,8 +45,7 @@ const ImageUpload: React.FC<Props> = ({ file, setFile }) => {
       setFile(file);
     }
   };
-  console.log(file);
-
+  
   return (
     <Grid container className={classes.container}>
       <Grid item>
