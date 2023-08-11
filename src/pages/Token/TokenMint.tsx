@@ -8,11 +8,12 @@ import { register } from "../../lib/tokenRegister";
 import { Token } from "../../utils/types";
 import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
-import { CircularProgress, Divider, Grid, Stack, TextField, Theme, Typography } from "@mui/material";
+import { CircularProgress, Divider, Grid, Stack, Theme, Typography } from "@mui/material";
 import { CustomButton } from "../../components/CustomButton";
 import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
 import { NFTStorage } from "nft.storage";
+import ImageUpload from "../../components/ImageUpload";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -155,6 +156,7 @@ const TokenMint: React.FC = () => {
         </Grid>
         <Grid item justifyContent={"center"} marginBottom={"2rem"}>
           <Stack direction={"column"} spacing={2} alignItems={"center"}>
+            <ImageUpload file={file} setFile={(data) => setFile(data)} />
             <CustomInput
               placeHolder="Name"
               label="Name"
@@ -220,16 +222,6 @@ const TokenMint: React.FC = () => {
         <Grid item marginBottom={8}>
           <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
         </Grid>
-
-        {/* <TextField
-          type="file"
-          onChange={(e) => {
-            setFile(e.target.files[0]);
-          }}
-          fullWidth
-          variant="outlined"
-          margin="normal"
-        /> */}
       </Grid>
     </div>
   );

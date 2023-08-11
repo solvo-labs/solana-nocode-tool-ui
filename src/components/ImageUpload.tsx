@@ -1,14 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ChangeEvent, useRef } from "react";
-import {
-  Avatar,
-  Button,
-  Grid,
-  IconButton,
-  Stack,
-  Theme,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Avatar, Button, Grid, IconButton, Stack, Theme, Tooltip, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { makeStyles } from "@mui/styles";
 
@@ -33,33 +25,23 @@ const useStyles = makeStyles((_theme: Theme) => ({
 }));
 
 type Props = {
-  onChange: (image: any) => void;
-  onClear: () => void;
   file: File | undefined;
   setFile: (image: File | undefined) => void;
 };
 
-const ImageUpload: React.FC<Props> = ({ onChange, onClear, file, setFile }) => {
+const ImageUpload: React.FC<Props> = ({ file, setFile }) => {
   const classes = useStyles();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClearButtonClick = () => {
     setFile(undefined);
-    onClear();
     inputRef.current!.value = "";
   };
 
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const file = event.target.files[0];
-      const fileReader = new FileReader();
 
-      fileReader.readAsDataURL(file);
-      fileReader.onload = (event) => {
-        if (event.target?.result) {
-          onChange(event.target.result);
-        }
-      };
       setFile(file);
     }
   };
@@ -70,23 +52,11 @@ const ImageUpload: React.FC<Props> = ({ onChange, onClear, file, setFile }) => {
       <Grid item>
         <Stack spacing={1}>
           <Typography variant="body1" color="black">
-            Upload your icon
+            Upload your icon (optional)
           </Typography>
-          <input
-            className={classes.input}
-            accept="image/*"
-            multiple
-            id="contained-button-file"
-            type="file"
-            onChange={handleFileInputChange}
-          ></input>
+          <input className={classes.input} accept="image/*" multiple id="contained-button-file" type="file" onChange={handleFileInputChange}></input>
           <label htmlFor="contained-button-file">
-            <Button
-              className={classes.button}
-              variant="contained"
-              color="primary"
-              component="span"
-            >
+            <Button className={classes.button} variant="contained" color="primary" component="span">
               Select Image
             </Button>
           </label>
@@ -101,13 +71,7 @@ const ImageUpload: React.FC<Props> = ({ onChange, onClear, file, setFile }) => {
               </IconButton>
             </Tooltip>
           </Grid>
-          {file && (
-            <Avatar
-              alt="Remy Sharp"
-              src={URL.createObjectURL(file)}
-              sx={{ width: 72, height: 72 }}
-            ></Avatar>
-          )}
+          {file && <Avatar alt="Remy Sharp" src={URL.createObjectURL(file)} sx={{ width: 72, height: 72 }}></Avatar>}
         </Grid>
       </Grid>
     </Grid>
