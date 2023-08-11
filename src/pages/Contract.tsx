@@ -204,13 +204,13 @@ export const ContractPage = () => {
 
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <h4>Functions</h4>
+              <h4>Methods</h4>
               <Divider />
               <TableContainer>
                 <Table aria-label="simple table">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Function</TableCell>
+                      <TableCell>Method</TableCell>
                       <TableCell></TableCell>
                     </TableRow>
                   </TableHead>
@@ -222,7 +222,7 @@ export const ContractPage = () => {
                         </TableCell>
                         <TableCell>
                           <CustomButton
-                            label={"Run"}
+                            label={"EXEC"}
                             disable={false}
                             onClick={() => {
                               const inputs = row.accounts.map((ac: any, index: number) => {
@@ -333,8 +333,8 @@ export const ContractPage = () => {
           }}
         >
           <div className={classes.modalContent}>
-            <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
-              Run Your Contract Functions
+            <Typography id="modal-modal-title" variant="h4" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
+              Exec <span style={{ fontWeight: "bold" }}>{actionModal.writeAction?.instruction.name} ()</span> method
             </Typography>
             <div>
               {actionModal.readAction && (
@@ -382,7 +382,7 @@ export const ContractPage = () => {
               )}
 
               {actionModal.writeAction && actionModal.writeAction.instruction.accounts.length > 0 && (
-                <h3 style={{ color: "black" }}>Accounts for {actionModal.writeAction.instruction.name}() function</h3>
+                <h3 style={{ color: "black" }}>Accounts for {actionModal.writeAction.instruction.name}() method</h3>
               )}
 
               {actionModal.writeAction &&
@@ -435,7 +435,7 @@ export const ContractPage = () => {
                 })}
 
               {actionModal.writeAction && actionModal.writeAction.instruction.args.length > 0 && (
-                <h3 style={{ color: "black" }}>Args for {actionModal.writeAction.instruction.name}() function</h3>
+                <h3 style={{ color: "black" }}>Args for {actionModal.writeAction.instruction.name}() method</h3>
               )}
 
               {actionModal.writeAction &&
@@ -467,7 +467,7 @@ export const ContractPage = () => {
                 })}
 
               <div style={{ textAlign: "center" }}>
-                <CustomButton label="Run" onClick={exec} disable={false} />
+                <CustomButton label="EXEC" onClick={exec} disable={false} />
               </div>
             </div>
           </div>
