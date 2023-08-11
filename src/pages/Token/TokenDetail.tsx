@@ -33,12 +33,23 @@ import { CustomButton } from "../../components/CustomButton";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { CustomInput } from "../../components/CustomInput";
-import { burnToken, getLargestAccounts, getOrCreateAssociatedTokenAccount } from "../../lib/token";
+import {
+  burnToken,
+  getLargestAccounts,
+  getOrCreateAssociatedTokenAccount,
+} from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, createMintToInstruction, createTransferInstruction, getAccount } from "@solana/spl-token";
+import {
+  TOKEN_PROGRAM_ID,
+  createMintToInstruction,
+  createTransferInstruction,
+  getAccount,
+} from "@solana/spl-token";
 import toastr from "toastr";
 import RegisterTokenForm from "../../components/RegisterTokenForm";
 import { RegisterToken, register } from "../../lib/tokenRegister";
+import ImageUpload from "../../components/ImageUpload";
+import { NFTStorage } from "nft.storage";
 // import VestingForm from "../../components/VestingForm";
 // import { Durations, Recipient, RecipientFormInput, UnlockSchedule, VestParams, VestParamsData } from "../../lib/models/Vesting";
 // import dayjs from "dayjs";
@@ -115,6 +126,7 @@ export const TokenDetail = () => {
     ownerToolTip: false,
   });
   const [loading, setLoading] = useState<boolean>(true);
+  const [registerLoading, setRegiterLoading] = useState<boolean>(false);
 
   //Transfer
   const [transferData, setTransferData] = useState({
@@ -133,6 +145,34 @@ export const TokenDetail = () => {
     setValue(newValue);
   };
 
+  // Register
+  const [file, setFile] = useState<File | undefined>();
+
+  const storeImage = async () => {
+    if (file) {
+      const storage = new NFTStorage({
+        token: import.meta.env.VITE_NFT_STORAGE_API_KEY,
+      });
+
+      const fileCid = await storage.storeBlob(new Blob([file]));
+
+      const fileUrl = "https://ipfs.io/ipfs/" + fileCid;
+
+      const obj = {
+        image: fileUrl,
+      };
+
+      // (5)
+      const metadata = new Blob([JSON.stringify(obj)], {
+        type: "application/json",
+      });
+      const metadataCid = await storage.storeBlob(metadata);
+      const metadataUrl = "https://ipfs.io/ipfs/" + metadataCid;
+      return metadataUrl;
+    } else {
+      return "";
+    }
+  };
   // //vest
   // const [vestParams, setVestParams] = useState<VestParamsData>({
   //   startDate: dayjs().add(1, "h"),
@@ -154,7 +194,11 @@ export const TokenDetail = () => {
   useEffect(() => {
     const init = async () => {
       if (publicKey && tokenHex) {
-        const data = await fetchUserTokens(connection, publicKey, new PublicKey(tokenHex));
+        const data = await fetchUserTokens(
+          connection,
+          publicKey,
+          new PublicKey(tokenHex)
+        );
         setToken(data[0]);
         setLoading(false);
       }
@@ -172,11 +216,16 @@ export const TokenDetail = () => {
   useEffect(() => {
     const fetch = async () => {
       if (token && publicKey) {
-        const getLargest = await getLargestAccounts(connection, new PublicKey(token.hex));
+        const getLargest = await getLargestAccounts(
+          connection,
+          new PublicKey(token.hex)
+        );
         const myAddress = await connection.getTokenAccountsByOwner(publicKey, {
           mint: new PublicKey(token.hex),
         });
-        const myAddressPubkeys = myAddress.value.map((my) => my.pubkey.toBase58());
+        const myAddressPubkeys = myAddress.value.map((my) =>
+          my.pubkey.toBase58()
+        );
         setMyAddresses(myAddressPubkeys);
         setHolders(getLargest.value);
       }
@@ -208,7 +257,12 @@ export const TokenDetail = () => {
         const destination = new PublicKey(transferData.destinationPubkey);
         const selectedTokenPubkey = new PublicKey(token.hex);
 
-        const { associatedToken } = await getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, publicKey, connection);
+        const { associatedToken } = await getOrCreateAssociatedTokenAccount(
+          selectedTokenPubkey,
+          publicKey,
+          publicKey,
+          connection
+        );
 
         const fromAccount = await getAccount(connection, associatedToken);
 
@@ -216,13 +270,25 @@ export const TokenDetail = () => {
           transaction: tx2,
           account: toAccount,
           associatedToken: associatedTokenTo,
-        } = await getOrCreateAssociatedTokenAccount(selectedTokenPubkey, publicKey, destination, connection);
+        } = await getOrCreateAssociatedTokenAccount(
+          selectedTokenPubkey,
+          publicKey,
+          destination,
+          connection
+        );
 
         if (tx2) {
           const transactions = new Transaction();
 
           transactions.add(tx2);
-          transactions.add(createTransferInstruction(fromAccount.address, associatedTokenTo, publicKey, transferData.amount * Math.pow(10, token.decimal)));
+          transactions.add(
+            createTransferInstruction(
+              fromAccount.address,
+              associatedTokenTo,
+              publicKey,
+              transferData.amount * Math.pow(10, token.decimal)
+            )
+          );
 
           const signature = await sendTransaction(transactions, connection, {
             minContextSlot,
@@ -238,7 +304,12 @@ export const TokenDetail = () => {
           toastr.success("Transfer completed successfully.");
         } else {
           const transaction = new Transaction().add(
-            createTransferInstruction(fromAccount.address, toAccount.address, publicKey, transferData.amount * Math.pow(10, token.decimal))
+            createTransferInstruction(
+              fromAccount.address,
+              toAccount.address,
+              publicKey,
+              transferData.amount * Math.pow(10, token.decimal)
+            )
           );
 
           const signature = await sendTransaction(transaction, connection, {
@@ -260,7 +331,14 @@ export const TokenDetail = () => {
   const mintTransaction = async () => {
     if (publicKey && token && selectedHolder) {
       const ix = new Transaction().add(
-        createMintToInstruction(new PublicKey(token.hex), selectedHolder.address, publicKey, amountToMB * Math.pow(10, token.decimal), [], TOKEN_PROGRAM_ID)
+        createMintToInstruction(
+          new PublicKey(token.hex),
+          selectedHolder.address,
+          publicKey,
+          amountToMB * Math.pow(10, token.decimal),
+          [],
+          TOKEN_PROGRAM_ID
+        )
       );
 
       const {
@@ -273,10 +351,14 @@ export const TokenDetail = () => {
         const burnTransaction = new Transaction();
         burnTransaction.add(ix);
 
-        const burnSignature = await sendTransaction(burnTransaction, connection, {
-          minContextSlot,
-          signers: [],
-        });
+        const burnSignature = await sendTransaction(
+          burnTransaction,
+          connection,
+          {
+            minContextSlot,
+            signers: [],
+          }
+        );
         await connection.confirmTransaction({
           blockhash,
           lastValidBlockHeight,
@@ -291,7 +373,12 @@ export const TokenDetail = () => {
 
   const burnTransaction = async () => {
     if (publicKey && token && selectedHolder) {
-      const ix = await burnToken(publicKey, new PublicKey(token.hex), selectedHolder.address, amountToMB * Math.pow(10, token.decimal));
+      const ix = await burnToken(
+        publicKey,
+        new PublicKey(token.hex),
+        selectedHolder.address,
+        amountToMB * Math.pow(10, token.decimal)
+      );
 
       const {
         context: { slot: minContextSlot },
@@ -303,10 +390,14 @@ export const TokenDetail = () => {
         const burnTransaction = new Transaction();
         burnTransaction.add(ix);
 
-        const burnSignature = await sendTransaction(burnTransaction, connection, {
-          minContextSlot,
-          signers: [],
-        });
+        const burnSignature = await sendTransaction(
+          burnTransaction,
+          connection,
+          {
+            minContextSlot,
+            signers: [],
+          }
+        );
 
         await connection.confirmTransaction({
           blockhash,
@@ -324,6 +415,7 @@ export const TokenDetail = () => {
   };
 
   const registerTransaction = async () => {
+    setRegiterLoading(true);
     if (publicKey && token) {
       const {
         context: { slot: minContextSlot },
@@ -331,13 +423,21 @@ export const TokenDetail = () => {
       } = await connection.getLatestBlockhashAndContext();
 
       try {
+        const newUri = await storeImage();
+
         const transaction = register(token?.hex, publicKey, {
           name: registerData.name,
           symbol: registerData.symbol,
+          uri: newUri,
         });
+
         const registertransaction = new Transaction();
         registertransaction.add(transaction);
-        const signature = await sendTransaction(registertransaction, connection, { minContextSlot, signers: [] });
+        const signature = await sendTransaction(
+          registertransaction,
+          connection,
+          { minContextSlot, signers: [] }
+        );
         await connection.confirmTransaction({
           blockhash,
           lastValidBlockHeight,
@@ -346,8 +446,11 @@ export const TokenDetail = () => {
 
         setRegisterData({ name: "", symbol: "" });
         toastr.success("Token register completed successfully");
+        navigate("/token/" + tokenHex);
+        setRegiterLoading(false);
       } catch (error) {
         console.log(error);
+        setRegiterLoading(false);
       }
     }
   };
@@ -387,7 +490,7 @@ export const TokenDetail = () => {
   //   }
   // };
 
-  if (loading) {
+  if (loading || registerLoading) {
     return (
       <div
         style={{
@@ -405,17 +508,30 @@ export const TokenDetail = () => {
 
   return (
     <Grid container className={classes.container} direction={"column"}>
-      <Grid container className={classes.titleContainer} justifyContent={"space-between"}>
+      <Grid
+        container
+        className={classes.titleContainer}
+        justifyContent={"space-between"}
+      >
         <Grid item>
           <Typography variant="h5">Token Detail</Typography>
         </Grid>
-        <CustomButton disable={false} label="My Tokens" onClick={() => navigate("/my-tokens")}></CustomButton>
+        <CustomButton
+          disable={false}
+          label="My Tokens"
+          onClick={() => navigate("/my-tokens")}
+        ></CustomButton>
       </Grid>
       <Grid container direction={"row"} justifyContent={"center"} spacing={4}>
         <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
           <Card className={classes.card}>
             <CardContent>
-              <Typography className={classes.info} sx={{ fontWeight: "bold" }} variant="subtitle1" marginBottom={"0.5rem"}>
+              <Typography
+                className={classes.info}
+                sx={{ fontWeight: "bold" }}
+                variant="subtitle1"
+                marginBottom={"0.5rem"}
+              >
                 Token Summary
               </Typography>
               <Grid container className={classes.info}>
@@ -423,7 +539,9 @@ export const TokenDetail = () => {
                   <Typography variant="body2">Name:</Typography>
                 </Grid>
                 <Grid container width={"70%"}>
-                  <Typography variant="body2">{token?.metadata.name}</Typography>
+                  <Typography variant="body2">
+                    {token?.metadata.name}
+                  </Typography>
                 </Grid>
               </Grid>
               <Grid container className={classes.info}>
@@ -431,15 +549,24 @@ export const TokenDetail = () => {
                   <Typography variant="body2">Symbol:</Typography>
                 </Grid>
                 <Grid container width={"70%"}>
-                  <Typography variant="body2">{token?.metadata.symbol}</Typography>
+                  <Typography variant="body2">
+                    {token?.metadata.symbol}
+                  </Typography>
                 </Grid>
               </Grid>
               <Grid container className={classes.info}>
                 <Grid container width={"20%"}>
                   <Typography variant="body2">Hex:</Typography>
                 </Grid>
-                <Grid container width={"80%"} direction={"row"} justifyContent={"space-between"}>
-                  <Typography variant="body2">{token?.hex.slice(0, 24) + "..."}</Typography>
+                <Grid
+                  container
+                  width={"80%"}
+                  direction={"row"}
+                  justifyContent={"space-between"}
+                >
+                  <Typography variant="body2">
+                    {token?.hex.slice(0, 24) + "..."}
+                  </Typography>
                   <Tooltip
                     id="hex"
                     PopperProps={{
@@ -451,8 +578,16 @@ export const TokenDetail = () => {
                     leaveDelay={1000}
                     placement="left"
                   >
-                    <IconButton onClick={() => handleTooltipOpen("hexToolTip", token?.hex)} className={classes.copyButton} sx={{ padding: "0rem" }}>
-                      <ContentCopyIcon sx={{ fontSize: "1rem", margin: "0rem" }}></ContentCopyIcon>
+                    <IconButton
+                      onClick={() =>
+                        handleTooltipOpen("hexToolTip", token?.hex)
+                      }
+                      className={classes.copyButton}
+                      sx={{ padding: "0rem" }}
+                    >
+                      <ContentCopyIcon
+                        sx={{ fontSize: "1rem", margin: "0rem" }}
+                      ></ContentCopyIcon>
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -470,7 +605,9 @@ export const TokenDetail = () => {
                   <Typography variant="body2">Owner:</Typography>
                 </Grid>
                 <Grid container width={"80%"} justifyContent={"space-between"}>
-                  <Typography variant="body2">{token?.owner.slice(0, 24) + "..."}</Typography>
+                  <Typography variant="body2">
+                    {token?.owner.slice(0, 24) + "..."}
+                  </Typography>
                   <Tooltip
                     id="hex"
                     PopperProps={{
@@ -482,8 +619,16 @@ export const TokenDetail = () => {
                     leaveDelay={1000}
                     placement="left"
                   >
-                    <IconButton onClick={() => handleTooltipOpen("ownerToolTip", token?.owner)} className={classes.copyButton} sx={{ padding: "0rem" }}>
-                      <ContentCopyIcon sx={{ fontSize: "1rem", margin: "0rem" }}></ContentCopyIcon>
+                    <IconButton
+                      onClick={() =>
+                        handleTooltipOpen("ownerToolTip", token?.owner)
+                      }
+                      className={classes.copyButton}
+                      sx={{ padding: "0rem" }}
+                    >
+                      <ContentCopyIcon
+                        sx={{ fontSize: "1rem", margin: "0rem" }}
+                      ></ContentCopyIcon>
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -494,7 +639,12 @@ export const TokenDetail = () => {
         <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
           <Card className={classes.card}>
             <CardContent>
-              <Typography sx={{ fontWeight: "bold" }} variant="subtitle1" marginBottom={"0.5rem"} className={classes.info}>
+              <Typography
+                sx={{ fontWeight: "bold" }}
+                variant="subtitle1"
+                marginBottom={"0.5rem"}
+                className={classes.info}
+              >
                 Market Overview
               </Typography>
               <Grid container className={classes.info}>
@@ -502,7 +652,9 @@ export const TokenDetail = () => {
                   <Typography variant="body2">Current Supply:</Typography>
                 </Grid>
                 <Grid container width={"60%"}>
-                  <Typography variant="body2">{token?.supply.value.uiAmount}</Typography>
+                  <Typography variant="body2">
+                    {token?.supply.value.uiAmount}
+                  </Typography>
                 </Grid>
               </Grid>
               <Grid container className={classes.info}>
@@ -510,7 +662,9 @@ export const TokenDetail = () => {
                   <Typography variant="body2">Balance:</Typography>
                 </Grid>
                 <Grid container width={"60%"}>
-                  <Typography variant="body2">{token && token?.amount / Math.pow(10, token?.decimal)}</Typography>
+                  <Typography variant="body2">
+                    {token && token?.amount / Math.pow(10, token?.decimal)}
+                  </Typography>
                 </Grid>
               </Grid>
             </CardContent>
@@ -518,22 +672,58 @@ export const TokenDetail = () => {
         </Grid>
       </Grid>
 
-      <Grid item marginTop={"1rem"} xl={6} lg={6} md={6} sm={12} xs={12} maxWidth={"90vw !important"}>
+      <Grid
+        item
+        marginTop={"1rem"}
+        xl={6}
+        lg={6}
+        md={6}
+        sm={12}
+        xs={12}
+        maxWidth={"90vw !important"}
+      >
         <Card className={classes.card}>
           <CardContent>
             <Box>
               <TabContext value={value}>
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                   <TabList onChange={handleChange} className={classes.tabTitle}>
-                    <Tab className={classes.tabTitle} label="Transfer" value="1" />
-                    <Tab className={classes.tabTitle} label="Mint & Burn" value="2" />
-                    <Tab className={classes.tabTitle} label="Holders" value="3" />
-                    {!token?.metadata.isRegistered && <Tab className={classes.tabTitle} label="Register" value="4"></Tab>}
-                    <Tab className={classes.tabTitle} label="Vesting" value="5" />
+                    <Tab
+                      className={classes.tabTitle}
+                      label="Transfer"
+                      value="1"
+                    />
+                    <Tab
+                      className={classes.tabTitle}
+                      label="Mint & Burn"
+                      value="2"
+                    />
+                    <Tab
+                      className={classes.tabTitle}
+                      label="Holders"
+                      value="3"
+                    />
+                    {!token?.metadata.isRegistered && (
+                      <Tab
+                        className={classes.tabTitle}
+                        label="Register"
+                        value="4"
+                      ></Tab>
+                    )}
+                    <Tab
+                      className={classes.tabTitle}
+                      label="Vesting"
+                      value="5"
+                    />
                   </TabList>
                 </Box>
                 <TabPanel value="1">
-                  <Grid item display={"flex"} justifyContent={"center"} marginY={"1rem"}>
+                  <Grid
+                    item
+                    display={"flex"}
+                    justifyContent={"center"}
+                    marginY={"1rem"}
+                  >
                     <Stack spacing={4}>
                       <CustomInput
                         label="Destination Publickey"
@@ -562,31 +752,62 @@ export const TokenDetail = () => {
                         value={transferData.amount}
                       ></CustomInput>
 
-                      <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
-                        <CustomButton label="Transfer Token" disable={false} onClick={transfer}></CustomButton>
+                      <Grid
+                        item
+                        gap={2}
+                        display={"flex"}
+                        justifyContent={"center"}
+                        alignItems={"center"}
+                        flexDirection={"column"}
+                      >
+                        <CustomButton
+                          label="Transfer Token"
+                          disable={false}
+                          onClick={transfer}
+                        ></CustomButton>
                       </Grid>
                     </Stack>
                   </Grid>
                 </TabPanel>
                 <TabPanel value="2">
-                  <Grid item display={"flex"} justifyContent={"center"} marginY={"1rem"}>
+                  <Grid
+                    item
+                    display={"flex"}
+                    justifyContent={"center"}
+                    marginY={"1rem"}
+                  >
                     <Stack spacing={4}>
                       <Grid item display={"flex"} justifyContent={"center"}>
                         <FormControl fullWidth>
-                          <InputLabel id="selectLabel">Select a Holder</InputLabel>
+                          <InputLabel id="selectLabel">
+                            Select a Holder
+                          </InputLabel>
                           <Select
-                            value={selectedHolder ? selectedHolder.address.toBase58() : ""}
+                            value={
+                              selectedHolder
+                                ? selectedHolder.address.toBase58()
+                                : ""
+                            }
                             label=" Token"
                             onChange={(e: any) => {
-                              const currentHolder = holders.find((hf: any) => hf.address.toBase58() === e.target.value);
+                              const currentHolder = holders.find(
+                                (hf: any) =>
+                                  hf.address.toBase58() === e.target.value
+                              );
                               setSelectedHolder(currentHolder);
                             }}
                             id={"custom-select"}
                           >
                             {holders.map((holder: any) => {
                               return (
-                                <MenuItem key={holder.address.toBase58()} value={holder.address.toBase58()}>
-                                  {myAddresses.includes(holder.address.toBase58()) && "My Account: "} {holder.address.toBase58()}
+                                <MenuItem
+                                  key={holder.address.toBase58()}
+                                  value={holder.address.toBase58()}
+                                >
+                                  {myAddresses.includes(
+                                    holder.address.toBase58()
+                                  ) && "My Account: "}{" "}
+                                  {holder.address.toBase58()}
                                 </MenuItem>
                               );
                             })}
@@ -602,16 +823,35 @@ export const TokenDetail = () => {
                         value={amountToMB}
                       ></CustomInput>
 
-                      <Grid item gap={2} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"row"}>
-                        <CustomButton label="Burn Token" disable={false} onClick={burnTransaction}></CustomButton>
-                        <CustomButton disable={false} label="Mint Token" onClick={mintTransaction}></CustomButton>
+                      <Grid
+                        item
+                        gap={2}
+                        display={"flex"}
+                        justifyContent={"center"}
+                        alignItems={"center"}
+                        flexDirection={"row"}
+                      >
+                        <CustomButton
+                          label="Burn Token"
+                          disable={false}
+                          onClick={burnTransaction}
+                        ></CustomButton>
+                        <CustomButton
+                          disable={false}
+                          label="Mint Token"
+                          onClick={mintTransaction}
+                        ></CustomButton>
                       </Grid>
                     </Stack>
                   </Grid>
                 </TabPanel>
                 <TabPanel value="3">
                   <TableContainer>
-                    <Table component={Paper} sx={{ minWidth: 650 }} aria-label="simple table">
+                    <Table
+                      component={Paper}
+                      sx={{ minWidth: 650 }}
+                      aria-label="simple table"
+                    >
                       <TableHead>
                         <TableRow>
                           <TableCell align="left">Address</TableCell>
@@ -622,7 +862,9 @@ export const TokenDetail = () => {
                         {holders.map((e: any, index: number) => (
                           <TableRow key={index}>
                             <TableCell>{e.address.toBase58()}</TableCell>
-                            <TableCell align="right">{e.amount / Math.pow(10, e.decimals)}</TableCell>
+                            <TableCell align="right">
+                              {e.amount / Math.pow(10, e.decimals)}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -630,15 +872,27 @@ export const TokenDetail = () => {
                   </TableContainer>
                 </TabPanel>
                 <TabPanel value="4">
-                  <Grid item display={"flex"} justifyContent={"center"} marginY={"1rem"}>
-                    <RegisterTokenForm
-                      disable={false}
-                      register={registerTransaction}
-                      inputs={registerData}
-                      inputOnChange={(data) => {
-                        setRegisterData(data);
-                      }}
-                    ></RegisterTokenForm>
+                  <Grid
+                    container
+                    display={"flex"}
+                    justifyContent={"center"}
+                    marginY={"1rem"}
+                    direction={"row"}
+                  >
+                    <Stack spacing={2}>
+                      <ImageUpload
+                        file={file}
+                        setFile={(data) => setFile(data)}
+                      ></ImageUpload>
+                      <RegisterTokenForm
+                        disable={false}
+                        register={registerTransaction}
+                        inputs={registerData}
+                        inputOnChange={(data) => {
+                          setRegisterData(data);
+                        }}
+                      ></RegisterTokenForm>
+                    </Stack>
                   </Grid>
                 </TabPanel>
                 {/* <TabPanel value="5">
