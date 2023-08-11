@@ -3,7 +3,7 @@ import { utils } from "@project-serum/anchor";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 
 // ref https://github.com/loopcreativeandy/video-tutorial-resources/blob/main/mpl/mpl_tutorial.ts
-export const register = (mintPublickey: string, publicKey: PublicKey, metadata: { name: string; symbol: string }) => {
+export const register = (mintPublickey: string, publicKey: PublicKey, metadata: { name: string; symbol: string; uri: string }) => {
   const mint = new PublicKey(mintPublickey);
 
   const seed1 = Buffer.from(utils.bytes.utf8.encode("metadata"));
@@ -30,7 +30,7 @@ export const register = (mintPublickey: string, publicKey: PublicKey, metadata: 
     creators: null,
     collection: null,
     uses: null,
-    uri: "",
+    uri: metadata.uri,
   };
 
   const args = {
@@ -65,4 +65,4 @@ export const getMetadataPDA = async (mint: PublicKey, connection: Connection) =>
 export type RegisterToken = {
   name: string;
   symbol: string;
-}
+};

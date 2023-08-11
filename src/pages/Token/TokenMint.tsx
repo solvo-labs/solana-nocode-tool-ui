@@ -8,10 +8,11 @@ import { register } from "../../lib/tokenRegister";
 import { Token } from "../../utils/types";
 import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
-import { CircularProgress, Divider, Grid, Stack, Theme, Typography } from "@mui/material";
+import { CircularProgress, Divider, Grid, Stack, TextField, Theme, Typography } from "@mui/material";
 import { CustomButton } from "../../components/CustomButton";
 import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
+import { NFTStorage } from "nft.storage";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -33,6 +34,7 @@ const TokenMint: React.FC = () => {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<any>();
   const navigate = useNavigate();
 
   const [tokenData, setTokenData] = useState<Token>({
@@ -43,6 +45,27 @@ const TokenMint: React.FC = () => {
     freezeAuthority: publicKey?.toBase58(),
     authority: publicKey?.toBase58(),
   });
+
+  const storeImage = async () => {
+    const storage = new NFTStorage({
+      token: import.meta.env.VITE_NFT_STORAGE_API_KEY,
+    });
+
+    const fileCid = await storage.storeBlob(new Blob([file]));
+
+    const fileUrl = "https://ipfs.io/ipfs/" + fileCid;
+
+    const obj = {
+      image: fileUrl,
+    };
+
+    // (5)
+    const metadata = new Blob([JSON.stringify(obj)], { type: "application/json" });
+    const metadataCid = await storage.storeBlob(metadata);
+    const metadataUrl = "https://ipfs.io/ipfs/" + metadataCid;
+
+    return metadataUrl;
+  };
 
   const createTransaction = async () => {
     if (publicKey) {
@@ -74,7 +97,13 @@ const TokenMint: React.FC = () => {
           )
         );
 
-        const transaction4 = register(toAccount.publicKey.toBase58(), publicKey, { name: tokenData.name, symbol: tokenData.symbol });
+        let uri = "";
+
+        if (file) {
+          uri = await storeImage();
+        }
+
+        const transaction4 = register(toAccount.publicKey.toBase58(), publicKey, { name: tokenData.name, symbol: tokenData.symbol, uri });
 
         const finalTransactions = new Transaction();
         finalTransactions.add(transaction);
@@ -191,6 +220,16 @@ const TokenMint: React.FC = () => {
         <Grid item marginBottom={8}>
           <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
         </Grid>
+
+        {/* <TextField
+          type="file"
+          onChange={(e) => {
+            setFile(e.target.files[0]);
+          }}
+          fullWidth
+          variant="outlined"
+          margin="normal"
+        /> */}
       </Grid>
     </div>
   );
