@@ -46,8 +46,8 @@ const CurrentBlock: React.FC<Props> = ({ lastBlock, loading }) => {
             Current Block
           </Typography>
           <Stack spacing={1} direction={"row"}>
-            <Chip size="small" sx={{ fontSize: "12px" }} label="Live" color="success" />
-            <Chip size="small" sx={{ fontSize: "12px" }} label="Devnet" color="success" />
+            <Chip sx={{ fontSize: "1rem" }} label="Live" color="success" />
+            <Chip sx={{ fontSize: "1rem" }} label="Devnet" color="success" />
           </Stack>
         </Stack>
 
