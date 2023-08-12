@@ -3,11 +3,10 @@ import { Grid, Theme } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Profile, { ProfileLoading } from "../components/Profile";
 import SolPrice, { SolPriceLoading } from "../components/SolPrice";
-import CurrentBlock, { CurrentBlockLoading } from "../components/CurrentBlock";
+import CurrentBlock from "../components/CurrentBlock";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { makeStyles } from "@mui/styles";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import SolNetwork, { SolNetworkLoading } from "../components/SolNetwork";
 // import SolTotalStake from "../components/SolTotalStake";
 // import SolSupply from "../components/SolSupply";
 import StakeClass from "../lib/stakeClass";
@@ -15,10 +14,10 @@ import ActiveStake, { StakesLoading } from "../components/ActiveStake";
 import { useNavigate } from "react-router-dom";
 import { getVestingMyIncoming } from "../lib/vesting";
 import ActiveVesting, { VestingLoading } from "../components/ActiveVesting";
-import { ChainInfo, MarketInfo, TokenData, ToolTips } from "../utils/types";
+import { MarketInfo, TokenData, ToolTips } from "../utils/types";
 import { Stream } from "@streamflow/stream/dist/solana";
 import { fetchUserTokens } from "../lib";
-import { lastBlock, marketInfo, networkInfo } from "../api/solscan";
+import { lastBlock, marketInfo } from "../api/solscan";
 import RegisterToken, { RegisterTokenLoading } from "../components/NonRegisteredToken";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -52,7 +51,7 @@ const Main: React.FC = () => {
     walletToolTop: false,
   });
 
-  const [chain, setChain] = useState<ChainInfo>();
+  // const [chain, setChain] = useState<ChainInfo>();
   const [lastBlockData, setLastBlockData] = useState<number>(0);
   const [solInfo, setSolInfo] = useState<MarketInfo | undefined>();
 
@@ -60,7 +59,6 @@ const Main: React.FC = () => {
   const [walletLoading, setWalletLoading] = useState<boolean>(true);
   const [priceLoading, setPriceLoading] = useState<boolean>(true);
   const [currentBlockLoading, setCurrentBlockLoading] = useState<boolean>(true);
-  const [networkLoading, setNetworkLoading] = useState<boolean>(true);
   const [stakesLoading, setStakesLoading] = useState<boolean>(true);
   const [vestingsLoading, setVestingsLoading] = useState<boolean>(true);
   const [nonRegisteredTokenLoading, setNonRegisteredTokenLoading] = useState<boolean>(true);
@@ -145,20 +143,20 @@ const Main: React.FC = () => {
     };
   }, [connection, publicKey]);
 
-  useEffect(() => {
-    const marketInfoFunction = async () => {
-      const returnValue = await networkInfo();
-      setChain(returnValue);
-      setNetworkLoading(false);
-    };
-    marketInfoFunction();
-    const interval = setInterval(() => {
-      marketInfoFunction();
-    }, 5000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const marketInfoFunction = async () => {
+  //     const returnValue = await networkInfo();
+  //     setChain(returnValue);
+  //     setNetworkLoading(false);
+  //   };
+  //   marketInfoFunction();
+  //   const interval = setInterval(() => {
+  //     marketInfoFunction();
+  //   }, 5000);
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -213,11 +211,11 @@ const Main: React.FC = () => {
             {priceLoading ? <SolPriceLoading /> : <SolPrice data={solInfo ? solInfo : undefined} />}
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            {currentBlockLoading ? <CurrentBlockLoading /> : <CurrentBlock lastBlock={lastBlockData}></CurrentBlock>}
+            {<CurrentBlock lastBlock={lastBlockData} loading={currentBlockLoading}></CurrentBlock>}
           </Grid>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+          {/* <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             {networkLoading ? <SolNetworkLoading /> : <SolNetwork data={chain}></SolNetwork>}
-          </Grid>
+          </Grid> */}
           {/* <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
             <SolTotalStake/>
           </Grid>

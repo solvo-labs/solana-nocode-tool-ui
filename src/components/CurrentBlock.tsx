@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Stack,
-  Theme,
-  Typography,
-} from "@mui/material";
+import { Button, Card, CardContent, Chip, CircularProgress, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,9 +33,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 type Props = {
   lastBlock: number;
+  loading: boolean;
 };
 
-const CurrentBlock: React.FC<Props> = ({ lastBlock }) => {
+const CurrentBlock: React.FC<Props> = ({ lastBlock, loading }) => {
   const classes = useStyles();
   return (
     <Card className={classes.card}>
@@ -54,36 +46,21 @@ const CurrentBlock: React.FC<Props> = ({ lastBlock }) => {
             Current Block
           </Typography>
           <Stack spacing={1} direction={"row"}>
-            <Chip
-              size="small"
-              sx={{ fontSize: "12px" }}
-              label="Live"
-              color="success"
-            />
-            <Chip
-              size="small"
-              sx={{ fontSize: "12px" }}
-              label="Devnet"
-              color="success"
-            />
+            <Chip size="small" sx={{ fontSize: "12px" }} label="Live" color="success" />
+            <Chip size="small" sx={{ fontSize: "12px" }} label="Devnet" color="success" />
           </Stack>
         </Stack>
-        <Stack
-          direction={"row"}
-          spacing={4}
-          marginTop={"1.5rem"}
-          alignItems={"center"}
-        >
-          <Typography className={classes.currentBlock}>{lastBlock}</Typography>
-          <Button
-            sx={{ maxHeight: "2rem" }}
-            size="small"
-            variant="contained"
-            className={classes.button}
-          >
-            View
-          </Button>
-        </Stack>
+
+        {loading ? (
+          <CurrentBlockLoading />
+        ) : (
+          <Stack direction={"row"} spacing={4} marginTop={"1.5rem"} alignItems={"center"}>
+            <Typography className={classes.currentBlock}>{lastBlock}</Typography>
+            <Button sx={{ maxHeight: "2rem" }} size="small" variant="contained" className={classes.button}>
+              View
+            </Button>
+          </Stack>
+        )}
       </CardContent>
     </Card>
   );
@@ -94,7 +71,7 @@ export const CurrentBlockLoading = () => {
     <Card
       sx={{
         borderRadius: "16px !important",
-        height: "160px",
+        height: "80px",
       }}
     >
       <div
