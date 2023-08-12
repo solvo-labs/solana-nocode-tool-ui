@@ -17,7 +17,7 @@ import ActiveVesting, { VestingLoading } from "../components/ActiveVesting";
 import { MarketInfo, TokenData, ToolTips } from "../utils/types";
 import { Stream } from "@streamflow/stream/dist/solana";
 import { fetchUserTokens } from "../lib";
-import { lastBlock, marketInfo } from "../api/solscan";
+import { marketInfo } from "../api/solscan";
 import RegisterToken, { RegisterTokenLoading } from "../components/NonRegisteredToken";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -160,18 +160,18 @@ const Main: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      const returnValue = await lastBlock();
+      const returnValue = await connection.getBlockHeight();
       setLastBlockData(returnValue);
       setCurrentBlockLoading(false);
     };
     init();
     const interval = setInterval(() => {
       init();
-    }, 5000);
+    }, 2000);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [connection]);
 
   useEffect(() => {
     const init = async () => {
