@@ -54,6 +54,8 @@ const TopBar: React.FC = () => {
   const openForVesting = Boolean(anchorElVesting);
   const [anchorElToken, setAnchorElToken] = useState<null | HTMLElement>(null);
   const openForToken = Boolean(anchorElToken);
+  const [anchorElDao, setAnchorElDao] = useState<null | HTMLElement>(null);
+  const openForDao = Boolean(anchorElDao);
 
   const classes = useStyles();
   const navigate = useNavigate();
@@ -111,6 +113,10 @@ const TopBar: React.FC = () => {
   const vestinList = () => {
     navigate("/vesting-list");
     setAnchorElVesting(null);
+  };
+  const createDao = () => {
+    navigate("/create-dao");
+    setAnchorElDao(null);
   };
 
   return (
@@ -204,9 +210,11 @@ const TopBar: React.FC = () => {
                   <Typography>Manage Tokenomics</Typography>
                 </MenuItem>
               </Menu>
+
               <Button onClick={() => navigate("/stake")}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.STAKE}</Typography>
               </Button>
+
               <Button onClick={() => navigate("/raffle")}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.RAFFLE}</Typography>
               </Button>
@@ -214,6 +222,36 @@ const TopBar: React.FC = () => {
               <Button onClick={() => navigate("/contract")}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.DYNAMIC_CONTRACT}</Typography>
               </Button>
+
+              <Button onClick={(e: any) => handleClick(e, setAnchorElDao)} onMouseOver={(e: any) => handleClick(e, setAnchorElDao)}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.DAO}</Typography>
+              </Button>
+              <Menu
+                id="demo-positioned-menu"
+                aria-labelledby="demo-positioned-button"
+                anchorEl={anchorElDao}
+                open={openForDao}
+                onClose={() => setAnchorElDao}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                sx={{
+                  "& .MuiPaper-root": {
+                    background: "#000000",
+                    color: "#FFFFFF",
+                    border: "1px solid #AA66FE",
+                  },
+                }}
+              >
+                <MenuItem className={classes.menuItem} onClick={createDao}>
+                  <Typography>Create Dao</Typography>
+                </MenuItem>
+              </Menu>
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>

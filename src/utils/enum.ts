@@ -8,6 +8,7 @@ export enum PAGES_NAME {
   VESTING = "TOKENOMICS",
   TOKEN = "TOKEN",
   DYNAMIC_CONTRACT = "Dynamic Contract",
+  DAO = "DAO",
 }
 
 export enum ACCOUNT_STATE {
