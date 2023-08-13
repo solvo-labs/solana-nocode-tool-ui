@@ -19,3 +19,5 @@ export type TokenData = {
   decimal: number;
   supply: RpcResponseAndContext<TokenAmount>;
 };
+
+export type Category = { id: number; label: string; icon: unknown };
