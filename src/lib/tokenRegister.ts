@@ -1,9 +1,17 @@
-import { Metadata, PROGRAM_ID, createCreateMetadataAccountV3Instruction } from "@metaplex-foundation/mpl-token-metadata";
+import {
+  Metadata,
+  PROGRAM_ID,
+  createCreateMetadataAccountV3Instruction,
+} from "@metaplex-foundation/mpl-token-metadata";
 import { utils } from "@project-serum/anchor";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 
 // ref https://github.com/loopcreativeandy/video-tutorial-resources/blob/main/mpl/mpl_tutorial.ts
-export const register = (mintPublickey: string, publicKey: PublicKey, metadata: { name: string; symbol: string }) => {
+export const register = (
+  mintPublickey: string,
+  publicKey: PublicKey,
+  metadata: { name: string; symbol: string; uri: string }
+) => {
   const mint = new PublicKey(mintPublickey);
 
   const seed1 = Buffer.from(utils.bytes.utf8.encode("metadata"));
@@ -12,7 +20,10 @@ export const register = (mintPublickey: string, publicKey: PublicKey, metadata: 
 
   const seed3 = Buffer.from(mint.toBytes());
 
-  const [metadataPDA] = PublicKey.findProgramAddressSync([seed1, seed2, seed3], PROGRAM_ID);
+  const [metadataPDA] = PublicKey.findProgramAddressSync(
+    [seed1, seed2, seed3],
+    PROGRAM_ID
+  );
 
   const accounts = {
     metadata: metadataPDA,
@@ -30,7 +41,7 @@ export const register = (mintPublickey: string, publicKey: PublicKey, metadata: 
     creators: null,
     collection: null,
     uses: null,
-    uri: "",
+    uri: metadata.uri,
   };
 
   const args = {
@@ -49,15 +60,35 @@ export const register = (mintPublickey: string, publicKey: PublicKey, metadata: 
 };
 
 // https://stackoverflow.com/questions/69900783/how-to-get-metadata-from-a-token-adress-using-web3-js-on-solana
-export const getMetadataPDA = async (mint: PublicKey, connection: Connection) => {
+export const getMetadataPDA = async (
+  mint: PublicKey,
+  connection: Connection
+) => {
   try {
-    const [publicKey] = await PublicKey.findProgramAddress([Buffer.from("metadata"), PROGRAM_ID.toBuffer(), mint.toBuffer()], PROGRAM_ID);
+    const [publicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from("metadata"), PROGRAM_ID.toBuffer(), mint.toBuffer()],
+      PROGRAM_ID
+    );
 
     const res = await Metadata.fromAccountAddress(connection, publicKey);
-
-    return { name: res.data.name, symbol: res.data.symbol };
+    return {
+      name: res.data.name,
+      symbol: res.data.symbol,
+      isRegistered: true,
+      uri: res.data.uri,
+    };
   } catch {
     const mintHex = mint.toBase58();
-    return { name: mintHex.substring(0, 3) + "..." + mintHex.slice(-3), symbol: mintHex.substring(0, 3) };
+    return {
+      name: mintHex.substring(0, 3) + "..." + mintHex.slice(-3),
+      symbol: mintHex.substring(0, 3),
+      isRegistered: false,
+      uri: "",
+    };
   }
+};
+
+export type RegisterToken = {
+  name: string;
+  symbol: string;
 };

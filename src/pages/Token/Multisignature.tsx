@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo, useState } from "react";
-import { Divider, FormControl, Grid, IconButton, Stack, Theme, Typography } from "@mui/material";
+import { CircularProgress, Divider, FormControl, Grid, IconButton, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { CustomInput } from "../../components/CustomInput";
 import { CustomButton } from "../../components/CustomButton";
@@ -8,7 +8,6 @@ import { HighlightOff } from "@mui/icons-material";
 import { createMultiSig } from "../../lib/multisig";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -42,7 +41,9 @@ export const Multisignature = () => {
   const { connection } = useConnection();
   const [signatures, setSignatures] = useState<string[]>([publicKey?.toBase58() || ""]);
   const [threshold, setThreshold] = useState<number>(1);
-  const navigate = useNavigate();
+  const [multisigResult, setMultisigResult] = useState<PublicKey>();
+  const [loading, setLoading] = useState<boolean>(false);
+  // const navigate = useNavigate();
 
   const addInput = () => {
     setSignatures([...signatures, ""]);
@@ -69,6 +70,7 @@ export const Multisignature = () => {
 
   const signatureTransaction = async () => {
     if (publicKey) {
+      setLoading(true);
       const signatureKeys = signatures.map((key: string) => new PublicKey(key));
       const { transaction, newAccount } = await createMultiSig(connection, publicKey, threshold, signatureKeys);
 
@@ -88,30 +90,32 @@ export const Multisignature = () => {
         });
 
         toastr.success("Multisignature created successfully.");
-        navigate("/");
+        setMultisigResult(newAccount.publicKey);
+        setLoading(false);
       } catch (error: any) {
         toastr.error(error);
+        setLoading(false);
       }
     }
   };
 
-  // useEffect(() => {
-  //   const init = async () => {
-  //     // if (publicKey) {
-  //     //   const account = await fetchAllMultisignatureAddress(
-  //     //     connection,
-  //     //     publicKey
-  //     //   );
-  //     //   const activeAccounts = await Promise.all(account);
-  //     //   account.forEach((account, index) => {
-  //     //     // const parse = account.account?.data;
-  //     //     // console.log(parse);
-  //     //   });
-  //     // }
-  //   };
-
-  //   init();
-  // }, []);
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "50vh",
+          width: "50vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+        }}
+      >
+        <span style={{ position: "absolute" }}>Multi Signature Pubkey is creating...</span>
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -186,6 +190,23 @@ export const Multisignature = () => {
               </FormControl>
             </Grid>
           </Grid>
+
+          {multisigResult && (
+            <FormControl fullWidth>
+              <Grid item>
+                <CustomInput
+                  key={multisigResult.toBase58()}
+                  label="MultiSignature Public Key"
+                  name="multisignature"
+                  onChange={() => {}}
+                  placeHolder="MultiSignature Public Key"
+                  type="text"
+                  value={multisigResult.toBase58()}
+                  disable={true}
+                ></CustomInput>
+              </Grid>
+            </FormControl>
+          )}
         </Stack>
       </Grid>
     </Grid>

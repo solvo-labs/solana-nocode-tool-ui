@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Theme, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
@@ -50,6 +51,7 @@ export const FreezeAccount = () => {
 
   const freezeTransaction = async () => {
     if (publicKey && selectedToken && selectedHolder) {
+      setLoading(true);
       const ix = await freezeAccount(new PublicKey(selectedHolder), new PublicKey(selectedToken.hex), publicKey);
 
       const {
@@ -77,6 +79,8 @@ export const FreezeAccount = () => {
         navigate("/my-tokens");
       } catch (error: any) {
         toastr.error(error);
+      } finally {
+        setLoading(false);
       }
     }
   };

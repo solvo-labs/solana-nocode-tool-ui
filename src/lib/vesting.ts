@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { StreamflowSolana, Types, getBN } from "@streamflow/stream";
+import { StreamflowSolana, Types, getBN, getNumberFromBN } from "@streamflow/stream";
 import { getTimestamp } from "./utils";
 import { TokenData } from "../utils/types";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
@@ -41,9 +41,9 @@ export const vestSingle = async (wallet: SignerWalletAdapter, mint: TokenData, r
   }
 };
 
-export const vestMulti = async (wallet: SignerWalletAdapter, mint: TokenData, vestParams: VestParams, recipients: Recipient[]) => {
+export const vestMulti = async (wallet: SignerWalletAdapter, mint: string, vestParams: VestParams, recipients: Recipient[]) => {
   const createMultiStreamsParams = {
-    tokenId: mint.hex, // SPL token mint or Aptos Coin type
+    tokenId: mint, // SPL token mint or Aptos Coin type
     cliff: vestParams.cliff || 0, // Vesting contract "cliff" timestamp in seconds.
     period: vestParams.period, // Time step (period) in seconds per which the unlocking occurs.
     start: vestParams.startDate, // Timestamp (in seconds) when the stream/token vesting starts.
@@ -52,7 +52,7 @@ export const vestMulti = async (wallet: SignerWalletAdapter, mint: TokenData, ve
     cancelableByRecipient: false, // Wether or not recipient can cancel the stream.
     transferableBySender: false, // Wether or not sender can transfer the stream.
     transferableByRecipient: false, // Wether or not recipient can transfer the stream.
-    automaticWithdrawal: true, // [optional] Wether or not a 3rd party (e.g. cron job, "cranker") can initiate a token withdraw/transfer.
+    automaticWithdrawal: vestParams.automaticWithdrawal, // [optional] Wether or not a 3rd party (e.g. cron job, "cranker") can initiate a token withdraw/transfer.
     withdrawalFrequency: vestParams.period, // [optional] Relevant when automatic withdrawal is enabled. If greater than 0 our withdrawor will take care of withdrawals. If equal to 0 our withdrawor will skip, but everyone else can initiate withdrawals.
     recipients,
   };
@@ -70,12 +70,26 @@ export const vestMulti = async (wallet: SignerWalletAdapter, mint: TokenData, ve
   }
 };
 
+export const getVestingMyIncoming = async (address: string) => {
+  try {
+    const streams = await client.get({
+      address, // Wallet signing the transaction.
+      type: StreamType.Vesting, // (optional) Type, default is StreamType.All
+      direction: StreamDirection.Incoming, // (optional) Direction, default is StreamDirection.All)
+    });
+
+    return streams;
+  } catch (exception) {
+    // handle exception
+  }
+};
+
 export const getVestingMyOwn = async (address: string) => {
   try {
     const streams = await client.get({
       address, // Wallet signing the transaction.
-      type: StreamType.All, // (optional) Type, default is StreamType.All
-      direction: StreamDirection.All, // (optional) Direction, default is StreamDirection.All)
+      type: StreamType.Vesting, // (optional) Type, default is StreamType.All
+      direction: StreamDirection.Outgoing, // (optional) Direction, default is StreamDirection.All)
     });
 
     return streams;
@@ -115,13 +129,12 @@ export const getStreamById = async (id: string) => {
   }
 };
 
-// export const unlock = async (id: string) => {
-//   const stream = await client.getOne(id);
+export const unlock = async (id: string, decimal: number) => {
+  const stream = await client.getOne({ id });
 
-//   const unlocked = stream.unlocked(getTimestamp(), 9); // bn amount unlocked at the tsInSeconds
+  const unlocked = stream.unlocked(Date.now()); // bn amount unlocked at the tsInSeconds
 
-//   const withdrawn = stream.withdrawnAmount; // bn amount withdrawn already
-//   console.log("wih", withdrawn.toNumber());
-//   const remaining = stream.withdrawnAmount; // bn amount of remaining funds
-//   console.log("remaining", remaining.toNumber() / Math.pow(10, 9));
-// };
+  const withdrawn = stream.withdrawnAmount; // bn amount withdrawn already
+
+  return { unlocked: getNumberFromBN(unlocked, decimal), withdrawn };
+};

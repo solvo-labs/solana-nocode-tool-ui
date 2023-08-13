@@ -87,6 +87,11 @@ const TopBar: React.FC = () => {
     setAnchorElToken(null);
   };
 
+  const airdrop = () => {
+    navigate("/airdrop");
+    setAnchorElToken(null);
+  };
+
   const freezeAccount = () => {
     navigate("/freeze-account");
     setAnchorElToken(null);
@@ -100,7 +105,7 @@ const TopBar: React.FC = () => {
     setAnchorElToken(null);
   };
   const vesting = () => {
-    navigate("/vesting");
+    navigate("/tokenomics");
     setAnchorElVesting(null);
   };
   const vestinList = () => {
@@ -117,44 +122,6 @@ const TopBar: React.FC = () => {
               {APP_NAME.SOLANA}
             </Typography>
             <Box sx={{ flexGrow: 1, display: "flex" }}>
-              <Button onClick={() => navigate("/stake")}>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.STAKE}</Typography>
-              </Button>
-              <Button onClick={() => navigate("/raffle")}>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.RAFFLE}</Typography>
-              </Button>
-              <Button onClick={(e: any) => handleClick(e, setAnchorElVesting)} onMouseOver={(e: any) => handleClick(e, setAnchorElVesting)}>
-                <Typography className={classes.menuTitle}>{PAGES_NAME.VESTING}</Typography>
-              </Button>
-              <Menu
-                id="demo-positioned-menu"
-                aria-labelledby="demo-positioned-button"
-                anchorEl={anchorElVesting}
-                open={openForVesting}
-                onClose={() => setAnchorElVesting(null)}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                sx={{
-                  "& .MuiPaper-root": {
-                    background: "#000000",
-                    color: "#FFFFFF",
-                    border: "1px solid #AA66FE",
-                  },
-                }}
-              >
-                <MenuItem className={classes.menuItem} onClick={vesting}>
-                  <Typography>Vesting</Typography>
-                </MenuItem>
-                <MenuItem className={classes.menuItem} onClick={vestinList}>
-                  <Typography>Vesting List</Typography>
-                </MenuItem>
-              </Menu>
               <Button onClick={(e: any) => handleClick(e, setAnchorElToken)} onMouseOver={(e: any) => handleClick(e, setAnchorElToken)}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.TOKEN}</Typography>
               </Button>
@@ -201,7 +168,52 @@ const TopBar: React.FC = () => {
                 <MenuItem className={classes.menuItem} onClick={multisingature}>
                   <Typography>Multisignature</Typography>
                 </MenuItem>
+                <MenuItem className={classes.menuItem} onClick={airdrop}>
+                  <Typography>Faucet</Typography>
+                </MenuItem>
               </Menu>
+              <Button onClick={(e: any) => handleClick(e, setAnchorElVesting)} onMouseOver={(e: any) => handleClick(e, setAnchorElVesting)}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.VESTING}</Typography>
+              </Button>
+              <Menu
+                id="demo-positioned-menu"
+                aria-labelledby="demo-positioned-button"
+                anchorEl={anchorElVesting}
+                open={openForVesting}
+                onClose={() => setAnchorElVesting(null)}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                sx={{
+                  "& .MuiPaper-root": {
+                    background: "#000000",
+                    color: "#FFFFFF",
+                    border: "1px solid #AA66FE",
+                  },
+                }}
+              >
+                <MenuItem className={classes.menuItem} onClick={vesting}>
+                  <Typography>Create Tokenomics</Typography>
+                </MenuItem>
+                <MenuItem className={classes.menuItem} onClick={vestinList}>
+                  <Typography>Manage Tokenomics</Typography>
+                </MenuItem>
+              </Menu>
+              <Button onClick={() => navigate("/stake")}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.STAKE}</Typography>
+              </Button>
+              <Button onClick={() => navigate("/raffle")}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.RAFFLE}</Typography>
+              </Button>
+
+              <Button onClick={() => navigate("/contract")}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.DYNAMIC_CONTRACT}</Typography>
+              </Button>
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>

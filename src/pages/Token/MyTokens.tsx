@@ -3,28 +3,72 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
-import { CircularProgress, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
+import {
+  CircularProgress,
+  Divider,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import { Theme } from "@emotion/react";
 import { makeStyles } from "@mui/styles";
 import { TokenData } from "../../utils/types";
+import { useNavigate } from "react-router-dom";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
   container: {
-    maxWidth: 700,
+    minWidth: 1000,
+    maxWidth: 1000,
     justifyContent: "center",
   },
   tableTitle: {
     backgroundColor: "purple",
     color: "white !important",
   },
+  titleContainer: {
+    minWidth: "30vw",
+    textAlign: "center",
+  },
   tableRow: {
     "&:nth-of-type(odd)": {
-      backgroundColor: "gray",
+      backgroundColor: "whitesmoke",
+    },
+    "&:hover": {
+      cursor: "pointer",
+      backgroundColor: "#f9dbff",
     },
     // hide last border
     "&:last-child td, &:last-child th": {
       border: 0,
+    },
+  },
+  paginatonContainer: {
+    display: "flex !important",
+    justifyContent: "end",
+    borderBottomLeftRadius: "8px",
+    borderBottomRightRadius: "8px",
+    backgroundColor: "purple",
+  },
+  pagination: {
+    color: "white !important",
+    "& .css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon": {
+      color: "white",
+      marginRight: "-10px",
+    },
+    "& .css-1mf6u8l-MuiSvgIcon-root-MuiSelect-icon": {
+      color: "white",
+      marginRight: "-10px",
+    },
+    "& .css-zylse7-MuiButtonBase-root-MuiIconButton-root.Mui-disabled": {
+      color: "#f5f5f566",
     },
   },
 }));
@@ -35,6 +79,7 @@ export const MyTokens = () => {
   const classes = useStyles();
   const [allToken, setAllToken] = useState<Array<TokenData>>([]);
   const [actionLoader, setActionLoader] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -63,15 +108,23 @@ export const MyTokens = () => {
 
   const listToken = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any, index: number) => (
-      <TableRow className={classes.tableRow} key={index}>
-        <TableCell>{a.metadata.name}</TableCell>
-        <TableCell>{a.metadata.symbol}</TableCell>
-        <TableCell>{a.supply.value.uiAmount}</TableCell>
-        <TableCell>{a.amount / Math.pow(10, a.supply.value.decimals)}</TableCell>
-        <TableCell>{a.hex.slice(0, 8) + "..." + a.hex.slice(-5)}</TableCell>
-      </TableRow>
-    ));
+    return allToken
+      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+      .map((a: any, index: number) => (
+        <TableRow
+          className={classes.tableRow}
+          key={index}
+          onClick={() => navigate(`/token/${a.hex}`)}
+        >
+          <TableCell>{a.metadata.name}</TableCell>
+          <TableCell>{a.metadata.symbol}</TableCell>
+          <TableCell>{a.supply.value.uiAmount}</TableCell>
+          <TableCell>
+            {a.amount / Math.pow(10, a.supply.value.decimals)}
+          </TableCell>
+          <TableCell>{a.hex.slice(0, 14) + "..." + a.hex.slice(-5)}</TableCell>
+        </TableRow>
+      ));
   };
 
   const loader = () => {
@@ -94,20 +147,23 @@ export const MyTokens = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
 
   if (actionLoader) {
     return (
-      <Grid container className={classes.container}>
-        <Grid item marginBottom={"1rem"} marginTop={"1rem"}>
+      <Grid container direction={"row"} className={classes.container}>
+        <Grid item className={classes.titleContainer}>
           <Typography variant="h5">List of My Tokens</Typography>
+          <Divider sx={{ marginTop: "1rem", background: "white" }} />
         </Grid>
-        <Grid item>
+        <Grid container marginTop={"2rem"}>
           <TableContainer>
-            <Table component={Paper} sx={{ minWidth: 700 }}>
+            <Table component={Paper}>
               <TableHead>
                 <TableRow>
                   <TableCell className={classes.tableTitle}>Name</TableCell>
@@ -117,7 +173,9 @@ export const MyTokens = () => {
                   <TableCell className={classes.tableTitle}>Hex</TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody>{loader()}</TableBody>
+              <TableBody>
+                <TableCell colSpan={8}>{loader()}</TableCell>
+              </TableBody>
             </Table>
           </TableContainer>
         </Grid>
@@ -126,13 +184,14 @@ export const MyTokens = () => {
   }
 
   return (
-    <Grid container className={classes.container}>
-      <Grid item marginBottom={"1rem"} marginTop={"1rem"}>
+    <Grid container direction={"row"} className={classes.container}>
+      <Grid item className={classes.titleContainer}>
         <Typography variant="h5">List of My Tokens</Typography>
+        <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
-      <Grid item>
+      <Grid container marginTop={"2rem"}>
         <TableContainer>
-          <Table component={Paper} sx={{ minWidth: 700 }}>
+          <Table component={Paper}>
             <TableHead>
               <TableRow>
                 <TableCell className={classes.tableTitle}>Name</TableCell>
@@ -143,22 +202,21 @@ export const MyTokens = () => {
               </TableRow>
             </TableHead>
             <TableBody>{listToken()}</TableBody>
-            <TableFooter>
-              <TableCell colSpan={8} padding={"none"}>
-                <TablePagination
-                  rowsPerPageOptions={[1, 5, 10]}
-                  component="div"
-                  colSpan={4}
-                  count={allToken.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-              </TableCell>
-            </TableFooter>
           </Table>
         </TableContainer>
+      </Grid>
+      <Grid container className={classes.paginatonContainer}>
+        <TablePagination
+          className={classes.pagination}
+          rowsPerPageOptions={[1, 5, 10]}
+          component="div"
+          colSpan={4}
+          count={allToken.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </Grid>
     </Grid>
   );

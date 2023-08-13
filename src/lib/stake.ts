@@ -1,6 +1,6 @@
 import { Authorized, Connection, GetProgramAccountsFilter, Keypair, LAMPORTS_PER_SOL, Lockup, PublicKey, StakeProgram, VoteAccountInfo } from "@solana/web3.js";
 
-export const createStakeAccount = async (connection: Connection, owner: PublicKey, balance: number) => {
+export const createStakeAccount = async (connection: Connection, owner: PublicKey, balance: number, time: number = 0, epoch: number = 0) => {
   const stakeAccount = Keypair.generate();
 
   const amountUserWantsToStake = LAMPORTS_PER_SOL * balance;
@@ -12,7 +12,7 @@ export const createStakeAccount = async (connection: Connection, owner: PublicKe
     authorized: new Authorized(owner, owner), // Here we set two authorities: Stake Authority and Withdrawal Authority. Both are set to our wallet.
     fromPubkey: owner,
     lamports: amountToStake,
-    lockup: new Lockup(0, 0, owner), // Optional. We'll set this to 0 for demonstration purposes.
+    lockup: new Lockup(time, epoch, owner), // Optional. We'll set this to 0 for demonstration purposes.
     stakePubkey: stakeAccount.publicKey,
   });
 

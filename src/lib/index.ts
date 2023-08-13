@@ -2,8 +2,8 @@ import { AccountInfo, Connection, LAMPORTS_PER_SOL, ParsedAccountData, PublicKey
 import { getTokensWithAccount } from "./token";
 import { getMetadataPDA } from "./tokenRegister";
 
-export const fetchUserTokens = async (connection: Connection, payer: PublicKey) => {
-  const tokensFromWallet = await getTokensWithAccount(connection, payer);
+export const fetchUserTokens = async (connection: Connection, payer: PublicKey, mint?: PublicKey) => {
+  const tokensFromWallet = await getTokensWithAccount(connection, payer, mint);
 
   const getTokensMetadataPromises = tokensFromWallet.map((tf) => {
     return getMetadataPDA(tf.token, connection);
@@ -12,7 +12,7 @@ export const fetchUserTokens = async (connection: Connection, payer: PublicKey) 
   const metaDatas = await Promise.all(getTokensMetadataPromises);
 
   const finalData = tokensFromWallet.map((tf, index) => {
-    return { hex: tf.token.toBase58(), amount: parseInt(tf.amount.toString()), metadata: metaDatas[index], supply: tf.supply, decimal: tf.supply.value.decimals };
+    return { hex: tf.token.toBase58(), amount: parseInt(tf.amount.toString()), metadata: metaDatas[index], supply: tf.supply, decimal: tf.supply.value.decimals, owner: tf.owner };
   });
 
   return finalData;

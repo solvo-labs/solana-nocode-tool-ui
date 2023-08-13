@@ -12,10 +12,13 @@ import { FreezeAccount } from "../pages/Token/FreezeAccount";
 import { CloseAccount } from "../pages/Token/CloseAccount";
 import { Raffle } from "../pages/Token/Raffle";
 import NotFoundPage from "../components/NotFound";
-import { Vesting } from "../pages/Tokenomics/Vesting";
 import { Multisignature } from "../pages/Token/Multisignature";
 import { VestingList } from "../pages/Tokenomics/VestingList";
 import { TokenDetail } from "../pages/Token/TokenDetail";
+import { ContractPage } from "../pages/Contract";
+import { Tokenomics } from "../pages/Tokenomics/Tokenomics";
+import { Vesting } from "../pages/Tokenomics/Vesting";
+import { Airdrop } from "../pages/Token/Airdrop";
 
 const Router: React.FC = () => {
   return (
@@ -25,7 +28,7 @@ const Router: React.FC = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/" index element={<Main />} />
             <Route path="/token-create" index element={<TokenMint />} />
-            <Route path="/token:id" index element={<TokenDetail />} />
+            <Route path="/token/:id" index element={<TokenDetail />} />
             <Route path="/my-tokens" index element={<MyTokens />} />
             <Route path="/token-transfer" index element={<TokenTransfer />} />
             <Route path="/stake" index element={<Stake />} />
@@ -34,8 +37,11 @@ const Router: React.FC = () => {
             <Route path="/close-account" index element={<CloseAccount />} />
             <Route path="/multisignature" index element={<Multisignature />} />
             <Route path="/raffle" index element={<Raffle />} />
-            <Route path="/vesting" index element={<Vesting />} />
+            <Route path="/tokenomics" index element={<Tokenomics />} />
             <Route path="/vesting-list" index element={<VestingList />} />
+            <Route path="/create-vesting/:tokenid/:name/:amount" index element={<Vesting />} />
+            <Route path="/contract" index element={<ContractPage />} />
+            <Route path="/airdrop" index element={<Airdrop />} />
           </Route>
           <Route path="/login" index element={<Login />} />
           <Route path="*" index element={<NotFoundPage />} />

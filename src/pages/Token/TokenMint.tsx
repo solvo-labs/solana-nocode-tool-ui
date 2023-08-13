@@ -8,10 +8,12 @@ import { register } from "../../lib/tokenRegister";
 import { Token } from "../../utils/types";
 import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
-import { Divider, Grid, Stack, Theme, Typography } from "@mui/material";
+import { CircularProgress, Divider, Grid, Stack, Theme, Typography } from "@mui/material";
 import { CustomButton } from "../../components/CustomButton";
 import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
+import { NFTStorage } from "nft.storage";
+import ImageUpload from "../../components/ImageUpload";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -32,6 +34,8 @@ const TokenMint: React.FC = () => {
   const classes = useStyles();
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+  const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<any>();
   const navigate = useNavigate();
 
   const [tokenData, setTokenData] = useState<Token>({
@@ -43,9 +47,30 @@ const TokenMint: React.FC = () => {
     authority: publicKey?.toBase58(),
   });
 
+  const storeImage = async () => {
+    const storage = new NFTStorage({
+      token: import.meta.env.VITE_NFT_STORAGE_API_KEY,
+    });
+
+    const fileCid = await storage.storeBlob(new Blob([file]));
+
+    const fileUrl = "https://ipfs.io/ipfs/" + fileCid;
+
+    const obj = {
+      image: fileUrl,
+    };
+
+    // (5)
+    const metadata = new Blob([JSON.stringify(obj)], { type: "application/json" });
+    const metadataCid = await storage.storeBlob(metadata);
+    const metadataUrl = "https://ipfs.io/ipfs/" + metadataCid;
+
+    return metadataUrl;
+  };
+
   const createTransaction = async () => {
     if (publicKey) {
-      // @To-do set freeze authority with input
+      setLoading(true);
       const { transaction, toAccount } = await createMint(
         connection,
         publicKey,
@@ -73,7 +98,13 @@ const TokenMint: React.FC = () => {
           )
         );
 
-        const transaction4 = register(toAccount.publicKey.toBase58(), publicKey, { name: tokenData.name, symbol: tokenData.symbol });
+        let uri = "";
+
+        if (file) {
+          uri = await storeImage();
+        }
+
+        const transaction4 = register(toAccount.publicKey.toBase58(), publicKey, { name: tokenData.name, symbol: tokenData.symbol, uri });
 
         const finalTransactions = new Transaction();
         finalTransactions.add(transaction);
@@ -86,13 +117,33 @@ const TokenMint: React.FC = () => {
 
         toastr.success("Token Mint completed successfully");
         navigate("/my-tokens");
+        setLoading(false);
       } catch (error: any) {
         toastr.error(error);
+        setLoading(false);
       }
     }
   };
 
   const disable = !(tokenData.name && tokenData.symbol && tokenData.amount && tokenData.decimal);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: "50vh",
+          width: "50vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+        }}
+      >
+        <span style={{ position: "absolute" }}>Token is minting...</span>
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -105,6 +156,7 @@ const TokenMint: React.FC = () => {
         </Grid>
         <Grid item justifyContent={"center"} marginBottom={"2rem"}>
           <Stack direction={"column"} spacing={2} alignItems={"center"}>
+            <ImageUpload file={file} setFile={(data) => setFile(data)} />
             <CustomInput
               placeHolder="Name"
               label="Name"
