@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     left: 0,
     width: "100%",
     padding: "1rem 0rem",
-    background: "white",
+    background: "#f4f4f5",
     color: "white",
   },
   // title: {
