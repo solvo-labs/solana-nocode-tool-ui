@@ -11,40 +11,45 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   box: {
     width: "100%",
-    background: "linear-gradient(to right, #aa66fe, #23ed98)",
+    //background: "linear-gradient(to right, #aa66fe, #23ed98)",
+    background: "white",
+    border: "1px solid linear-gradient(to right, #aa66fe, #23ed98)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
     alignItems: "center",
     padding: "1rem",
-    borderRadius: "0.5rem", // Kenar yuvarlatma
+    borderRadius: "0.5rem",
     height: "100%", // Kutu yüksekliğini 100% yaparak ortala
   },
   label: {
+    background: "linear-gradient(to right, #aa66fe, #23ed98)",
+    borderRadius: "0.5rem",
     color: "white",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "1rem",
   },
 }));
 
 type Props = {
   label: string;
-  index: number;
   icon: unknown;
 };
 
-const DaoCategories: React.FC<Props> = ({ label, index, icon }) => {
+const DaoCategories: React.FC<Props> = ({ label, icon }) => {
   const classes = useStyles();
 
   return (
     <Grid container direction="row" spacing={2}>
       <Grid container className={classes.container} xs={12} sm={6}>
-        <Grid container className={classes.boxContainer} spacing={2}>
-          <Paper style={{ height: "100px" }} className={classes.box}>
-            <Typography className={classes.label} variant="h5">
-              {label}
-            </Typography>
+        <Paper style={{ height: "100px" }} className={classes.box}>
+          <Typography className={classes.label} variant="h5">
+            {label}
             {icon}
-          </Paper>
-        </Grid>
+          </Typography>
+        </Paper>
       </Grid>
     </Grid>
   );

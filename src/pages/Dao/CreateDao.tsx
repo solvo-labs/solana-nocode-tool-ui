@@ -8,7 +8,7 @@ import GavelIcon from "@mui/icons-material/Gavel";
 import PixIcon from "@mui/icons-material/Pix";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
-import DaoCategories from "../../components/DaoCategories";
+import DaoCategories from "../../components/Dao/DaoCategories";
 import { Category } from "../../utils/types";
 import { Steps } from "../../components/DaoStep/Steps";
 import { DAO_STEPS } from "../../utils/enum";
@@ -103,7 +103,7 @@ const CreateDao: React.FC = () => {
       </div>
       <div className={classes.daoCategories}>
         {categories.map((category) => (
-          <DaoCategories key={category.id} label={category.label} index={category.id} icon={category.icon} />
+          <DaoCategories key={category.id} label={category.label} icon={category.icon} />
         ))}
       </div>
     </Grid>

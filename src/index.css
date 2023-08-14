@@ -6,7 +6,8 @@
 
   color-scheme: light dark;
   color: #ffffff;
-  background: linear-gradient(to right, #aa66fe, #23ed98);
+  /* background: linear-gradient(to right, #aa66fe, #23ed98); */
+  background: white;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
