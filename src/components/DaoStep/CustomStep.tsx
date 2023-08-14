@@ -70,9 +70,8 @@ export const CustomStep: React.FC<Props> = ({ steps, activeStep }) => {
             {
               <span
                 style={{
-                  color: "#2D6495",
+                  color: "#AA66FE",
                   fontWeight: "bold",
-                  fontSize: "1rem",
                 }}
               >
                 {label}

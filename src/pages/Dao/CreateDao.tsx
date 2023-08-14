@@ -28,21 +28,22 @@ const useStyles = makeStyles((theme: Theme) => ({
     top: 100,
     left: 0,
     width: "100%",
-    padding: "1rem 0rem 0.5rem 0rem",
-    background: "linear-gradient(to left, #aa66fe, #23ed98)",
+    padding: "1rem 0rem",
+    background: "white",
+    color: "white",
   },
-  title: {
-    textAlign: "center",
-  },
+  // title: {
+  //   textAlign: "center",
+  //   background: "linear-gradient(to left, #aa66fe, #23ed98)",
+  // },
   daoCategories: {
     display: "flex",
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: "7rem",
-    overflow: "auto",
+    marginTop: "4rem",
     "& > div": {
-      width: "48%",
+      width: "25%",
       marginBottom: "1rem",
       marginTop: "1rem",
     },
@@ -95,10 +96,10 @@ const CreateDao: React.FC = () => {
   return (
     <Grid container className={classes.container} direction="column">
       <div className={classes.top}>
-        <Typography variant="h5" className={classes.title}>
+        {/* <Typography variant="h5" className={classes.title}>
           Create Dao
-        </Typography>
-        <Divider sx={{ background: "white" }} />
+        </Typography> */}
+        {/* <Divider sx={{ background: "#aa66fe" }} /> */}
         <Steps activeStep={activeStep} allSteps={Object.values(DAO_STEPS)} />
       </div>
       <div className={classes.daoCategories}>
