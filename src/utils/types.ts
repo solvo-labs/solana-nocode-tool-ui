@@ -53,4 +53,4 @@ export type Section = {
   isOldSection: boolean;
 };
 
-export type Category = { id: number; label: string; icon: unknown };
+export type Category = { id: number; label: string; icon: any };
