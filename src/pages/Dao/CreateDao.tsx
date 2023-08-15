@@ -1,17 +1,10 @@
 import React, { useState } from "react";
-import { Divider, Grid, Theme, Typography } from "@mui/material";
+import { Grid, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import BusinessIcon from "@mui/icons-material/Business";
-import AssuredWorkloadIcon from "@mui/icons-material/AssuredWorkload";
-import ForumIcon from "@mui/icons-material/Forum";
-import GavelIcon from "@mui/icons-material/Gavel";
-import PixIcon from "@mui/icons-material/Pix";
-import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import DaoCategories from "../../components/Dao/DaoCategories";
-import { Category } from "../../utils/types";
 import { Steps } from "../../components/DaoStep/Steps";
 import { DAO_STEPS } from "../../utils/enum";
+import { Category } from "../../utils/types";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -41,55 +34,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: "4rem",
-    "& > div": {
-      width: "25%",
-      marginBottom: "1rem",
-      marginTop: "1rem",
-    },
+    marginTop: "6rem",
+    width: "100%",
   },
 }));
 
-const categories: Category[] = [
-  {
-    id: 1,
-    label: "Company",
-    icon: <BusinessIcon style={{ color: "white", marginRight: "1rem" }} fontSize="large" />,
-  },
-  {
-    id: 2,
-    label: "Governance",
-    icon: <AssuredWorkloadIcon style={{ color: "white", marginRight: "1rem" }} fontSize="large" />,
-  },
-  {
-    id: 3,
-    label: "Community",
-    icon: <ForumIcon style={{ color: "white", marginRight: "1rem" }} fontSize="large" />,
-  },
-  {
-    id: 4,
-    label: "Election",
-    icon: <GavelIcon style={{ color: "white", marginRight: "1rem" }} fontSize="large" />,
-  },
-  {
-    id: 5,
-    label: "Venture Capital",
-    icon: <PixIcon style={{ color: "white", marginRight: "1rem" }} fontSize="large" />,
-  },
-  {
-    id: 6,
-    label: "Game-Fi",
-    icon: <SportsEsportsIcon style={{ color: "white", marginRight: "1rem" }} fontSize="large" />,
-  },
-  {
-    id: 7,
-    label: "Start-Up",
-    icon: <RocketLaunchIcon style={{ color: "white", marginRight: "1rem" }} fontSize="large" />,
-  },
-];
-
 const CreateDao: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(1);
+  const [selectedCategory, setSelectedCategory] = useState<Category>({
+    id: 0,
+    label: "",
+    icon: undefined,
+  });
 
   const classes = useStyles();
 
@@ -102,11 +58,11 @@ const CreateDao: React.FC = () => {
         {/* <Divider sx={{ background: "#aa66fe" }} /> */}
         <Steps activeStep={activeStep} allSteps={Object.values(DAO_STEPS)} />
       </div>
-      <div className={classes.daoCategories}>
-        {categories.map((category) => (
-          <DaoCategories key={category.id} label={category.label} icon={category.icon} />
-        ))}
-      </div>
+      {activeStep === 1 && (
+        <div className={classes.daoCategories}>
+          <DaoCategories activeStepOnChange={setActiveStep} selectedCategoryOnChange={setSelectedCategory} selectedCategory={selectedCategory} />
+        </div>
+      )}
     </Grid>
   );
 };
