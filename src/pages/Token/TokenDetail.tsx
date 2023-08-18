@@ -70,9 +70,6 @@ const useStyles = makeStyles((theme: Theme) => ({
       maxWidth: "90vw",
       minWidth: "90vw",
     },
-    [theme.breakpoints.down("md")]: {
-      marginTop: "2rem",
-    },
     paddingBottom: "1rem",
   },
   cardsContainer: {
@@ -106,9 +103,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   titleContainer: {
     marginBottom: "2rem",
-    marginTop: "1rem",
     [theme.breakpoints.down("md")]: {
-      marginTop: "2rem",
+      // marginTop: "2rem",
     },
   },
 }));

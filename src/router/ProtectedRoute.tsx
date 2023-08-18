@@ -58,7 +58,7 @@ const ProtectedRoute: React.FC = () => {
         md={12}
         xs={12}
         height={"100vh"}
-        paddingTop={{ xl: "6rem", md: "6rem", sm: "4rem", xs: "4rem" }}
+        paddingTop={{ xl: "8rem", md: "8rem", sm: "8rem", xs: "8rem" }}
       >
         <Grid container direction={"column"} spacing={0}>
           <Outlet />
