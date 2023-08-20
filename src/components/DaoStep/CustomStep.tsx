@@ -10,31 +10,31 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
   },
   [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      borderColor: "#AA66FE",
+      borderColor: "#5719A3",
     },
   },
   [`&.${stepConnectorClasses.completed}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      borderColor: "#AA66FE",
+      borderColor: "#5719A3",
     },
   },
   [`& .${stepConnectorClasses.line}`]: {
-    borderColor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#AA66FE",
+    borderColor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#5719A3",
     borderTopWidth: 3,
     borderRadius: 1,
   },
 }));
 
 const QontoStepIconRoot = styled("div")<{ ownerState: { active?: boolean } }>(({ theme, ownerState }) => ({
-  color: theme.palette.mode === "dark" ? theme.palette.grey[700] : "#AA66FE",
+  color: theme.palette.mode === "dark" ? theme.palette.grey[700] : "#5719A3",
   display: "flex",
   height: 22,
   alignItems: "center",
   ...(ownerState.active && {
-    color: "#AA66FE",
+    color: "#5719A3",
   }),
   "& .QontoStepIcon-completedIcon": {
-    color: "#AA66FE",
+    color: "#5719A3",
     zIndex: 1,
     fontSize: 24,
   },
@@ -70,7 +70,7 @@ export const CustomStep: React.FC<Props> = ({ steps, activeStep }) => {
             {
               <span
                 style={{
-                  color: "#AA66FE",
+                  color: "#5719A3",
                   fontWeight: "bold",
                 }}
               >
