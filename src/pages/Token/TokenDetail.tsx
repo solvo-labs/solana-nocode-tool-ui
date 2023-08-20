@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { fetchUserTokens } from "../../lib";
 import { TokenData, ToolTips } from "../../utils/types";
 import {
+  Avatar,
   Box,
   Card,
   CardContent,
@@ -62,7 +63,17 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     paddingBottom: "1rem",
   },
+  cardsContainer: {
+    justifyContent: "center",
+  },
   card: {
+    maxHeight: "240px",
+    [theme.breakpoints.up("md")]: {
+      minHeight: "240px",
+    },
+    borderRadius: "16px !important",
+  },
+  manager: {
     minHeight: "240px",
     borderRadius: "16px !important",
   },
@@ -82,10 +93,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
   },
   titleContainer: {
-    marginBottom: "1rem",
-    marginTop: "1rem",
+    marginBottom: "2rem",
     [theme.breakpoints.down("md")]: {
-      marginTop: "2rem",
+      // marginTop: "2rem",
     },
   },
 }));
@@ -446,17 +456,37 @@ export const TokenDetail = () => {
     <Grid container className={classes.container} direction={"column"}>
       <Grid container className={classes.titleContainer} justifyContent={"space-between"}>
         <Grid item>
-          <Typography variant="h5">Token Detail</Typography>
+          <Grid container direction={"row"} alignItems={"center"}>
+            <Grid item>
+              {token?.metadata.uri?.startsWith("https:") ? (
+                <Avatar src={token.metadata.uri} sx={{ marginRight: "1rem", width: 56, height: 56 }} />
+              ) : (
+                <Avatar sx={{ marginRight: "1rem", width: 56, height: 56 }}>{token?.metadata.symbol.slice(0, 2)}</Avatar>
+              )}
+            </Grid>
+            <Grid item>
+              <Typography variant="h5">Token Detail</Typography>
+            </Grid>
+          </Grid>
+          {/* <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            > */}
+          {/* </div> */}
         </Grid>
         <CustomButton disable={false} label="My Tokens" onClick={() => navigate("/my-tokens")}></CustomButton>
       </Grid>
-      <Grid container direction={"row"} justifyContent={"center"} spacing={4}>
+      <Grid container className={classes.cardsContainer} direction={"row"} spacing={4}>
         <Grid item xl={6} lg={6} md={6} sm={12} xs={12}>
           <Card className={classes.card}>
             <CardContent>
               <Typography className={classes.info} sx={{ fontWeight: "bold" }} variant="subtitle1" marginBottom={"0.5rem"}>
                 Token Summary
               </Typography>
+
               <Grid container className={classes.info}>
                 <Grid container width={"20%"}>
                   <Typography variant="body2">Name:</Typography>
@@ -558,7 +588,7 @@ export const TokenDetail = () => {
       </Grid>
 
       <Grid item marginTop={"1rem"} xl={6} lg={6} md={6} sm={12} xs={12} maxWidth={"90vw !important"}>
-        <Card className={classes.card}>
+        <Card className={classes.manager}>
           <CardContent>
             <Box>
               <TabContext value={value}>

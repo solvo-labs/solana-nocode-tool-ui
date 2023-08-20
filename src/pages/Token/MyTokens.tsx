@@ -3,20 +3,7 @@
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
 import { fetchUserTokens } from "../../lib";
-import {
-  CircularProgress,
-  Divider,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Avatar, CircularProgress, Divider, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Typography } from "@mui/material";
 import { Theme } from "@emotion/react";
 import { makeStyles } from "@mui/styles";
 import { TokenData } from "../../utils/types";
@@ -108,23 +95,16 @@ export const MyTokens = () => {
 
   const listToken = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return allToken
-      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-      .map((a: any, index: number) => (
-        <TableRow
-          className={classes.tableRow}
-          key={index}
-          onClick={() => navigate(`/token/${a.hex}`)}
-        >
-          <TableCell>{a.metadata.name}</TableCell>
-          <TableCell>{a.metadata.symbol}</TableCell>
-          <TableCell>{a.supply.value.uiAmount}</TableCell>
-          <TableCell>
-            {a.amount / Math.pow(10, a.supply.value.decimals)}
-          </TableCell>
-          <TableCell>{a.hex.slice(0, 14) + "..." + a.hex.slice(-5)}</TableCell>
-        </TableRow>
-      ));
+    return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any, index: number) => (
+      <TableRow className={classes.tableRow} key={index} onClick={() => navigate(`/token/${a.hex}`)}>
+        <TableCell>{a.metadata.uri.startsWith("https:") ? <Avatar src={a.metadata.uri} /> : <Avatar>{a.metadata.symbol.slice(0, 2)}</Avatar>}</TableCell>
+        <TableCell>{a.metadata.name}</TableCell>
+        <TableCell>{a.metadata.symbol}</TableCell>
+        <TableCell>{a.supply.value.uiAmount}</TableCell>
+        <TableCell>{a.amount / Math.pow(10, a.supply.value.decimals)}</TableCell>
+        <TableCell>{a.hex.slice(0, 14) + "..." + a.hex.slice(-5)}</TableCell>
+      </TableRow>
+    ));
   };
 
   const loader = () => {
@@ -147,9 +127,7 @@ export const MyTokens = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
@@ -166,6 +144,7 @@ export const MyTokens = () => {
             <Table component={Paper}>
               <TableHead>
                 <TableRow>
+                  <TableCell className={classes.tableTitle}></TableCell>
                   <TableCell className={classes.tableTitle}>Name</TableCell>
                   <TableCell className={classes.tableTitle}>Symbol</TableCell>
                   <TableCell className={classes.tableTitle}>Supply</TableCell>
@@ -194,6 +173,7 @@ export const MyTokens = () => {
           <Table component={Paper}>
             <TableHead>
               <TableRow>
+                <TableCell className={classes.tableTitle}></TableCell>
                 <TableCell className={classes.tableTitle}>Name</TableCell>
                 <TableCell className={classes.tableTitle}>Symbol</TableCell>
                 <TableCell className={classes.tableTitle}>Supply</TableCell>

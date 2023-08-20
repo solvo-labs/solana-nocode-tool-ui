@@ -16,6 +16,7 @@ export type TokenData = {
     name: string;
     symbol: string;
     isRegistered: boolean;
+    uri?: string;
   };
   decimal: number;
   supply: RpcResponseAndContext<TokenAmount>;
