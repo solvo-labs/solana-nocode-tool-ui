@@ -22,18 +22,22 @@ import RegisterToken, { RegisterTokenLoading } from "../components/NonRegistered
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
-    [theme.breakpoints.up("xl")]: {
-      minWidth: "80vw !important",
-      maxWidth: "80vw !important",
-    },
-    marginBottom: "1rem !important",
-    [theme.breakpoints.down("xl")]: {
-      maxWidth: "90vw",
-      minWidth: "90vw",
-    },
-    [theme.breakpoints.down("md")]: {
-      marginTop: "2rem !important",
-    },
+    // [theme.breakpoints.up("xl")]: {
+    //   minWidth: "80vw !important",
+    //   maxWidth: "80vw !important",
+    // },
+    // marginBottom: "1rem !important",
+    // [theme.breakpoints.down("xl")]: {
+    //   maxWidth: "90vw",
+    //   minWidth: "90vw",
+    // },
+    // [theme.breakpoints.down("md")]: {
+    //   marginTop: "2rem !important",
+    // },
+    width: "100%",
+    height: "100%",
+    background: "linear-gradient(to right, #aa66fe, #23ed98)",
+    padding: "2rem",
   },
 }));
 
