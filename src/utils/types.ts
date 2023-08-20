@@ -54,3 +54,9 @@ export type Section = {
 };
 
 export type Category = { id: number; label: string; icon: any };
+
+export type Dao = {
+  name: string;
+  description: string;
+  image: string;
+};
