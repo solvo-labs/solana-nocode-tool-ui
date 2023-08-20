@@ -293,7 +293,7 @@ export const ContractPage = () => {
                 label="Program Id"
                 name="programId"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramId(e.target.value)}
-                placeHolder="Program Id"
+                placeholder="Program Id"
                 type="text"
                 value={programId}
                 disable={false}
@@ -339,7 +339,7 @@ export const ContractPage = () => {
             <div>
               {actionModal.readAction && (
                 <CustomInput
-                  placeHolder="Address"
+                  placeholder="Address"
                   label="Address (optional)"
                   required={false}
                   id="address"
@@ -391,7 +391,7 @@ export const ContractPage = () => {
                     <div key={"div" + index} style={{ marginBottom: "1rem" }}>
                       <CustomInput
                         key={"input" + index}
-                        placeHolder={act.name}
+                        placeholder={act.name}
                         label={act.name + " (Public key)"}
                         required={false}
                         id={act.name}
@@ -444,7 +444,7 @@ export const ContractPage = () => {
                     <div key={"div" + index} style={{ marginBottom: "1rem" }}>
                       <CustomInput
                         key={"input" + index}
-                        placeHolder={act.name}
+                        placeholder={act.name}
                         label={act.name + "(" + act.type + ")"}
                         required={false}
                         id={act.name}

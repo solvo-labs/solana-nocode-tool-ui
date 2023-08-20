@@ -55,7 +55,7 @@ export const Airdrop = () => {
             label="Public Key"
             name="publicKey"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKey(e.target.value)}
-            placeHolder="Public Key"
+            placeholder="Public Key"
             type="text"
             value={key}
             disable={false}

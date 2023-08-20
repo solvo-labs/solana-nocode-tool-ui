@@ -221,7 +221,7 @@ export const Vesting = () => {
             <Grid item xs={4}>
               <FormControl fullWidth>
                 <CustomInput
-                  placeHolder="Duration"
+                  placeholder="Duration"
                   label="Duration"
                   id="name"
                   name="name"
@@ -301,7 +301,7 @@ export const Vesting = () => {
                   label="Cliff Amount (Optional)"
                   name="cliffAmount"
                   onChange={(e: any) => setVestParams({ ...vestParams, cliffAmount: e.target.value })}
-                  placeHolder={"Cliff Amount"}
+                  placeholder={"Cliff Amount"}
                   type="text"
                   value={vestParams.cliffAmount || 0}
                   disable={false}

@@ -177,7 +177,7 @@ export const TokenTransfer = () => {
             > */}
             <Grid item>
               <CustomInput
-                placeHolder="Destination Pubkey"
+                placeholder="Destination Pubkey"
                 label="Destination Pubkey"
                 id="destinationPubkey"
                 name="destinationPubkey"
@@ -190,7 +190,7 @@ export const TokenTransfer = () => {
 
             <Grid item>
               <CustomInput
-                placeHolder="Amount"
+                placeholder="Amount"
                 label="Amount"
                 id="amount"
                 name="amount"

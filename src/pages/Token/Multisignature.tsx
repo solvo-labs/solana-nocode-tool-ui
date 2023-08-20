@@ -134,7 +134,7 @@ export const Multisignature = () => {
                     label="Signature"
                     name="signature"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => signatureSetter(e, index)}
-                    placeHolder="Signature"
+                    placeholder="Signature"
                     type="text"
                     value={signatures[index]}
                     disable={false}
@@ -167,7 +167,7 @@ export const Multisignature = () => {
                     label="Threshold"
                     name="threshold"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setThreshold(Number(e.target.value))}
-                    placeHolder="Threshold"
+                    placeholder="Threshold"
                     type="text"
                     value={threshold}
                     disable={false}
@@ -199,7 +199,7 @@ export const Multisignature = () => {
                   label="MultiSignature Public Key"
                   name="multisignature"
                   onChange={() => {}}
-                  placeHolder="MultiSignature Public Key"
+                  placeholder="MultiSignature Public Key"
                   type="text"
                   value={multisigResult.toBase58()}
                   disable={true}

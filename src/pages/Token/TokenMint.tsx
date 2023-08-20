@@ -158,7 +158,7 @@ const TokenMint: React.FC = () => {
           <Stack direction={"column"} spacing={2} alignItems={"center"}>
             <ImageUpload file={file} setFile={(data) => setFile(data)} />
             <CustomInput
-              placeHolder="Name"
+              placeholder="Name"
               label="Name"
               id="name"
               name="name"
@@ -168,7 +168,7 @@ const TokenMint: React.FC = () => {
               disable={false}
             ></CustomInput>
             <CustomInput
-              placeHolder="Symbol"
+              placeholder="Symbol"
               label="Symbol"
               id="symbol"
               name="symbol"
@@ -178,7 +178,7 @@ const TokenMint: React.FC = () => {
               disable={false}
             ></CustomInput>
             <CustomInput
-              placeHolder="Amount"
+              placeholder="Amount"
               label="Amount"
               id="amount"
               name="amount"
@@ -188,7 +188,7 @@ const TokenMint: React.FC = () => {
               disable={false}
             ></CustomInput>
             <CustomInput
-              placeHolder="Decimal"
+              placeholder="Decimal"
               label="Decimal"
               id="decimal"
               name="decimal"
@@ -198,7 +198,7 @@ const TokenMint: React.FC = () => {
               disable={false}
             />
             <CustomInput
-              placeHolder="Authority"
+              placeholder="Authority"
               label="Authority"
               id="authority"
               name="authority"
@@ -208,7 +208,7 @@ const TokenMint: React.FC = () => {
               disable={false}
             />
             <CustomInput
-              placeHolder="Freeze Authority"
+              placeholder="Freeze Authority"
               label="Freeze Authority"
               id="freezeAuthority"
               name="freezeAuthority"

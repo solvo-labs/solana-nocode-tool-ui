@@ -524,7 +524,7 @@ export const Raffle = () => {
             </Typography>
             <div>
               <CustomInput
-                placeHolder="Ticket Price"
+                placeholder="Ticket Price"
                 label="Ticket Price"
                 id="amnewTicketPriceunt"
                 name="newTicketPrice"

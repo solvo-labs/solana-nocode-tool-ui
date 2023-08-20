@@ -17,7 +17,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
           label="Name"
           name="name"
           onChange={(e: any) => inputOnChange({ ...inputs, name: e.target.value })}
-          placeHolder={"Name"}
+          placeholder={"Name"}
           type="text"
           value={inputs.name}
           disable={false}
@@ -27,7 +27,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
           label="Recipient Address"
           name="recipientAddress"
           onChange={(e: any) => inputOnChange({ ...inputs, recipientAddress: e.target.value })}
-          placeHolder={"Recipient Address"}
+          placeholder={"Recipient Address"}
           type="text"
           value={inputs.recipientAddress}
           disable={false}
@@ -37,7 +37,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
           label="Amount"
           name="amount"
           onChange={(e: any) => inputOnChange({ ...inputs, amount: e.target.value })}
-          placeHolder={"Amount"}
+          placeholder={"Amount"}
           type="text"
           value={inputs.amount}
           disable={false}
@@ -47,7 +47,7 @@ const RecipientComponent: React.FC<Props> = ({ inputs, inputOnChange }) => {
           label="Cliff Amount (Optional)"
           name="cliffAmount"
           onChange={(e: any) => inputOnChange({ ...inputs, cliffAmount: e.target.value })}
-          placeHolder={"Cliff Amount"}
+          placeholder={"Cliff Amount"}
           type="text"
           value={inputs.cliffAmount}
           disable={false}

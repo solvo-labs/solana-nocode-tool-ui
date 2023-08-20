@@ -506,7 +506,7 @@ export const Stake = () => {
                       <Grid item xs={4}>
                         <FormControl fullWidth>
                           <CustomInput
-                            placeHolder="Time Period"
+                            placeholder="Time Period"
                             label="Time Period"
                             id="period"
                             name="period"
@@ -544,7 +544,7 @@ export const Stake = () => {
                     <Divider sx={{ margin: 3 }} key={"divider3"} />
 
                     <CustomInput
-                      placeHolder="Epoch (Optional)"
+                      placeholder="Epoch (Optional)"
                       label="Epoch (Optional)"
                       id="epoch"
                       name="epoch"
@@ -558,7 +558,7 @@ export const Stake = () => {
                     <Divider sx={{ margin: 3 }} key={"divider3"} />
 
                     <CustomInput
-                      placeHolder="Sol Amount"
+                      placeholder="Sol Amount"
                       label="Sol Amount"
                       id="amount"
                       name="amount"

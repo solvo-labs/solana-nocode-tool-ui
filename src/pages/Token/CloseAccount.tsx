@@ -211,7 +211,7 @@ export const CloseAccount = () => {
               </Grid>
               <Grid item>
                 <CustomInput
-                  placeHolder="Destination Pubkey"
+                  placeholder="Destination Pubkey"
                   label="Destination Pubkey"
                   id="destinationPubkey"
                   name="destinationPubkey"

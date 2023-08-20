@@ -240,7 +240,7 @@ export const TokenMintAndBurn = () => {
                 onChange={(e: any) => {
                   setAmountToBeBurn(e.target.value);
                 }}
-                placeHolder="Amount"
+                placeholder="Amount"
                 type="number"
                 disable={false}
                 value={amountToBeBurn}

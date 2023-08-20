@@ -326,7 +326,7 @@ export const Tokenomics = () => {
                     label="Section Name"
                     name="sectionName"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "name")}
-                    placeHolder="Section Name"
+                    placeholder="Section Name"
                     type="text"
                     disable={section.isOldSection}
                     value={section.name}
@@ -338,11 +338,11 @@ export const Tokenomics = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "percent")}
                     disable={section.isOldSection}
                     type="text"
-                    placeHolder={"percent"}
+                    placeholder={"percent"}
                   ></CustomInput>
                   <CustomInput
                     label="Amount"
-                    placeHolder="Amount"
+                    placeholder="Amount"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => sectionSetter(e, index, "amount")}
                     disable={section.isOldSection}
                     type="text"
