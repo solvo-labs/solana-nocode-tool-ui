@@ -42,6 +42,15 @@ h1 {
   line-height: 1.1;
 }
 
+h5 {
+  color: #5719a3;
+}
+
+hr {
+  background-color: #5719a3 !important;
+  border-width: 1px !important;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
