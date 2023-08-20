@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { Grid, Theme } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Grid } from "@mui/material";
 import ImageUpload from "../ImageUpload";
 import { makeStyles } from "@mui/styles";
 import { CustomInput } from "../CustomInput";
 import { Dao } from "../../utils/types";
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   container: {
     display: "flex",
     justifyContent: "center",
@@ -13,11 +13,20 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export const DaoInfo: React.FC = () => {
+type Props = {
+  daoOnChange: (value: Dao) => void;
+  dao: Dao;
+  disableButtonOnChange: (value: boolean) => void;
+};
+
+export const DaoInfo: React.FC<Props> = ({ daoOnChange, dao, disableButtonOnChange }) => {
   const [file, setFile] = useState<any>();
-  const [dao, setDao] = useState<Dao>({ name: "", description: "", image: "" });
 
   const classes = useStyles();
+
+  useEffect(() => {
+    disableButtonOnChange(!(dao.name && dao.description));
+  }, [dao.description, dao.name, disableButtonOnChange]);
 
   return (
     <Grid container className={classes.container} direction={"column"}>
@@ -29,7 +38,7 @@ export const DaoInfo: React.FC = () => {
         name="name"
         type="text"
         value={dao.name}
-        onChange={(e: any) => setDao({ ...dao, name: e.target.value })}
+        onChange={(e: any) => daoOnChange({ ...dao, name: e.target.value })}
         disable={false}
       />
       <CustomInput
@@ -39,7 +48,7 @@ export const DaoInfo: React.FC = () => {
         name="description"
         type="text"
         value={dao.description}
-        onChange={(e: any) => setDao({ ...dao, description: e.target.value })}
+        onChange={(e: any) => daoOnChange({ ...dao, description: e.target.value })}
         disable={false}
       />
     </Grid>

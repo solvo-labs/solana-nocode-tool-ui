@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Grid, Theme } from "@mui/material";
+import { Grid } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import DaoCategories from "../../components/Dao/DaoCategories";
 import { Steps } from "../../components/DaoStep/Steps";
@@ -18,23 +18,22 @@ const CreateDao: React.FC = () => {
   const [dao, setDao] = useState<Dao>({
     name: "",
     description: "",
-    image: "",
   });
+  const [disableButton, setDisableButton] = useState<boolean>(false);
 
-  const useStyles = makeStyles((theme: Theme) => ({
+  const useStyles = makeStyles(() => ({
     container: {
-      padding: "2rem 2rem 3rem 2rem",
-      background: activeStep === 2 ? "" : "#f4f4f5",
+      background: "#f4f4f5",
       borderRadius: "5px",
-      marginTop: activeStep === 2 ? "6.5rem" : "0",
+      marginTop: activeStep !== 1 ? "5rem" : "0",
+      padding: activeStep !== 1 ? "0" : "1rem",
     },
     top: {
       position: "fixed",
       top: 100,
       left: 0,
       width: "100%",
-      padding: "1rem 0rem",
-      background: activeStep === 2 ? "" : "#f4f4f5",
+      background: "#f4f4f5",
       color: "white",
     },
     // title: {
@@ -43,8 +42,14 @@ const CreateDao: React.FC = () => {
     // },
     buttonContainer: {
       display: "flex",
-      marginTop: "1rem",
       width: "100%",
+      borderBottom: "3px solid #5719A3",
+      borderLeft: "3px solid #5719A3",
+      borderRight: "3px solid #5719A3",
+      borderBottomLeftRadius: "8px",
+      borderBottomRightRadius: "8px",
+      padding: "1.5rem",
+      //background: "linear-gradient(to left, #aa66fe, #23ed98)",
     },
     daoCategories: {
       display: "flex",
@@ -59,6 +64,13 @@ const CreateDao: React.FC = () => {
       justifyContent: "center",
       alignItems: "center",
       width: "100%",
+      borderTop: "3px solid #5719A3",
+      borderLeft: "3px solid #5719A3",
+      borderRight: "3px solid #5719A3",
+      borderTopLeftRadius: "8px",
+      borderTopRightRadius: "8px",
+      padding: "1.5rem",
+      //background: "linear-gradient(to left, #aa66fe, #23ed98)",
     },
   }));
 
@@ -86,7 +98,7 @@ const CreateDao: React.FC = () => {
 
       {activeStep === 2 && (
         <div className={classes.daoInfo}>
-          <DaoInfo />
+          <DaoInfo daoOnChange={setDao} dao={dao} disableButtonOnChange={setDisableButton} />
         </div>
       )}
 
@@ -95,7 +107,7 @@ const CreateDao: React.FC = () => {
           <Grid paddingTop={2} container justifyContent={"space-evenly"} width={"100%"}>
             <CustomButton onClick={() => setActiveStep(activeStep - 1)} disable={false} label="BACK" />
             {activeStep !== 4 ? (
-              <CustomButton onClick={() => setActiveStep(activeStep + 1)} disable={false} label="NEXT" />
+              <CustomButton onClick={() => setActiveStep(activeStep + 1)} disable={disableButton} label="NEXT" />
             ) : (
               <CustomButton onClick={createDao} disable={false} label="SAVE" />
             )}
