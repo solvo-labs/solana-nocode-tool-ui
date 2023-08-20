@@ -3,20 +3,35 @@ import { makeStyles } from "@mui/styles";
 import { TextField, Theme } from "@mui/material";
 
 const useStyles = makeStyles((theme: Theme) => ({
+  // input: {
+  //   width: "100%",
+  //   // maxHeight: "44px !important",
+  //   [theme.breakpoints.up("sm")]: {
+  //     // maxWidth: "24rem !important",
+  //   },
+  //   [theme.breakpoints.down("sm")]: {
+  //     // maxWidth: "12rem !important",
+  //   },
+  //   borderColor: "white !important",
+
+  // },
   input: {
-    width: "100%",
-    // maxHeight: "44px !important",
-    [theme.breakpoints.up("sm")]: {
-      // maxWidth: "24rem !important",
-    },
+    width: "400px",
+    maxHeight: "44px",
+    color: "#767D86",
+    boxShadow: "none",
+    fontSize: "1rem",
+    fontFamily: "Raleway",
+    fontWeight: "500",
+    marginTop: "1rem !important",
     [theme.breakpoints.down("sm")]: {
-      // maxWidth: "12rem !important",
+      minWidth: "300px",
     },
   },
 }));
 
 type Props = {
-  placeHolder: string;
+  placeholder: string;
   label: string;
   id?: string;
   name: string;
@@ -27,13 +42,32 @@ type Props = {
   required?: boolean;
 };
 
-export const CustomInput: React.FC<Props> = ({ placeHolder, label, id, name, type, value, onChange, disable = false, required = true }) => {
+export const CustomInput: React.FC<Props> = ({ placeholder, label, id, name, type, value, onChange, disable = false, required = true }) => {
   const classes = useStyles();
 
   return (
     <TextField
+      sx={{
+        "& .MuiOutlinedInput-notchedOutline": {
+          borderRadius: "1rem",
+          border: "1px solid black",
+          "&:hover": {
+            borderColor: "black",
+          },
+        },
+        "& .css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input": {
+          height: "11px",
+          background: "transparent",
+        },
+        label: {
+          color: "black",
+        },
+        "& .css-14s5rfu-MuiFormLabel-root-MuiInputLabel-root": {
+          ";-webkit-transform": "translate(14px, 12px) scale(1)",
+        },
+      }}
       className={classes.input}
-      placeholder={placeHolder}
+      placeholder={placeholder}
       id={id}
       name={name}
       label={label}
@@ -42,6 +76,6 @@ export const CustomInput: React.FC<Props> = ({ placeHolder, label, id, name, typ
       required={required}
       type={type}
       disabled={disable}
-    ></TextField>
+    />
   );
 };
