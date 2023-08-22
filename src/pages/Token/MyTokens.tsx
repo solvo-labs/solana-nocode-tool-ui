@@ -93,6 +93,8 @@ export const MyTokens = () => {
     };
   }, [connection, publicKey]);
 
+  console.log(allToken);
+
   const listToken = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any, index: number) => (
