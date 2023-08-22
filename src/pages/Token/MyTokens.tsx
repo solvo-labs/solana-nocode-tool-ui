@@ -99,7 +99,7 @@ export const MyTokens = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any, index: number) => (
       <TableRow className={classes.tableRow} key={index} onClick={() => navigate(`/token/${a.hex}`)}>
-        <TableCell>{a.metadata.uri.startsWith("https:") ? <Avatar src={a.metadata.uri} /> : <Avatar>{a.metadata.symbol.slice(0, 2)}</Avatar>}</TableCell>
+        <TableCell>{a.metadata.uri && a.metadata.uri.startsWith("https:") ? <Avatar src={a.metadata.uri} /> : <Avatar>{a.metadata.symbol.slice(0, 2)}</Avatar>}</TableCell>
         <TableCell>{a.metadata.name}</TableCell>
         <TableCell>{a.metadata.symbol}</TableCell>
         <TableCell>{a.supply.value.uiAmount}</TableCell>
