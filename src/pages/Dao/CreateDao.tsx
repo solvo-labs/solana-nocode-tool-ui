@@ -3,12 +3,16 @@ import { Grid } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import DaoCategories from "../../components/Dao/DaoCategories";
 import { Steps } from "../../components/DaoStep/Steps";
-import { DAO_STEPS } from "../../utils/enum";
-import { Category, Dao } from "../../utils/types";
+import { DAO_STEPS, TOKEN_TYPES } from "../../utils/enum";
+import { Category, Dao, TokenWithType } from "../../utils/types";
 import { DaoInfo } from "../../components/Dao/DaoInfo";
-import { CustomButton } from "../../components/CustomButton";
+import { CustomButton } from "../../components/Custom/CustomButton";
+import TokenDetail from "../../components/Dao/TokenDetail";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const CreateDao: React.FC = () => {
+  const { publicKey } = useWallet();
+
   const [activeStep, setActiveStep] = useState<number>(1);
   const [selectedCategory, setSelectedCategory] = useState<Category>({
     id: 0,
@@ -19,21 +23,31 @@ const CreateDao: React.FC = () => {
     name: "",
     description: "",
   });
+  const [token, setToken] = useState<TokenWithType>({
+    type: TOKEN_TYPES.NEW_TOKEN,
+    name: "",
+    symbol: "",
+    amount: 0,
+    decimal: 8,
+    freezeAuthority: publicKey?.toBase58(),
+    authority: publicKey?.toBase58(),
+  });
   const [disableButton, setDisableButton] = useState<boolean>(false);
 
   const useStyles = makeStyles(() => ({
     container: {
       background: "#f4f4f5",
-      borderRadius: "5px",
       marginTop: activeStep !== 1 ? "5rem" : "0",
-      padding: activeStep !== 1 ? "0" : "1rem",
+      padding: activeStep !== 1 ? "0" : "2rem",
+      paddingRight: activeStep !== 1 ? "3.2rem" : "2rem",
+      borderRadius: "0.5rem",
     },
     top: {
       position: "fixed",
       top: 100,
       left: 0,
       width: "100%",
-      background: "#f4f4f5",
+      background: activeStep !== 1 ? "" : "#f4f4f5",
       color: "white",
     },
     // title: {
@@ -46,8 +60,8 @@ const CreateDao: React.FC = () => {
       borderBottom: "3px solid #5719A3",
       borderLeft: "3px solid #5719A3",
       borderRight: "3px solid #5719A3",
-      borderBottomLeftRadius: "8px",
-      borderBottomRightRadius: "8px",
+      borderBottomLeftRadius: "5px",
+      borderBottomRightRadius: "5px",
       padding: "1.5rem",
       //background: "linear-gradient(to left, #aa66fe, #23ed98)",
     },
@@ -56,7 +70,8 @@ const CreateDao: React.FC = () => {
       flexWrap: "wrap",
       justifyContent: "center",
       alignItems: "center",
-      marginTop: "6rem",
+      marginTop: "5rem",
+      marginBottom: "1rem",
       width: "100%",
     },
     daoInfo: {
@@ -67,8 +82,8 @@ const CreateDao: React.FC = () => {
       borderTop: "3px solid #5719A3",
       borderLeft: "3px solid #5719A3",
       borderRight: "3px solid #5719A3",
-      borderTopLeftRadius: "8px",
-      borderTopRightRadius: "8px",
+      borderTopLeftRadius: "5px",
+      borderTopRightRadius: "5px",
       padding: "1.5rem",
       //background: "linear-gradient(to left, #aa66fe, #23ed98)",
     },
@@ -99,6 +114,12 @@ const CreateDao: React.FC = () => {
       {activeStep === 2 && (
         <div className={classes.daoInfo}>
           <DaoInfo daoOnChange={setDao} dao={dao} disableButtonOnChange={setDisableButton} />
+        </div>
+      )}
+
+      {activeStep === 3 && (
+        <div className={classes.daoInfo}>
+          <TokenDetail tokenDetailOnChange={setToken} tokenDetail={token} />
         </div>
       )}
 
