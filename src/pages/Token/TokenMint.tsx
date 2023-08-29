@@ -1,19 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { createMint, getOrCreateAssociatedTokenAccount } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, createMintToInstruction } from "@solana/spl-token";
 import { register } from "../../lib/tokenRegister";
-import { Token } from "../../utils/types";
-import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
-import { CircularProgress, Divider, Grid, Stack, Theme, Typography } from "@mui/material";
-import { CustomButton } from "../../components/CustomButton";
+import { CircularProgress, Divider, Grid, Theme, Typography } from "@mui/material";
+import { CustomButton } from "../../components/Custom/CustomButton";
 import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
 import { NFTStorage } from "nft.storage";
-import ImageUpload from "../../components/ImageUpload";
+import Token from "../../components/Token/Token";
+import { TokenWithType } from "../../utils/types";
+import { TOKEN_TYPES } from "../../utils/enum";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -31,14 +30,12 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const TokenMint: React.FC = () => {
-  const classes = useStyles();
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<any>();
-  const navigate = useNavigate();
-
-  const [tokenData, setTokenData] = useState<Token>({
+  const [tokenData, setTokenData] = useState<TokenWithType>({
+    type: TOKEN_TYPES.NEW_TOKEN,
     name: "",
     symbol: "",
     amount: 0,
@@ -46,6 +43,9 @@ const TokenMint: React.FC = () => {
     freezeAuthority: publicKey?.toBase58(),
     authority: publicKey?.toBase58(),
   });
+
+  const navigate = useNavigate();
+  const classes = useStyles();
 
   const storeImage = async () => {
     const storage = new NFTStorage({
@@ -154,71 +154,7 @@ const TokenMint: React.FC = () => {
           </Typography>
           <Divider sx={{ marginTop: "1rem", background: "white" }} />
         </Grid>
-        <Grid item justifyContent={"center"} marginBottom={"2rem"}>
-          <Stack direction={"column"} spacing={2} alignItems={"center"}>
-            <ImageUpload file={file} setFile={(data) => setFile(data)} />
-            <CustomInput
-              placeholder="Name"
-              label="Name"
-              id="name"
-              name="name"
-              type="text"
-              value={tokenData.name}
-              onChange={(e: any) => setTokenData({ ...tokenData, name: e.target.value })}
-              disable={false}
-            ></CustomInput>
-            <CustomInput
-              placeholder="Symbol"
-              label="Symbol"
-              id="symbol"
-              name="symbol"
-              type="text"
-              value={tokenData.symbol}
-              onChange={(e: any) => setTokenData({ ...tokenData, symbol: e.target.value })}
-              disable={false}
-            ></CustomInput>
-            <CustomInput
-              placeholder="Amount"
-              label="Amount"
-              id="amount"
-              name="amount"
-              type="text"
-              value={tokenData.amount}
-              onChange={(e: any) => setTokenData({ ...tokenData, amount: e.target.value })}
-              disable={false}
-            ></CustomInput>
-            <CustomInput
-              placeholder="Decimal"
-              label="Decimal"
-              id="decimal"
-              name="decimal"
-              type="text"
-              value={tokenData.decimal}
-              onChange={(e: any) => setTokenData({ ...tokenData, decimal: e.target.value })}
-              disable={false}
-            />
-            <CustomInput
-              placeholder="Authority"
-              label="Authority"
-              id="authority"
-              name="authority"
-              type="text"
-              value={tokenData.authority || ""}
-              onChange={(e: any) => setTokenData({ ...tokenData, authority: e.target.value })}
-              disable={false}
-            />
-            <CustomInput
-              placeholder="Freeze Authority"
-              label="Freeze Authority"
-              id="freezeAuthority"
-              name="freezeAuthority"
-              type="text"
-              value={tokenData.freezeAuthority || ""}
-              onChange={(e: any) => setTokenData({ ...tokenData, freezeAuthority: e.target.value })}
-              disable={false}
-            />
-          </Stack>
-        </Grid>
+        <Token tokenOnChange={setTokenData} token={tokenData} fileOnChange={setFile} file={file} />
         <Grid item marginBottom={8}>
           <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
         </Grid>
