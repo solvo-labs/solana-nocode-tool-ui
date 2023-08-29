@@ -1,6 +1,7 @@
 import { RpcResponseAndContext, TokenAmount } from "@solana/web3.js";
+import { TOKEN_TYPES } from "./enum";
 
-export type Token = {
+export type TokenDetail = {
   name: string;
   symbol: string;
   amount: number;
@@ -59,4 +60,8 @@ export type Category = { id: number; label: string; icon: any };
 export type Dao = {
   name: string;
   description: string;
+};
+
+export type TokenWithType = TokenDetail & {
+  type: TOKEN_TYPES;
 };
