@@ -15,6 +15,7 @@ const useStyles = makeStyles(() => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    paddingBottom: "1rem",
   },
   box: {
     display: "flex",

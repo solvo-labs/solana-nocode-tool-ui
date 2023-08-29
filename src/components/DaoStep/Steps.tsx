@@ -6,10 +6,8 @@ import { CustomStep } from "./CustomStep";
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
     marginTop: "2rem",
+    marginBottom: "1rem",
     width: "100%",
-    [theme.breakpoints.down("sm")]: {
-      marginTop: "2rem",
-    },
   },
   cardDiv: {
     marginTop: "8rem",
