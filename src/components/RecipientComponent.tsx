@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Grid, Stack } from "@mui/material";
-import { CustomInput } from "./CustomInput";
+import { CustomInput } from "./Custom/CustomInput";
 import { RecipientFormInput } from "../lib/models/Vesting";
 
 type Props = {

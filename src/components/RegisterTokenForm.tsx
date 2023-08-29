@@ -1,8 +1,8 @@
 import React from "react";
 import { Stack } from "@mui/material";
-import { CustomInput } from "./CustomInput";
+import { CustomInput } from "./Custom/CustomInput";
 import { RegisterToken } from "../lib/tokenRegister";
-import { CustomButton } from "./CustomButton";
+import { CustomButton } from "./Custom/CustomButton";
 
 type Props = {
   inputs: RegisterToken;

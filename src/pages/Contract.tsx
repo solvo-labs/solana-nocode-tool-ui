@@ -23,8 +23,8 @@ import {
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { CustomInput } from "../components/CustomInput";
-import { CustomButton } from "../components/CustomButton";
+import { CustomInput } from "../components/Custom/CustomInput";
+import { CustomButton } from "../components/Custom/CustomButton";
 import { IdlInstruction } from "@project-serum/anchor/dist/cjs/idl";
 
 const useStyles = makeStyles((theme: Theme) => ({

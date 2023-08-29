@@ -8,7 +8,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import TokenSelector from "../../components/TokenSelector";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { CustomInput } from "../../components/CustomInput";
+import { CustomInput } from "../../components/Custom/CustomInput";
 import { useNavigate } from "react-router-dom";
 import { getVestingMyOwn } from "../../lib/vesting";
 

@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Grid, Theme } from "@mui/material";
+import { Grid } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Profile, { ProfileLoading } from "../components/Profile";
 import SolPrice, { SolPriceLoading } from "../components/SolPrice";
-import CurrentBlock from "../components/CurrentBlock";
+import CurrentBlock from "../components/Custom/CurrentBlock";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { makeStyles } from "@mui/styles";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -20,7 +19,7 @@ import { fetchUserTokens } from "../lib";
 import { marketInfo } from "../api/solscan";
 import RegisterToken, { RegisterTokenLoading } from "../components/NonRegisteredToken";
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   container: {
     // [theme.breakpoints.up("xl")]: {
     //   minWidth: "80vw !important",

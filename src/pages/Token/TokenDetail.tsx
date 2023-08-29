@@ -30,10 +30,10 @@ import {
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { CustomButton } from "../../components/CustomButton";
+import { CustomButton } from "../../components/Custom/CustomButton";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { CustomInput } from "../../components/CustomInput";
+import { CustomInput } from "../../components/Custom/CustomInput";
 import { burnToken, getLargestAccounts, getOrCreateAssociatedTokenAccount } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, createMintToInstruction, createTransferInstruction, getAccount } from "@solana/spl-token";
@@ -645,7 +645,7 @@ export const TokenDetail = () => {
                           <InputLabel id="selectLabel">Select a Holder</InputLabel>
                           <Select
                             value={selectedHolder ? selectedHolder.address.toBase58() : ""}
-                            label=" Token"
+                            label="Token"
                             onChange={(e: any) => {
                               const currentHolder = holders.find((hf: any) => hf.address.toBase58() === e.target.value);
                               setSelectedHolder(currentHolder);

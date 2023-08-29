@@ -5,13 +5,13 @@ import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { accountState, fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
-import { CustomButton } from "../../components/CustomButton";
+import { CustomButton } from "../../components/Custom/CustomButton";
 import { closeAccount, getLargestAccounts } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { ACCOUNT_STATE } from "../../utils/enum";
 import toastr from "toastr";
 import { useNavigate } from "react-router-dom";
-import { CustomInput } from "../../components/CustomInput";
+import { CustomInput } from "../../components/Custom/CustomInput";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {

@@ -3,8 +3,8 @@ import { useState } from "react";
 import { airdrop } from "../../lib/utils";
 import { PublicKey } from "@solana/web3.js";
 import { CircularProgress, FormControl, Grid } from "@mui/material";
-import { CustomInput } from "../../components/CustomInput";
-import { CustomButton } from "../../components/CustomButton";
+import { CustomInput } from "../../components/Custom/CustomInput";
+import { CustomButton } from "../../components/Custom/CustomButton";
 import toastr from "toastr";
 
 export const Airdrop = () => {

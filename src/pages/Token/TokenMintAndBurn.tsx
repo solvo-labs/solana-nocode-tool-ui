@@ -5,8 +5,8 @@ import { makeStyles } from "@mui/styles";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { fetchUserTokens } from "../../lib";
 import { TokenData } from "../../utils/types";
-import { CustomInput } from "../../components/CustomInput";
-import { CustomButton } from "../../components/CustomButton";
+import { CustomInput } from "../../components/Custom/CustomInput";
+import { CustomButton } from "../../components/Custom/CustomButton";
 import { burnToken, getLargestAccounts } from "../../lib/token";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, createMintToInstruction } from "@solana/spl-token";
@@ -185,7 +185,7 @@ export const TokenMintAndBurn = () => {
               <InputLabel id="selectLabel">Select a Token</InputLabel>
               <Select
                 value={selectedToken?.hex || ""}
-                label=" Token"
+                label="Token"
                 onChange={(e: any) => {
                   const token = myTokens.find((tkn: any) => tkn.hex === e.target.value);
                   if (token != undefined) {

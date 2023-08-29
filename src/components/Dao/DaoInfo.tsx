@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Grid } from "@mui/material";
 import ImageUpload from "../ImageUpload";
 import { makeStyles } from "@mui/styles";
-import { CustomInput } from "../CustomInput";
+import { CustomInput } from "../Custom/CustomInput";
 import { Dao } from "../../utils/types";
 
 const useStyles = makeStyles(() => ({

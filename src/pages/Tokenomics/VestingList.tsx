@@ -29,7 +29,7 @@ import PendingIcon from "@mui/icons-material/Pending";
 import { PublicKey } from "@solana/web3.js";
 import { getMetadataPDA } from "../../lib/tokenRegister";
 import { UnlockSchedule, UnlockScheduleType } from "../../lib/models/Vesting";
-import { CustomButton } from "../../components/CustomButton";
+import { CustomButton } from "../../components/Custom/CustomButton";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

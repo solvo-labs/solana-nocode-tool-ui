@@ -34,7 +34,7 @@ import {
 import StakeClass from "../../lib/stakeClass";
 import { makeStyles } from "@mui/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { CustomInput } from "../../components/CustomInput";
+import { CustomInput } from "../../components/Custom/CustomInput";
 import toastr from "toastr";
 import { Durations, DurationsType } from "../../lib/models/Vesting";
 import { getTimestamp } from "../../lib/utils";

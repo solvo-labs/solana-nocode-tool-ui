@@ -28,7 +28,7 @@ import {
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { CustomButton } from "../../components/CustomButton";
+import { CustomButton } from "../../components/Custom/CustomButton";
 import { vestMulti } from "../../lib/vesting";
 import { SignerWalletAdapter } from "@solana/wallet-adapter-base";
 import { getBN } from "@streamflow/stream";
@@ -37,7 +37,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
-import { CustomInput } from "../../components/CustomInput";
+import { CustomInput } from "../../components/Custom/CustomInput";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";

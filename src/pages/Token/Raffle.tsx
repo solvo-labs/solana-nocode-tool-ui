@@ -28,7 +28,7 @@ import {
   Typography,
 } from "@mui/material";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
-import { CustomInput } from "../../components/CustomInput";
+import { CustomInput } from "../../components/Custom/CustomInput";
 
 const useStyles = makeStyles((theme: Theme) => ({
   cardContainer: {
