@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { TokenData, TokenWithType } from "../../utils/types";
 import Token from "../Token/Token";
-import { CustomButton } from "../Custom/CustomButton";
 import { CustomSelect } from "../Custom/CustomSelect";
 import { TOKEN_TYPES } from "../../utils/enum";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
@@ -84,10 +83,7 @@ const TokenDetail: React.FC<Props> = ({ tokenDetailOnChange, tokenDetail }) => {
           </Typography> */}
             <Divider sx={{ marginTop: "1rem", background: "white" }} />
           </Grid>
-          <Token tokenOnChange={tokenDetailOnChange} token={tokenDetail} fileOnChange={setFile} file={file} />
-          <Grid item marginBottom={8}>
-            <CustomButton label="create token" disable={false} onClick={() => {}}></CustomButton>
-          </Grid>
+          <Token tokenOnChange={tokenDetailOnChange} token={tokenDetail} fileOnChange={setFile} file={file} isNavigate={false} />
         </Grid>
       )}
       {tokenType === TOKEN_TYPES.TOKEN_FROM_WALLET && (

@@ -62,7 +62,7 @@ const CreateDao: React.FC = () => {
       borderRight: "3px solid #5719A3",
       borderBottomLeftRadius: "5px",
       borderBottomRightRadius: "5px",
-      padding: "1.5rem",
+      padding: "0 1.5rem 1.5rem 1.5rem",
       //background: "linear-gradient(to left, #aa66fe, #23ed98)",
     },
     daoCategories: {
