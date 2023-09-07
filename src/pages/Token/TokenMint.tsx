@@ -42,7 +42,7 @@ const TokenMint: React.FC = () => {
   return (
     <Grid container className={classes.tokenMintContainer} direction={"column"}>
       <Title label="Token Mint" />
-      <Token tokenOnChange={setTokenData} token={tokenData} fileOnChange={setFile} file={file} isNavigate={true} />
+      <Token tokenOnChange={setTokenData} token={tokenData} fileOnChange={setFile} file={file} isNavigate={true} showButton={true} />
     </Grid>
   );
 };

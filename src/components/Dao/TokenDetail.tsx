@@ -1,4 +1,4 @@
-import { Divider, Grid, MenuItem, SelectChangeEvent } from "@mui/material";
+import { Grid, MenuItem, SelectChangeEvent } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { TokenData, TokenWithType } from "../../utils/types";
@@ -10,13 +10,11 @@ import { fetchUserTokens } from "../../lib";
 
 const useStyles = makeStyles(() => ({
   container: {
-    display: "flex",
+    marginTop: "1.5rem",
     justifyContent: "center",
     alignItems: "center",
   },
-  tokenFromWallet: {
-    margin: "1rem",
-  },
+  tokenFromWallet: {},
 }));
 
 type Props = {
@@ -77,13 +75,7 @@ const TokenDetail: React.FC<Props> = ({ tokenDetailOnChange, tokenDetail }) => {
       </CustomSelect>
       {tokenType === TOKEN_TYPES.NEW_TOKEN && (
         <Grid container className={classes.container} direction={"column"}>
-          <Grid item marginBottom={"2rem"}>
-            {/* <Typography variant="h5" className={classes.title}>
-            Token Mint
-          </Typography> */}
-            <Divider sx={{ marginTop: "1rem", background: "white" }} />
-          </Grid>
-          <Token tokenOnChange={tokenDetailOnChange} token={tokenDetail} fileOnChange={setFile} file={file} isNavigate={false} />
+          <Token tokenOnChange={tokenDetailOnChange} token={tokenDetail} fileOnChange={setFile} file={file} isNavigate={false} showButton={false} />
         </Grid>
       )}
       {tokenType === TOKEN_TYPES.TOKEN_FROM_WALLET && (

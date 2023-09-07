@@ -20,6 +20,7 @@ type Props = {
   fileOnChange: (value: any) => void;
   file: any;
   isNavigate: boolean;
+  showButton: boolean;
 };
 
 const useStyles = makeStyles(() => ({
@@ -35,7 +36,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const Token: React.FC<Props> = ({ tokenOnChange, token, fileOnChange, file, isNavigate }) => {
+const Token: React.FC<Props> = ({ tokenOnChange, token, fileOnChange, file, isNavigate, showButton }) => {
   const [loading, setLoading] = useState(false);
 
   const classes = useStyles();
@@ -206,9 +207,11 @@ const Token: React.FC<Props> = ({ tokenOnChange, token, fileOnChange, file, isNa
           />
         </Stack>
       </Stack>
-      <Grid item className={classes.transactionButton}>
-        <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
-      </Grid>
+      {showButton && (
+        <Grid item className={classes.transactionButton}>
+          <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
+        </Grid>
+      )}
     </Grid>
   );
 };

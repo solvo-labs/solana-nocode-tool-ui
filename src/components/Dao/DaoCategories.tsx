@@ -38,7 +38,8 @@ const useStyles = makeStyles(() => ({
   },
   selectedLabel: {
     background: "#2FD9BB",
-    //color: "#aa66fe",
+    color: "#aa66fe",
+    border: "2px solid #AA66FE",
   },
 }));
 
@@ -101,7 +102,7 @@ const DaoCategories: React.FC<Props> = ({ activeStepOnChange, selectedCategoryOn
           <Grid item key={category.id} xs={12} sm={6} md={3} className={classes.box} onClick={() => handleCategoryClick(category)}>
             <Typography className={`${classes.label} ${selectedCategory === category ? classes.selectedLabel : ""}`} variant="h5">
               {category.label}
-              {category.icon}
+              <div style={{ color: "purple" }}> {category.icon}</div>
             </Typography>
           </Grid>
         ))}

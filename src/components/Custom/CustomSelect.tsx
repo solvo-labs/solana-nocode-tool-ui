@@ -11,7 +11,7 @@ const useStyles = makeStyles(() => ({
     fontWeight: "bold",
     color: "#AA66FE",
     boxShadow: "0 0 10px 0 rgba(0,0,0,0.1)",
-    backgroundColor: "#EF87FE !important",
+    backgroundColor: "#AA66FE !important",
     padding: "10px",
   },
 }));
@@ -38,7 +38,7 @@ export const CustomSelect: React.FC<Props> = ({ onChange, value, children, id, l
           borderRadius: "1rem",
         },
         "& .MuiOutlinedInput-notchedOutline": {
-          border: "1px solid #EF87FE",
+          border: "1px solid #AA66FE",
           borderRadius: "1rem",
         },
       }}
