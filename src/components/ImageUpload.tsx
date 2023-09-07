@@ -9,11 +9,12 @@ const useStyles = makeStyles((_theme: Theme) => ({
   container: {
     borderColor: "black !important",
     borderRadius: "16px",
-    padding: "1rem",
     justifyContent: "space-between",
     borderStyle: "solid",
     borderWidth: "0.02rem",
     width: "100%",
+    marginBottom: "1rem",
+    padding: "0.5rem",
   },
   input: {
     display: "none",
@@ -45,7 +46,7 @@ const ImageUpload: React.FC<Props> = ({ file, setFile }) => {
       setFile(file);
     }
   };
-  
+
   return (
     <Grid container className={classes.container}>
       <Grid item>

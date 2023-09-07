@@ -23,7 +23,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontSize: "1rem",
     fontFamily: "Raleway",
     fontWeight: "500",
-    marginTop: "1rem !important",
+    marginBottom: "1rem !important",
+    marginTop: "0rem !important",
     [theme.breakpoints.down("sm")]: {
       minWidth: "300px",
     },
