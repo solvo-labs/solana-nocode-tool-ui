@@ -11,13 +11,13 @@ import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import { Category } from "../../utils/types";
 
 const useStyles = makeStyles(() => ({
-  container: {
+  daoCategoriesContainer: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     paddingBottom: "1rem",
   },
-  box: {
+  doaCategoriesBox: {
     display: "flex",
     flexDirection: "column",
     marginBottom: "1rem",
@@ -25,7 +25,7 @@ const useStyles = makeStyles(() => ({
     height: "9rem",
     width: "25%",
   },
-  label: {
+  daoCategoriesLabel: {
     background: "linear-gradient(to right, #aa66fe, #23ed98)",
     borderRadius: "0.5rem",
     color: "white",
@@ -36,7 +36,7 @@ const useStyles = makeStyles(() => ({
     flexDirection: "column",
     width: "100%",
   },
-  selectedLabel: {
+  daoCategoriesSelectedLabel: {
     background: "#2FD9BB",
     color: "#aa66fe",
     border: "2px solid #AA66FE",
@@ -96,11 +96,11 @@ const DaoCategories: React.FC<Props> = ({ activeStepOnChange, selectedCategoryOn
   };
 
   return (
-    <div className={classes.container}>
+    <div className={classes.daoCategoriesContainer}>
       <Grid container spacing={2}>
         {categories.map((category: Category) => (
-          <Grid item key={category.id} xs={12} sm={6} md={3} className={classes.box} onClick={() => handleCategoryClick(category)}>
-            <Typography className={`${classes.label} ${selectedCategory === category ? classes.selectedLabel : ""}`} variant="h5">
+          <Grid item key={category.id} xs={12} sm={6} md={3} className={classes.doaCategoriesBox} onClick={() => handleCategoryClick(category)}>
+            <Typography className={`${classes.daoCategoriesLabel} ${selectedCategory === category ? classes.daoCategoriesSelectedLabel : ""}`} variant="h5">
               {category.label}
               <div style={{ color: "purple" }}> {category.icon}</div>
             </Typography>

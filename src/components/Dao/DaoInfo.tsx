@@ -6,7 +6,7 @@ import { CustomInput } from "../Custom/CustomInput";
 import { Dao } from "../../utils/types";
 
 const useStyles = makeStyles(() => ({
-  container: {
+  daoInfoContainer: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -29,7 +29,7 @@ export const DaoInfo: React.FC<Props> = ({ daoOnChange, dao, disableButtonOnChan
   }, [dao.description, dao.name, disableButtonOnChange]);
 
   return (
-    <Grid container className={classes.container} direction={"column"}>
+    <Grid container className={classes.daoInfoContainer} direction={"column"}>
       <ImageUpload file={file} setFile={(data) => setFile(data)} />
       <CustomInput
         placeholder="DAO Name"
