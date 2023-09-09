@@ -9,6 +9,7 @@ import { DaoInfo } from "../../components/Dao/DaoInfo";
 import { CustomButton } from "../../components/Custom/CustomButton";
 import TokenDetail from "../../components/Dao/TokenDetail";
 import { useWallet } from "@solana/wallet-adapter-react";
+import Review from "../../components/Dao/Review";
 
 const CreateDao: React.FC = () => {
   const { publicKey } = useWallet();
@@ -35,14 +36,32 @@ const CreateDao: React.FC = () => {
   const [disableButton, setDisableButton] = useState<boolean>(false);
 
   const useStyles = makeStyles(() => ({
-    container: {
+    createDaoContainer: {
       background: "#f4f4f5",
-      marginTop: activeStep !== 1 ? "5rem" : "0",
-      padding: activeStep !== 1 ? "0" : "2rem",
-      paddingRight: activeStep !== 1 ? "3.2rem" : "2rem",
       borderRadius: "0.5rem",
     },
-    top: {
+    createDaoOne: {
+      marginTop: "0",
+      padding: "2rem",
+      paddingRight: "2rem",
+    },
+    createDaoTwo: {
+      marginTop: "5rem",
+      padding: "0",
+      paddingRight: "3.2rem",
+    },
+    createDaoThree: {
+      marginTop: "5rem",
+      padding: "0",
+      paddingRight: "3.2rem",
+      // width: "50rem !important",
+    },
+    createDaoFour: {
+      marginTop: "5rem",
+      padding: "0",
+      paddingRight: "3.2rem",
+    },
+    createDaoTop: {
       position: "fixed",
       top: 100,
       left: 0,
@@ -50,11 +69,7 @@ const CreateDao: React.FC = () => {
       background: activeStep !== 1 ? "" : "#f4f4f5",
       color: "white",
     },
-    // title: {
-    //   textAlign: "center",
-    //   background: "linear-gradient(to left, #aa66fe, #23ed98)",
-    // },
-    buttonContainer: {
+    createDaoButtonContainer: {
       display: "flex",
       width: "100%",
       borderBottom: "3px solid #5719A3",
@@ -87,21 +102,26 @@ const CreateDao: React.FC = () => {
       padding: activeStep !== 3 ? "1.5rem" : "1.5rem 1.5rem 0rem 1.5rem",
       //background: "linear-gradient(to left, #aa66fe, #23ed98)",
     },
+    review: {},
   }));
 
   const classes = useStyles();
 
   const createDao = () => {
-    console.log("create dao");
+    console.log("category", selectedCategory);
+    console.log("dao", dao);
+    console.log("token", token);
   };
 
   return (
-    <Grid container className={classes.container} direction="column">
-      <div className={classes.top}>
-        {/* <Typography variant="h5" className={classes.title}>
-          Create Dao
-        </Typography> */}
-        {/* <Divider sx={{ background: "#aa66fe" }} /> */}
+    <Grid
+      container
+      className={`${classes.createDaoContainer} ${activeStep === 1 ? classes.createDaoOne : ""} ${activeStep === 2 ? classes.createDaoTwo : ""} ${
+        activeStep === 3 ? classes.createDaoThree : ""
+      } ${activeStep === 4 ? classes.createDaoFour : ""}`}
+      direction="column"
+    >
+      <div className={classes.createDaoTop}>
         <Steps activeStep={activeStep} allSteps={Object.values(DAO_STEPS)} />
       </div>
 
@@ -123,8 +143,14 @@ const CreateDao: React.FC = () => {
         </div>
       )}
 
+      {activeStep === 4 && (
+        <div className={classes.daoInfo}>
+          <Review category={selectedCategory} dao={dao} token={token} />
+        </div>
+      )}
+
       {activeStep !== 1 ? (
-        <div className={classes.buttonContainer}>
+        <div className={classes.createDaoButtonContainer}>
           <Grid paddingTop={2} container justifyContent={"space-evenly"} width={"100%"}>
             <CustomButton onClick={() => setActiveStep(activeStep - 1)} disable={false} label="BACK" />
             {activeStep !== 4 ? (

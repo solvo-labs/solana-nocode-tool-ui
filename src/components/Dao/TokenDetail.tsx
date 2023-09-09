@@ -9,12 +9,14 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { fetchUserTokens } from "../../lib";
 
 const useStyles = makeStyles(() => ({
-  container: {
+  tokenDetailContainer: {
     marginTop: "1.5rem",
     justifyContent: "center",
     alignItems: "center",
   },
-  tokenFromWallet: {},
+  tokenFromWallet: {
+    marginTop: "1rem",
+  },
 }));
 
 type Props = {
@@ -43,15 +45,20 @@ const TokenDetail: React.FC<Props> = ({ tokenDetailOnChange, tokenDetail }) => {
   const selectToken = (e: SelectChangeEvent) => {
     e.preventDefault();
 
-    tokenDetailOnChange({
-      type: TOKEN_TYPES.TOKEN_FROM_WALLET,
-      amount: 10,
-      decimal: 8,
-      name: "token",
-      symbol: "symbol",
-      freezeAuthority: "freeze",
-      authority: "authority",
-    });
+    const currentAddress = e.target.value;
+    const currentToken = myTokens.find((token) => token.metadata.name === currentAddress);
+
+    if (currentToken) {
+      tokenDetailOnChange({
+        type: TOKEN_TYPES.TOKEN_FROM_WALLET,
+        amount: 10,
+        decimal: 8,
+        name: currentToken?.metadata.name,
+        symbol: currentToken?.metadata.symbol,
+        freezeAuthority: tokenDetail.freezeAuthority,
+        authority: tokenDetail.authority,
+      });
+    }
   };
 
   useEffect(() => {
@@ -74,13 +81,13 @@ const TokenDetail: React.FC<Props> = ({ tokenDetailOnChange, tokenDetail }) => {
         <MenuItem value={TOKEN_TYPES.TOKEN_FROM_WALLET}>{TOKEN_TYPES.TOKEN_FROM_WALLET}</MenuItem>
       </CustomSelect>
       {tokenType === TOKEN_TYPES.NEW_TOKEN && (
-        <Grid container className={classes.container} direction={"column"}>
+        <Grid container className={classes.tokenDetailContainer} direction={"column"}>
           <Token tokenOnChange={tokenDetailOnChange} token={tokenDetail} fileOnChange={setFile} file={file} isNavigate={false} showButton={false} />
         </Grid>
       )}
       {tokenType === TOKEN_TYPES.TOKEN_FROM_WALLET && (
         <div className={classes.tokenFromWallet}>
-          <CustomSelect id="token-from-wallet" onChange={selectToken} value={"address"} label="Choose a token">
+          <CustomSelect id="token-from-wallet" onChange={selectToken} value={tokenDetail.name} label="Choose a token">
             {myTokens.map((token: TokenData) => {
               return (
                 <MenuItem key={token.metadata.symbol} value={token.metadata.name}>
