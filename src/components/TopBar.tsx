@@ -147,8 +147,7 @@ const TopBar: React.FC = () => {
                 }}
                 sx={{
                   "& .MuiPaper-root": {
-                    background: "#000000",
-                    color: "#FFFFFF",
+                    background: "#FFFFFF",
                     border: "1px solid #AA66FE",
                   },
                 }}
