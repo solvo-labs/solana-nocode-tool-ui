@@ -51,6 +51,10 @@ hr {
   border-width: 1px !important;
 }
 
+p {
+  color: #5719a3;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
