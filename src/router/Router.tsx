@@ -19,7 +19,7 @@ import { ContractPage } from "../pages/Contract";
 import { Tokenomics } from "../pages/Tokenomics/Tokenomics";
 import { Vesting } from "../pages/Tokenomics/Vesting";
 import { Airdrop } from "../pages/Token/Airdrop";
-import { Dao } from "../pages/Dao/dao";
+import { Dao } from "../pages/Dao/Dao";
 
 const Router: React.FC = () => {
   return (
