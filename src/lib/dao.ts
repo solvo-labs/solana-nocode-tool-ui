@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { ProgramAccount, Realm, getRealms, getTokenOwnerRecordsByOwner } from "@solana/spl-governance";
+import { ProgramAccount, Realm, getRealm, getRealms, getTokenOwnerRecordsByOwner } from "@solana/spl-governance";
 
 const GOVERNANCE_PROGRAM_ID = new PublicKey("GovER5Lthms3bLBqWub97yVrMmEogzX7xNjdXpPPCVZw");
 
@@ -35,6 +35,16 @@ export class DAO {
     });
 
     return { myDaos, allDaos };
+  };
+
+  getDaoDetails = async (
+    currentRealm: PublicKey
+  ): Promise<{
+    dao: ProgramAccount<Realm>;
+  }> => {
+    const dao = await getRealm(this.connection, currentRealm);
+
+    return { dao };
   };
 
   fetchDaos = () => {
