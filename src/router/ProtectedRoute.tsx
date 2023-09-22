@@ -52,14 +52,7 @@ const ProtectedRoute: React.FC = () => {
   return connected ? (
     <Grid container spacing={0} className={classes.container}>
       <TopBar />
-      <Grid
-        item
-        lg={12}
-        md={12}
-        xs={12}
-        height={"100vh"}
-        paddingTop={{ xl: "8rem", md: "8rem", sm: "8rem", xs: "8rem" }}
-      >
+      <Grid item lg={12} md={12} xs={12} height={"100vh"} paddingTop={{ xl: "8rem", md: "8rem", sm: "8rem", xs: "8rem" }}>
         <Grid container direction={"column"} spacing={0}>
           <Outlet />
         </Grid>

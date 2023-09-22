@@ -1,27 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { DAO } from "../../lib/dao";
-import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
+import { Box, CircularProgress, Tab } from "@mui/material";
 import { Realm, ProgramAccount } from "@solana/spl-governance";
 import ListDaos from "../../components/ListDaos";
-// import { makeStyles } from "@mui/styles";
-
 import toastr from "toastr";
-import { TabContext, TabPanel } from "@mui/lab";
-
-// const useStyles = makeStyles(() => ({
-//   daoContainer: {
-//     position: "relative",
-//     display: "flex",
-//     flexWrap: "wrap",
-//   },
-//   daoBoxes: {},
-// }));
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 export const Dao = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<string>("1");
-  // const classes = useStyles();
   const characterLimit = 50;
   const [daoInstance, setDaoInstance] = useState<DAO>();
   const [daos, setDaos] = useState<ProgramAccount<Realm>[]>([]);
@@ -43,9 +31,9 @@ export const Dao = () => {
         try {
           const { allDaos, myDaos } = await daoInstance.fetchDaos();
 
-          // console.log("daoInstance.fetchDaos()", await daoInstance.fetchDaos());
-          // console.log("myDaos", typeof myDaos);
-          // console.log("allDaos", allDaos);
+          console.log("daoInstance.fetchDaos()", await daoInstance.fetchDaos());
+          console.log("myDaos", typeof myDaos);
+          console.log("allDaos", allDaos);
           // console.log("allDaos", typeof allDaos);
 
           setDaos(allDaos);
@@ -80,24 +68,26 @@ export const Dao = () => {
   }
 
   return (
-    <TabContext value={activeTab}>
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Tabs
-          onChange={(_event: React.SyntheticEvent, newValue: string) => {
-            setActiveTab(newValue);
-          }}
-          style={{ marginBottom: "5px" }}
-        >
-          <Tab style={{ outline: "none", fontWeight: "bold", marginRight: "5px", borderBottom: "1px solid #ffffff" }} label="My Dao's" value="1" />
-          <Tab style={{ outline: "none", fontWeight: "bold", borderBottom: "1px solid #ffffff" }} label="Dao's" value="2" />
-        </Tabs>
-      </Box>
-      <TabPanel value="1">
-        <ListDaos daos={myDaos} characterLimit={characterLimit} />
-      </TabPanel>
-      <TabPanel value="2">
-        <ListDaos daos={daos} characterLimit={characterLimit} />
-      </TabPanel>
-    </TabContext>
+    <div style={{ width: "100%", padding: "25px" }}>
+      <TabContext value={activeTab}>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <TabList
+            onChange={(_event: React.SyntheticEvent, newValue: string) => {
+              setActiveTab(newValue);
+            }}
+            style={{ marginBottom: "5px" }}
+          >
+            <Tab value="1" style={{ outline: "none", fontWeight: "bold", marginRight: "5px" }} label="Dao's" />
+            <Tab value="2" style={{ outline: "none", fontWeight: "bold" }} label="My Dao's" />
+          </TabList>
+        </Box>
+        <TabPanel style={{ padding: "0px" }} value="1">
+          <ListDaos daos={daos} characterLimit={characterLimit} />
+        </TabPanel>
+        <TabPanel style={{ padding: "0px" }} value="2">
+          <ListDaos daos={myDaos} characterLimit={characterLimit} />
+        </TabPanel>
+      </TabContext>
+    </div>
   );
 };

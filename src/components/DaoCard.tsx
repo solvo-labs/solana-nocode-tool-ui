@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography } from "@mui/material";
+import { Avatar, Card, CardContent, Typography } from "@mui/material";
 import React from "react";
 
 interface DaoCardProps {
@@ -7,7 +7,12 @@ interface DaoCardProps {
   characterLimit: number;
 }
 
-const DaoCard: React.FC<DaoCardProps> = ({ image, name, characterLimit }) => {
+const DaoCard: React.FC<DaoCardProps> = ({ name, characterLimit }) => {
+  const getInitials = (name: string): string => {
+    const namesInitials = name.split(" ");
+    return namesInitials.length >= 2 ? (" " + namesInitials[0].charAt(0) + namesInitials[1].charAt(0)).toUpperCase() : (" " + name.charAt(0)).toUpperCase();
+  };
+
   return (
     <Card style={{ borderRadius: "15px" }}>
       <CardContent
@@ -19,7 +24,7 @@ const DaoCard: React.FC<DaoCardProps> = ({ image, name, characterLimit }) => {
           whiteSpace: "pre-wrap",
           textOverflow: "ellipsis",
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           alignItems: "center",
           flexDirection: "column",
           padding: "32px",
@@ -28,7 +33,9 @@ const DaoCard: React.FC<DaoCardProps> = ({ image, name, characterLimit }) => {
           boxShadow: "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
         }}
       >
-        <img style={{ paddingBottom: "20px" }} width={40} height={40} src={image} alt="" />
+        <div style={{ paddingBottom: "20px" }}>
+          <Avatar style={{ minWidth: "65px", minHeight: "65px", display: "flex", justifyContent: "center", alignItems: "center" }}> {getInitials(name)} </Avatar>
+        </div>
         <Typography variant="h5" style={{ textAlign: "center", color: "black", maxWidth: "100%", maxHeight: "100%", wordWrap: "break-word", fontSize: "18px" }}>
           {name.length > characterLimit ? name.slice(0, characterLimit) + "..." : name}
         </Typography>
