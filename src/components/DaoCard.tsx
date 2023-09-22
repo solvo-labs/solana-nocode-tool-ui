@@ -14,7 +14,7 @@ const DaoCard: React.FC<DaoCardProps> = ({ name, characterLimit }) => {
   };
 
   return (
-    <Card style={{ borderRadius: "15px" }}>
+    <Card style={{ borderRadius: "15px" }} onClick={() => {}}>
       <CardContent
         style={{
           maxWidth: "150px",

@@ -31,9 +31,9 @@ export const Dao = () => {
         try {
           const { allDaos, myDaos } = await daoInstance.fetchDaos();
 
-          console.log("daoInstance.fetchDaos()", await daoInstance.fetchDaos());
-          console.log("myDaos", typeof myDaos);
-          console.log("allDaos", allDaos);
+          // console.log("daoInstance.fetchDaos()", await daoInstance.fetchDaos());
+          // console.log("myDaos", typeof myDaos);
+          // console.log("allDaos", allDaos);
           // console.log("allDaos", typeof allDaos);
 
           setDaos(allDaos);
@@ -68,7 +68,7 @@ export const Dao = () => {
   }
 
   return (
-    <div style={{ width: "100%", padding: "25px" }}>
+    <div style={{ padding: "25px" }}>
       <TabContext value={activeTab}>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <TabList
