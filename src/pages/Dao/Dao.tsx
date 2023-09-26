@@ -48,6 +48,7 @@ export const Dao = () => {
     fetch();
   }, [daoInstance]);
 
+  // console.log("daos", daos[0].pubkey.toBase58());
   // console.log(daos[0].pubkey.toBase58());
   // console.log(daos[0].account.name);
 

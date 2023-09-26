@@ -1,20 +1,31 @@
 import { Avatar, Card, CardContent, Typography } from "@mui/material";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface DaoCardProps {
-  image: string;
   name: string;
   characterLimit: number;
+  pubkey: {
+    toBase58: () => string;
+  };
 }
 
-const DaoCard: React.FC<DaoCardProps> = ({ name, characterLimit }) => {
+const DaoCard: React.FC<DaoCardProps> = ({ name, characterLimit, pubkey }) => {
+  const navigate = useNavigate();
+
   const getInitials = (name: string): string => {
     const namesInitials = name.split(" ");
     return namesInitials.length >= 2 ? (" " + namesInitials[0].charAt(0) + namesInitials[1].charAt(0)).toUpperCase() : (" " + name.charAt(0)).toUpperCase();
   };
 
   return (
-    <Card style={{ borderRadius: "15px" }} onClick={() => {}}>
+    <Card
+      style={{ borderRadius: "15px", cursor: "pointer" }}
+      onClick={() => {
+        // console.log(`/dao-details/${getInitials(name).trim()}/${pubkey.toBase58()}`);
+        navigate(`/dao-details/${getInitials(name).trim()}/${pubkey.toBase58()}`);
+      }}
+    >
       <CardContent
         style={{
           maxWidth: "150px",

@@ -5,6 +5,9 @@ interface DaoData {
   account: {
     name: string;
   };
+  pubkey: {
+    toBase58: () => string;
+  };
 }
 
 interface ListDaosProps {
@@ -16,10 +19,11 @@ const ListDaos: React.FC<ListDaosProps> = ({ daos, characterLimit }) => {
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
       {daos.slice(0, 100).map((dao, index) => {
+        // console.log("dao.pubkey", typeof dao.pubkey);
         if (dao.account.name) {
           return (
             <div style={{ padding: "20px", borderRadius: "15px" }} key={index}>
-              <DaoCard image={""} name={dao.account.name} characterLimit={characterLimit} />
+              <DaoCard name={dao.account.name} characterLimit={characterLimit} pubkey={dao.pubkey} />
             </div>
           );
         }
