@@ -37,20 +37,16 @@ const DaoDetails: React.FC = () => {
 
   const handleFilter = () => {
     if (filtre === "") {
-      // Filtre boşsa, tüm anketleri göster
       setFilteredSurveys(surveys);
     } else {
-      // Filtre doluysa, filtreye uygun anketleri göster
       setFilteredSurveys(surveys.filter((survey) => survey.sonDurum === filtre));
     }
   };
 
   const handleSearch = () => {
     if (arama === "") {
-      // Arama boşsa, tüm anketleri göster
       setFilteredSurveys(surveys);
     } else {
-      // Arama doluysa, başlığa göre ara
       const filtered = surveys.filter((survey) => survey.baslik.toLowerCase().includes(arama.toLowerCase()));
       setFilteredSurveys(filtered);
     }
@@ -123,15 +119,11 @@ const DaoDetails: React.FC = () => {
           </div>
 
           <ul>
-            {filteredSurveys.map(
-              (
-                survey // filteredSurveys'ı kullanın
-              ) => (
-                <li key={survey.id}>
-                  {survey.baslik} - {survey.sonDurum}
-                </li>
-              )
-            )}
+            {filteredSurveys.map((survey) => (
+              <li key={survey.id}>
+                {survey.baslik} - {survey.sonDurum}
+              </li>
+            ))}
           </ul>
         </div>
       </Grid>
