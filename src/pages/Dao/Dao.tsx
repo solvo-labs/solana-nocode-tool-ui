@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { DAO } from "../../lib/dao/index";
 import { Box, CircularProgress, Tab } from "@mui/material";
 import { Realm, ProgramAccount } from "@solana/spl-governance";
@@ -14,16 +14,17 @@ export const Dao = () => {
   const [daoInstance, setDaoInstance] = useState<DAO>();
   const [daos, setDaos] = useState<ProgramAccount<Realm>[]>([]);
   const [myDaos, setMyDaos] = useState<ProgramAccount<Realm>[]>([]);
-  const { publicKey } = useWallet();
+
+  const wallet = useAnchorWallet();
 
   const { connection } = useConnection();
 
   useEffect(() => {
-    if (publicKey) {
-      const daoClass = new DAO(connection, publicKey);
+    if (wallet) {
+      const daoClass = new DAO(connection, wallet);
       setDaoInstance(daoClass);
     }
-  }, [connection, publicKey]);
+  }, [connection, wallet]);
 
   useEffect(() => {
     const fetch = async () => {

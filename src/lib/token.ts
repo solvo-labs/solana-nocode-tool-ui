@@ -12,21 +12,11 @@ import {
   getAssociatedTokenAddressSync,
   getMinimumBalanceForRentExemptMint,
   Account,
+  createMintToInstruction,
 } from "@solana/spl-token";
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 
-export const createMint = async (
-  connection: Connection,
-  publicKey: PublicKey,
-  freezeAuthority: PublicKey,
-  decimal: number
-) => {
+export const createMint = async (connection: Connection, publicKey: PublicKey, freezeAuthority: PublicKey, decimal: number) => {
   const toAccount = Keypair.generate();
   const lamports = await getMinimumBalanceForRentExemptMint(connection);
 
@@ -39,73 +29,34 @@ export const createMint = async (
       programId: TOKEN_PROGRAM_ID,
     }),
 
-    createInitializeMint2Instruction(
-      toAccount.publicKey,
-      decimal,
-      publicKey,
-      freezeAuthority,
-      TOKEN_PROGRAM_ID
-    )
+    createInitializeMint2Instruction(toAccount.publicKey, decimal, publicKey, freezeAuthority, TOKEN_PROGRAM_ID)
   );
 
   return { transaction, toAccount };
 };
 
-export const getOrCreateAssociatedTokenAccount = async (
-  mint: PublicKey,
-  payer: PublicKey,
-  owner: PublicKey,
-  connection: Connection
-) => {
+export const getOrCreateAssociatedTokenAccount = async (mint: PublicKey, payer: PublicKey, owner: PublicKey, connection: Connection) => {
   let account: Account;
-  const associatedToken = getAssociatedTokenAddressSync(
-    mint,
-    owner,
-    false,
-    TOKEN_PROGRAM_ID,
-    ASSOCIATED_TOKEN_PROGRAM_ID
-  );
+  const associatedToken = getAssociatedTokenAddressSync(mint, owner, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
 
   try {
     account = await getAccount(connection, associatedToken);
     return { associatedToken, account };
   } catch {
-    const transaction = new Transaction().add(
-      createAssociatedTokenAccountInstruction(
-        payer,
-        associatedToken,
-        owner,
-        mint,
-        TOKEN_PROGRAM_ID,
-        ASSOCIATED_TOKEN_PROGRAM_ID
-      )
-    );
+    const transaction = new Transaction().add(createAssociatedTokenAccountInstruction(payer, associatedToken, owner, mint, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID));
     return { associatedToken, transaction };
   }
 };
 
-export const getTokenBalance = async (
-  connection: Connection,
-  payer: PublicKey,
-  mint: PublicKey
-) => {
-  const { associatedToken } = await getOrCreateAssociatedTokenAccount(
-    mint,
-    payer,
-    payer,
-    connection
-  );
+export const getTokenBalance = async (connection: Connection, payer: PublicKey, mint: PublicKey) => {
+  const { associatedToken } = await getOrCreateAssociatedTokenAccount(mint, payer, payer, connection);
   const tokenAccount = await getAccount(connection, associatedToken);
   const balance = await connection.getTokenAccountBalance(tokenAccount.address);
 
   return balance;
 };
 
-export const getTokensWithAccount = async (
-  connection: Connection,
-  payer: PublicKey,
-  mint?: PublicKey
-) => {
+export const getTokensWithAccount = async (connection: Connection, payer: PublicKey, mint?: PublicKey) => {
   const tokenAccounts = await connection.getTokenAccountsByOwner(
     payer,
     mint
@@ -116,69 +67,51 @@ export const getTokensWithAccount = async (
       : { programId: TOKEN_PROGRAM_ID }
   );
 
-  const promises = tokenAccounts.value.map(
-    (tokenAccount: { account: { data: any } }) => {
-      const accountData = AccountLayout.decode(tokenAccount.account.data);
-      return connection.getTokenSupply(accountData.mint);
-    }
-  );
+  const promises = tokenAccounts.value.map((tokenAccount: { account: { data: Uint8Array } }) => {
+    const accountData = AccountLayout.decode(tokenAccount.account.data);
+    return connection.getTokenSupply(accountData.mint);
+  });
 
   const supplyData = await Promise.all(promises);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = tokenAccounts.value.map(
-    (tokenAccount: { account: { data: any } }, index) => {
-      const accountData = AccountLayout.decode(tokenAccount.account.data);
-      return {
-        token: accountData.mint,
-        amount: accountData.amount,
-        supply: supplyData[index],
-        owner: accountData.owner.toBase58(),
-      };
-    }
-  );
+  const data = tokenAccounts.value.map((tokenAccount: { account: { data: any } }, index) => {
+    const accountData = AccountLayout.decode(tokenAccount.account.data);
+    return {
+      token: accountData.mint,
+      amount: accountData.amount,
+      supply: supplyData[index],
+      owner: accountData.owner.toBase58(),
+    };
+  });
 
   return data;
 };
 
-export const burnToken = async (
-  owner: PublicKey,
-  mint: PublicKey,
-  burnAccount: PublicKey,
-  amount: number
-) => {
+export const burnToken = async (owner: PublicKey, mint: PublicKey, burnAccount: PublicKey, amount: number) => {
   const ix = createBurnInstruction(burnAccount, mint, owner, amount);
 
   return ix;
 };
 
-export const freezeAccount = async (
-  tokenAccount: PublicKey,
-  mint: PublicKey,
-  owner: PublicKey
-) => {
+export const freezeAccount = async (tokenAccount: PublicKey, mint: PublicKey, owner: PublicKey) => {
   const ix = createFreezeAccountInstruction(tokenAccount, mint, owner);
 
   return ix;
 };
 
-export const closeAccount = async (
-  closeaccount: PublicKey,
-  destination: PublicKey,
-  authority: PublicKey
-) => {
-  const ix = createCloseAccountInstruction(
-    closeaccount,
-    destination,
-    authority
-  );
+export const closeAccount = async (closeaccount: PublicKey, destination: PublicKey, authority: PublicKey) => {
+  const ix = createCloseAccountInstruction(closeaccount, destination, authority);
 
   return ix;
 };
 
-export const getLargestAccounts = async (
-  connection: Connection,
-  mint: PublicKey
-) => {
+export const getLargestAccounts = async (connection: Connection, mint: PublicKey) => {
   return await connection.getTokenLargestAccounts(mint);
+};
+
+export const mintTo = (mint: PublicKey, address: PublicKey, publicKey: PublicKey, amount: number, decimal: number) => {
+  const ix = new Transaction().add(createMintToInstruction(mint, address, publicKey, amount * Math.pow(10, decimal), [], TOKEN_PROGRAM_ID));
+
+  return ix;
 };
