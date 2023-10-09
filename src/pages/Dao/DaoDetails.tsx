@@ -6,27 +6,27 @@ const DaoDetails: React.FC = () => {
   const [surveys, setSurveys] = useState([
     {
       id: 1,
-      baslik: "Yeni Anket",
-      sonDurum: "Draft",
+      baslik: "Yeni survey",
+      status: "Draft",
     },
     {
       id: 2,
-      baslik: "Anket 2",
-      sonDurum: "Completed",
+      baslik: "survey 2",
+      status: "Completed",
     },
     {
       id: 3,
-      baslik: "Anket 3",
-      sonDurum: "Cancelled",
+      baslik: "survey 3",
+      status: "Cancelled",
     },
   ]);
-  const [filtre, setFiltre] = useState("");
-  const [arama, setArama] = useState("");
+  const [filter, setFilter] = useState("");
+  const [search, setSearch] = useState("");
   const [filteredSurveys, setFilteredSurveys] = useState(surveys);
 
   useEffect(() => {
     axios
-      .get("https://api.example.com/anketler")
+      .get("https://api.example.com/surveys")
       .then((response) => {
         setSurveys(response.data);
       })
@@ -35,25 +35,28 @@ const DaoDetails: React.FC = () => {
       });
   }, []);
 
-  const handleFilter = () => {
-    if (filtre === "") {
+  const handleFilter = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newFilter = event.target.value;
+
+    if (newFilter === "") {
       setFilteredSurveys(surveys);
     } else {
-      setFilteredSurveys(surveys.filter((survey) => survey.sonDurum === filtre));
+      setFilteredSurveys(surveys.filter((survey) => survey.status === newFilter));
     }
   };
 
-  const handleSearch = () => {
-    if (arama === "") {
-      setFilteredSurveys(surveys);
-    } else {
-      const filtered = surveys.filter((survey) => survey.baslik.toLowerCase().includes(arama.toLowerCase()));
-      setFilteredSurveys(filtered);
-    }
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+
+    setSearch(inputValue);
+
+    const filtered = surveys.filter((survey) => survey.baslik.toLowerCase().includes(inputValue.toLowerCase()));
+    setFilteredSurveys(filtered);
   };
 
   return (
     <Grid container spacing={2} minWidth={"100vw"} marginBottom={"40px"}>
+      <Grid item xs={1} style={{ marginTop: "20px" }}></Grid>
       <Grid item xs={3} style={{ marginTop: "20px" }}>
         <div style={{ marginLeft: "25px", backgroundColor: "white", color: "black", borderRadius: "8px" }}>
           <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", padding: "20px" }}>
@@ -63,11 +66,13 @@ const DaoDetails: React.FC = () => {
           <Divider />
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", padding: "20px" }}>
             <Typography style={{ fontWeight: "bold", marginBottom: "10px", textDecoration: "underline" }}>About</Typography>
-            <Typography style={{ fontSize: "18px" }}>Name: {} </Typography>
-            <Typography style={{ fontSize: "18px" }}>Token: {} </Typography>
-            <Typography style={{ fontSize: "18px" }}>Website: {} </Typography>
-            <Typography style={{ fontSize: "18px" }}>Program Version: {} </Typography>
-            <Typography style={{ fontSize: "18px" }}>X: {} </Typography>
+            <div>
+              <Typography style={{ fontSize: "18px" }}>Name: {} </Typography>
+              <Typography style={{ fontSize: "18px" }}>Token: {} </Typography>
+              <Typography style={{ fontSize: "18px" }}>Website: {} </Typography>
+              <Typography style={{ fontSize: "18px" }}>Program Version: {} </Typography>
+              <Typography style={{ fontSize: "18px" }}>X: {} </Typography>
+            </div>
           </div>
         </div>
         <div style={{ marginLeft: "25px", backgroundColor: "white", color: "black", borderRadius: "8px", marginTop: "20px" }}>
@@ -92,41 +97,65 @@ const DaoDetails: React.FC = () => {
         </div>
       </Grid>
       <Grid item xs={1} style={{ marginTop: "20px" }}></Grid>
-      <Grid item xs={8} style={{ marginTop: "20px" }}>
-        <div style={{ padding: "20px", display: "flex", justifyContent: "flex-start", alignItems: "center" }}>Proposal</div>
+      <Grid item xs={6} style={{ marginTop: "20px" }}>
+        <Typography style={{ padding: "20px" }}>Proposal</Typography>
+        <Divider />
         <div style={{ padding: "20px" }}>
           <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center" }}>
-            <div style={{}}>
-              <input type="text" placeholder="Anket başlığı" onChange={(event) => setArama(event.target.value)} />
-              <button onClick={handleSearch}>Ara</button>
+            <div>
+              <input
+                style={{ width: "400px", height: "20px", padding: "10px", borderRadius: "8px", border: "1px solid #000", backgroundColor: "transparent", color: "black" }}
+                type="text"
+                placeholder="Search Proposals"
+                value={search}
+                onChange={handleSearch}
+              />
             </div>
             <div>
-              <select value={filtre} onChange={(event) => setFiltre(event.target.value)}>
-                <option value="">Tümü</option>
-                <option value="Cancelled">İptal Edilmiş</option>
-                <option value="Completed">Tamamlanmış</option>
-                <option value="Defeated">Reddedilmiş</option>
-                <option value="Draft">Taslak</option>
-                <option value="Executable">Yürütülebilir</option>
-                <option value="Executing w/errors">Hatalarla Çalışıyor</option>
-                <option value="Signingoff">Onaylanıyor</option>
-                <option value="Voting">Oylama</option>
-                <option value="Vetoed">Veto Edilmiş</option>
-                <option value="Voting Without Quorum">Oylama Yetersiz Çoğunluk</option>
+              <select
+                value={filter}
+                onChange={(event) => {
+                  console.log("event.target.value", event.target.value);
+                  handleFilter(event);
+                  setFilter(event.target.value);
+                }}
+              >
+                <option value="">All</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Completed">Completed</option>
+                <option value="Defeated">Defeated</option>
+                <option value="Draft">Draft</option>
+                <option value="Executable">Executable</option>
+                <option value="Executing w/errors">Executing w/errors</option>
+                <option value="Signingoff">Signingoff</option>
+                <option value="Voting">Voting</option>
+                <option value="Vetoed">Vetoed</option>
+                <option value="Voting Without Quorum">Voting Without Quorum</option>
               </select>
-              <button onClick={handleFilter}>Filtrele</button>
             </div>
           </div>
 
-          <ul>
+          <ul style={{ padding: "20px" }}>
             {filteredSurveys.map((survey) => (
               <li key={survey.id}>
-                {survey.baslik} - {survey.sonDurum}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "400px" }}>
+                  <div>{survey.baslik}</div>
+                  <div
+                    style={{
+                      color: `${survey.status === "Completed" ? "green" : survey.status === "Draft" ? "yellow" : "red"}`,
+                      padding: "5px",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    {survey.status}
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
         </div>
       </Grid>
+      <Grid item xs={1} style={{ marginTop: "20px" }}></Grid>
     </Grid>
   );
 };
