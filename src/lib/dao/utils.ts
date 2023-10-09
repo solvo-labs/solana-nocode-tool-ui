@@ -19,6 +19,41 @@ import {
 import { DEFAULT_COMMUNITY_MINT_MAX_VOTE_WEIGHT_SOURCE, GOVERNANCE_PROGRAM_ID, MIN_COMMUNITY_TOKENS_TO_CREATE_WITH_ZERO_SUPPLY } from "./constants";
 import BigNumber from "bignumber.js";
 
+export const mintCommunityToken = async (connection: Connection, wallet: Wallet, recentBlockhash: BlockhashWithExpiryBlockHeight, decimal = 8) => {
+  const communityMint = await createMint(connection, wallet.publicKey, wallet.publicKey, decimal);
+
+  const transaction = new Transaction({
+    blockhash: recentBlockhash.blockhash,
+    lastValidBlockHeight: recentBlockhash.lastValidBlockHeight,
+    feePayer: wallet.publicKey,
+  });
+  transaction.add(communityMint.transaction);
+  transaction.partialSign(communityMint.toAccount);
+
+  return {
+    transaction,
+    communityMintPk: communityMint.toAccount.publicKey,
+  };
+};
+
+export const mintCouncilToken = async (connection: Connection, wallet: Wallet, recentBlockhash: BlockhashWithExpiryBlockHeight, decimal = 0) => {
+  const communityMint = await createMint(connection, wallet.publicKey, wallet.publicKey, decimal);
+
+  const transaction = new Transaction({
+    blockhash: recentBlockhash.blockhash,
+    lastValidBlockHeight: recentBlockhash.lastValidBlockHeight,
+    feePayer: wallet.publicKey,
+  });
+
+  transaction.add(communityMint.transaction);
+  transaction.partialSign(communityMint.toAccount);
+
+  return {
+    transaction,
+    communityMintPk: communityMint.toAccount.publicKey,
+  };
+};
+
 export const daoMints = async (connection: Connection, wallet: Wallet, recentBlockhash: BlockhashWithExpiryBlockHeight, decimal = 8) => {
   const communityMint = await createMint(connection, wallet.publicKey, wallet.publicKey, decimal);
 
