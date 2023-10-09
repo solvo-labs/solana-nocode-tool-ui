@@ -21,6 +21,7 @@ import { Vesting } from "../pages/Tokenomics/Vesting";
 import { Airdrop } from "../pages/Token/Airdrop";
 import { Dao } from "../pages/Dao/Dao";
 import DaoDetails from "../pages/Dao/DaoDetails";
+import { CreateDao } from "../pages/Dao/CreateDao";
 
 const Router: React.FC = () => {
   return (
@@ -46,6 +47,7 @@ const Router: React.FC = () => {
             <Route path="/airdrop" index element={<Airdrop />} />
             <Route path="/daos" index element={<Dao />} />
             <Route path="/dao-details/:name/:pubkey" index element={<DaoDetails />} />
+            <Route path="/create-dao" index element={<CreateDao />} />
           </Route>
           <Route path="/login" index element={<Login />} />
           <Route path="*" index element={<NotFoundPage />} />

@@ -54,7 +54,6 @@ export const mintCouncilTokensToMembers = async (
 ) => {
   const instructions = [];
   let walletAssociatedTokenAccountPk;
-  councilWalletsPks.push(wallet.publicKey);
 
   // const isWalletInCouncilWallets = councilWalletsPks.some((teamWalletPk) => teamWalletPk.equals(wallet.publicKey));
 

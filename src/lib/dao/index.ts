@@ -6,8 +6,8 @@ import { GOVERNANCE_PROGRAM_ID } from "./constants";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
 export class DAO {
-  connection: Connection;
-  wallet: Wallet;
+  private connection: Connection;
+  private wallet: Wallet;
 
   constructor(connection: Connection, wallet: Wallet) {
     this.connection = connection;
@@ -61,7 +61,9 @@ export class DAO {
     const recentBlockhash = await this.connection.getLatestBlockhash();
     const daoMintResult = await daoMints(this.connection, this.wallet, recentBlockhash);
 
-    const mintResult = await mintCouncilTokensToMembers(multiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
+    const finalMultiSigWallets = [...multiSigWallets, this.wallet.publicKey];
+
+    const mintResult = await mintCouncilTokensToMembers(finalMultiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
 
     const { daoPk, transaction: daoTransaction } = await createConfiguredDao(
       name,
@@ -76,6 +78,8 @@ export class DAO {
     const transactions = [daoMintResult.transaction, mintResult.transaction, daoTransaction];
 
     const signedTx = await this.wallet.signAllTransactions(transactions);
+
+    console.log(signedTx);
 
     const transactionsSignatures: string[] = [];
 
@@ -96,6 +100,8 @@ export class DAO {
 
       transactionsSignatures.push(transactionSignature);
     }
+
+    console.log(transactionsSignatures);
 
     return { daoPk };
   };
