@@ -167,7 +167,7 @@ const createDao = async (
     minCouncilTokensToCreateProposal: new BN(1),
     councilVoteThreshold: new VoteThreshold({
       type: VoteThresholdType.YesVotePercentage,
-      value: 0,
+      value: 1,
     }),
     councilVetoVoteThreshold: new VoteThreshold({
       type: VoteThresholdType.YesVotePercentage,
