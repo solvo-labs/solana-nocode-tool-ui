@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { DAO } from "../../lib/dao";
+import { DAO } from "../../lib/dao/index";
 import { Box, CircularProgress, Tab } from "@mui/material";
 import { Realm, ProgramAccount } from "@solana/spl-governance";
 import ListDaos from "../../components/ListDaos";
