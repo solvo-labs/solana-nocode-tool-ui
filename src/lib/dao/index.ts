@@ -1,7 +1,7 @@
 import { Connection, PublicKey, sendAndConfirmRawTransaction } from "@solana/web3.js";
 import { ProgramAccount, Realm, TokenOwnerRecord, getAllTokenOwnerRecords, getRealm, getRealms, getTokenOwnerRecordsByOwner } from "@solana/spl-governance";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-import { createConfiguredDao, daoMints, mintCouncilTokensToMembers } from "./utils";
+import { createMultisigdDao, daoMints, mintCouncilTokensToMembers } from "./utils";
 import { GOVERNANCE_PROGRAM_ID } from "./constants";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
@@ -65,7 +65,7 @@ export class DAO {
 
     const mintResult = await mintCouncilTokensToMembers(finalMultiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
 
-    const { daoPk, transaction: daoTransaction } = await createConfiguredDao(
+    const { daoPk, transaction: daoTransaction } = await createMultisigdDao(
       name,
       threshold,
       this.wallet.publicKey,
@@ -100,8 +100,6 @@ export class DAO {
 
       transactionsSignatures.push(transactionSignature);
     }
-
-    console.log(transactionsSignatures);
 
     return { daoPk };
   };

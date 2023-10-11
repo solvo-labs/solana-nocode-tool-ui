@@ -118,7 +118,7 @@ export const mintCouncilTokensToMembers = async (
   };
 };
 
-export const createConfiguredDao = async (
+export const createMultisigdDao = async (
   name: string,
   yesVoteThreshold: number,
   walletPk: PublicKey,
