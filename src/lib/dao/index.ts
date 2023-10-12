@@ -67,8 +67,10 @@ export class DAO {
     return getAllTokenOwnerRecords(this.connection, GOVERNANCE_PROGRAM_ID, dao);
   };
 
-  getProposals = async (dao: PublicKey): Promise<ProgramAccount<Proposal>[][]> => {
-    return getAllProposals(this.connection, GOVERNANCE_PROGRAM_ID, dao);
+  getProposals = async (dao: PublicKey): Promise<ProgramAccount<Proposal>[]> => {
+    const proposals = await getAllProposals(this.connection, GOVERNANCE_PROGRAM_ID, dao);
+
+    return proposals[0];
   };
 
   createMultisigDao = async (multiSigWallets: PublicKey[], name: string, threshold: number) => {
