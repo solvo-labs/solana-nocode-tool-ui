@@ -1,5 +1,15 @@
 import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, sendAndConfirmRawTransaction } from "@solana/web3.js";
-import { ProgramAccount, Realm, TokenOwnerRecord, getAllTokenOwnerRecords, getRealm, getRealms, getTokenOwnerRecordsByOwner } from "@solana/spl-governance";
+import {
+  ProgramAccount,
+  Proposal,
+  Realm,
+  TokenOwnerRecord,
+  getAllProposals,
+  getAllTokenOwnerRecords,
+  getRealm,
+  getRealms,
+  getTokenOwnerRecordsByOwner,
+} from "@solana/spl-governance";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { createCommunityDao, createMultisigdDao, daoMints, mintCouncilTokensToMembers } from "./utils";
 import { GOVERNANCE_PROGRAM_ID } from "./constants";
@@ -55,6 +65,10 @@ export class DAO {
 
   getMembers = async (dao: PublicKey): Promise<ProgramAccount<TokenOwnerRecord>[]> => {
     return getAllTokenOwnerRecords(this.connection, GOVERNANCE_PROGRAM_ID, dao);
+  };
+
+  getProposals = async (dao: PublicKey): Promise<ProgramAccount<Proposal>[][]> => {
+    return getAllProposals(this.connection, GOVERNANCE_PROGRAM_ID, dao);
   };
 
   createMultisigDao = async (multiSigWallets: PublicKey[], name: string, threshold: number) => {
