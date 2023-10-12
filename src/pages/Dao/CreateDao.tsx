@@ -3,7 +3,7 @@ import { Box, Button, Card, CardContent, Slider, Step, StepLabel, Stepper, TextF
 import remove from "../../assets/remove.png";
 import { CustomButton } from "../../components/CustomButton";
 import { DAO } from "../../lib/dao";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 
 export const CreateDao = () => {
@@ -13,11 +13,12 @@ export const CreateDao = () => {
   const [multisign, setMultisign] = useState<boolean>(false);
   const [community, setCommunity] = useState<boolean>(false);
   const [DAONameInputText, setDAONameInputText] = useState<string>("");
-  const [hashArr, setHashArr] = useState(["Hf8SzL3ztwWk594B7KwojUftmoXZp139cA7CLkNnSXjD"]);
   const [threshold, setThreshold] = useState<number>(0);
   const steps = ["Dao Category Selection", "DAO Info's", "Threshold", "Preview & confirm"];
   const wallet = useAnchorWallet();
   const { connection } = useConnection();
+  const { publicKey } = useWallet();
+  const [publicKeys, setPublicKeys] = useState<string[]>([publicKey?.toBase58() || ""]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isStepOptional = (_step: number) => {
@@ -64,19 +65,23 @@ export const CreateDao = () => {
   };
 
   const handleDAOName = (e: any) => {
-    if (e.code === "Enter") {
-      setDAONameInputText(e.target.value);
-    }
+    setDAONameInputText(e.target.value);
   };
 
   const handleDAOMembers = (e: any) => {
     if (e.code === "Enter") {
-      setHashArr([...hashArr, e.target.value]);
+      setPublicKeys([...publicKeys, e.target.value]);
+    }
+  };
+
+  const onBlurHandleDAOMembers = (e: any) => {
+    if (e.code === "Enter") {
+      setPublicKeys([...publicKeys, e.target.value]);
     }
   };
 
   const removeHash = (indexToRemove: number) => {
-    setHashArr((prevHashArr) => {
+    setPublicKeys((prevHashArr) => {
       const updatedHashArr = [...prevHashArr];
       updatedHashArr.splice(indexToRemove, 1);
       return updatedHashArr;
@@ -97,11 +102,11 @@ export const CreateDao = () => {
   const createDao = async () => {
     if (daoInstance) {
       try {
-        const result = await daoInstance.createMultisigDao(
-          [new PublicKey("G1xDSUJrQEFtJ1Z9ME1qcRs2w61AP5mYDDpEVBZrhPuW"), new PublicKey("GVfARe6xnujtzGbgDf1drSneKECpa65HPhQJkS6QeCz2")],
-          "namenamename",
-          60
-        );
+        const publicKeyList = publicKeys.map((pk) => new PublicKey(pk));
+        console.log("publicKeyList", publicKeyList);
+
+        const result = await daoInstance.createMultisigDao(publicKeyList, DAONameInputText, threshold);
+        console.log("result", result);
 
         console.log(result);
       } catch (error) {
@@ -109,45 +114,6 @@ export const CreateDao = () => {
       }
     }
   };
-
-  // function calculateMajority(votes) {
-  //   // "votes" dizisi, her bir seçeneğin kaç oy aldığını içerir
-  //   const totalVotes = votes.reduce((acc, curr) => acc + curr, 0);
-  //   const majorityThreshold = Math.ceil(totalVotes / 2) + 1;
-
-  //   // Çoğunluğun hesaplanması
-  //   let majorityOption = null;
-  //   for (let i = 0; i < votes.length; i++) {
-  //     if (votes[i] >= majorityThreshold) {
-  //       majorityOption = i;
-  //       break;
-  //     }
-  //   }
-
-  //   if (majorityOption !== null) {
-  //     return {
-  //       optionIndex: majorityOption,
-  //       votesForMajority: votes[majorityOption],
-  //       majorityThreshold,
-  //       totalVotes,
-  //     };
-  //   } else {
-  //     return {
-  //       optionIndex: -1, // Çoğunluk yoksa -1 döndürülebilir
-  //       votesForMajority: 0,
-  //       majorityThreshold,
-  //       totalVotes,
-  //     };
-  //   }
-  // }
-
-  // // Örnek kullanım
-  // const voteResults = [30, 25, 15, 10]; // Her seçenek için oy sayıları
-  // const majority = calculateMajority(voteResults);
-
-  // console.log("Çoğunluğun oluştuğu seçenek: ", majority.optionIndex);
-  // console.log("Çoğunluk için gerekli olan oy sayısı: ", majority.majorityThreshold);
-  // console.log("Toplam oy sayısı: ", majority.totalVotes);
 
   return (
     <div>
@@ -167,7 +133,7 @@ export const CreateDao = () => {
         </Stepper>
         {activeStep === steps.length ? (
           <>
-            <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you&apos;re finished</Typography>
+            <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you're finished</Typography>
             <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
               <Box sx={{ flex: "1 1 auto" }} />
               <Button onClick={handleReset}>Reset</Button>
@@ -243,7 +209,7 @@ export const CreateDao = () => {
                   <Typography>It's best to choose a descriptive, memorable name for you and your members.</Typography>
                 </div>
                 <div style={{ width: "100%", margin: "20px 0 20px 0" }}>
-                  <TextField sx={{ width: "100%" }} id="dao-name" label="e.g. DAO Name" variant="standard" onKeyDown={handleDAOName} />
+                  <TextField sx={{ width: "100%" }} id="dao-name" label="e.g. DAO Name" variant="standard" onChange={handleDAOName} />
                 </div>
                 {DAONameInputText && (
                   <div style={{ width: "100%" }}>
@@ -253,13 +219,13 @@ export const CreateDao = () => {
                       <Typography sx={{ fontSize: "40px", fontWeight: "600" }}>
                         Next, invite members <br /> with their Solana Wallet Address.
                       </Typography>
-                      <Typography sx={{ paddingTop: "20px", fontSize: "25px", fontWeight: "600" }}>Invite members {hashArr.length}</Typography>
+                      <Typography sx={{ paddingTop: "20px", fontSize: "25px", fontWeight: "600" }}>Invite members {publicKeys.length}</Typography>
                       <Typography>Add Solana wallet addressses, separated by a comma or line-break.</Typography>
                     </div>
                     <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start", width: "100%" }}>
                       <div>
-                        {hashArr.map((hash, index) => (
-                          <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", marginBottom: "10px" }}>
+                        {publicKeys.map((hash, index) => (
+                          <div key={index} style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", marginBottom: "10px" }}>
                             <div
                               style={{
                                 display: "flex",
@@ -284,7 +250,7 @@ export const CreateDao = () => {
                       </div>
                     </div>
                     <div style={{ width: "100%", margin: "20px 0 20px 0" }}>
-                      <TextField sx={{ width: "100%" }} id="dao-members" label="e.g. hash" variant="standard" onKeyDown={handleDAOMembers} />
+                      <TextField sx={{ width: "100%" }} id="dao-members" label="e.g. hash" variant="standard" onKeyDown={handleDAOMembers} onBlur={onBlurHandleDAOMembers} />
                     </div>
                   </div>
                 )}
@@ -327,9 +293,9 @@ export const CreateDao = () => {
                 <div style={{ marginTop: "20px", backgroundColor: "#3d3d3d", width: "100%", borderRadius: "16px" }}>
                   <Typography sx={{ padding: "20px" }}>
                     Member Percentage <br />
-                    With <span style={{ color: "#43DAA5", fontWeight: "600" }}>{hashArr.length}</span> members added to your wallet, <br />{" "}
-                    <span style={{ color: "#43DAA5", fontWeight: "600" }}>{Math.ceil(threshold / (100 / hashArr.length))}</span> members would need to approve a proposal for it to
-                    pass.
+                    With <span style={{ color: "#43DAA5", fontWeight: "600" }}>{publicKeys.length}</span> members added to your wallet, <br />{" "}
+                    <span style={{ color: "#43DAA5", fontWeight: "600" }}>{Math.ceil(threshold / (100 / publicKeys.length))}</span> members would need to approve a proposal for it
+                    to pass.
                   </Typography>
                 </div>
               </div>
@@ -351,7 +317,7 @@ export const CreateDao = () => {
                   <div style={{ marginTop: "20px", backgroundColor: "#3d3d3d", width: "50%", borderRadius: "16px" }}>
                     <Typography sx={{ padding: "20px" }}>
                       Invited members <br />
-                      {hashArr.length}
+                      {publicKeys.length}
                     </Typography>
                   </div>
                   <div style={{ margin: "20px 0 0 10px", backgroundColor: "#3d3d3d", width: "50%", borderRadius: "16px" }}>
