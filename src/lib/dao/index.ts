@@ -1,7 +1,17 @@
-import { Connection, PublicKey, sendAndConfirmRawTransaction } from "@solana/web3.js";
-import { ProgramAccount, Realm, TokenOwnerRecord, getAllTokenOwnerRecords, getRealm, getRealms, getTokenOwnerRecordsByOwner } from "@solana/spl-governance";
+import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, sendAndConfirmRawTransaction } from "@solana/web3.js";
+import {
+  ProgramAccount,
+  Proposal,
+  Realm,
+  TokenOwnerRecord,
+  getAllProposals,
+  getAllTokenOwnerRecords,
+  getRealm,
+  getRealms,
+  getTokenOwnerRecordsByOwner,
+} from "@solana/spl-governance";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-import { createConfiguredDao, daoMints, mintCouncilTokensToMembers } from "./utils";
+import { createCommunityDao, createMultisigdDao, daoMints, mintCouncilTokensToMembers } from "./utils";
 import { GOVERNANCE_PROGRAM_ID } from "./constants";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
@@ -57,15 +67,19 @@ export class DAO {
     return getAllTokenOwnerRecords(this.connection, GOVERNANCE_PROGRAM_ID, dao);
   };
 
+  getProposals = async (dao: PublicKey): Promise<ProgramAccount<Proposal>[]> => {
+    const proposals = await getAllProposals(this.connection, GOVERNANCE_PROGRAM_ID, dao);
+
+    return proposals[0];
+  };
+
   createMultisigDao = async (multiSigWallets: PublicKey[], name: string, threshold: number) => {
     const recentBlockhash = await this.connection.getLatestBlockhash();
     const daoMintResult = await daoMints(this.connection, this.wallet, recentBlockhash);
 
-    const finalMultiSigWallets = [...multiSigWallets, this.wallet.publicKey];
+    const mintResult = await mintCouncilTokensToMembers(multiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
 
-    const mintResult = await mintCouncilTokensToMembers(finalMultiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
-
-    const { daoPk, transaction: daoTransaction } = await createConfiguredDao(
+    const { daoPk, transaction: daoTransaction } = await createMultisigdDao(
       name,
       threshold,
       this.wallet.publicKey,
@@ -78,8 +92,6 @@ export class DAO {
     const transactions = [daoMintResult.transaction, mintResult.transaction, daoTransaction];
 
     const signedTx = await this.wallet.signAllTransactions(transactions);
-
-    console.log(signedTx);
 
     const transactionsSignatures: string[] = [];
 
@@ -101,8 +113,44 @@ export class DAO {
       transactionsSignatures.push(transactionSignature);
     }
 
-    console.log(transactionsSignatures);
-
     return { daoPk };
+  };
+
+  createCommunityDao = async () => {
+    const {
+      // mainGovernancePk,
+      // communityMintPk,
+      // councilMintPk,
+      realmPk,
+      realmInstructions,
+      realmSigners,
+      mintsSetupInstructions,
+      mintsSetupSigners,
+      councilMembersInstructions,
+      // walletPk,
+      // programIdPk,
+      // programVersion,
+      // minCommunityTokensToCreateAsMintValue,
+    } = await createCommunityDao(
+      this.connection,
+      this.wallet.publicKey,
+      "commu-222",
+      true,
+      false,
+      [],
+      10,
+      1,
+      false,
+      false,
+      new PublicKey("GEspYm1aBLExWHwQEofPgs4KnHNc3bGEDHierZGdo35U")
+      // new PublicKey("EqFSSoGJjgMhKKNnY1bg2UEbfwSmU5kPikEwn5tQc8wp")
+    );
+
+    const instructions: TransactionInstruction[] = [...realmInstructions, ...mintsSetupInstructions, ...councilMembersInstructions];
+    const transaction = new Transaction().add(...instructions);
+
+    const signers: Keypair[] = [...realmSigners, ...mintsSetupSigners];
+
+    return { transaction, signers, realmPk };
   };
 }

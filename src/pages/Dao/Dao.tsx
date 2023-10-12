@@ -6,6 +6,8 @@ import { Realm, ProgramAccount } from "@solana/spl-governance";
 import ListDaos from "../../components/ListDaos";
 import toastr from "toastr";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { CustomButton } from "../../components/CustomButton";
+import { useNavigate } from "react-router-dom";
 
 export const Dao = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -14,6 +16,7 @@ export const Dao = () => {
   const [daoInstance, setDaoInstance] = useState<DAO>();
   const [daos, setDaos] = useState<ProgramAccount<Realm>[]>([]);
   const [myDaos, setMyDaos] = useState<ProgramAccount<Realm>[]>([]);
+  const navigate = useNavigate();
 
   const wallet = useAnchorWallet();
 
@@ -72,7 +75,8 @@ export const Dao = () => {
   return (
     <div style={{ padding: "25px" }}>
       <TabContext value={activeTab}>
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <div></div>
           <TabList
             onChange={(_event: React.SyntheticEvent, newValue: string) => {
               setActiveTab(newValue);
@@ -82,6 +86,7 @@ export const Dao = () => {
             <Tab value="1" style={{ outline: "none", fontWeight: "bold", marginRight: "5px" }} label="Dao's" />
             <Tab value="2" style={{ outline: "none", fontWeight: "bold" }} label="My Dao's" />
           </TabList>
+          <CustomButton label="create dao" disable={false} onClick={() => navigate("/create-dao")} />
         </Box>
         <TabPanel style={{ padding: "0px" }} value="1">
           <ListDaos daos={daos} characterLimit={characterLimit} />
