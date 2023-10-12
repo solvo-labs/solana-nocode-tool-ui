@@ -30,8 +30,8 @@ import BigNumber from "bignumber.js";
 import { tryGetMint, withCreateAssociatedTokenAccount, withCreateMint, withMintTo } from "./token";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
+
+import { AuthorityType, createSetAuthorityInstruction } from "@solana/spl-token";
 
 export const mintCommunityToken = async (connection: Connection, wallet: Wallet, recentBlockhash: BlockhashWithExpiryBlockHeight, decimal = 8) => {
   const communityMint = await createMint(connection, wallet.publicKey, wallet.publicKey, decimal);
@@ -297,13 +297,13 @@ export const createCommunityDao = async (
   const programVersion = await getGovernanceProgramVersion(connection, programIdPk);
 
   const communityMintAccount = existingCommunityMintPk && (await tryGetMint(connection, existingCommunityMintPk));
-  const zeroCommunityTokenSupply = existingCommunityMintPk ? communityMintAccount?.account.supply.isZero() : true;
+  // const zeroCommunityTokenSupply = existingCommunityMintPk ? communityMintAccount?.account.supply.isZero() : true;
   const communityMintDecimals = communityMintAccount?.account?.decimals || 6;
 
   const communityMaxVoteWeightSource = parseMintMaxVoteWeight(useSupplyFactor, communityMintDecimals, communityMintSupplyFactor, communityAbsoluteMaxVoteWeight);
 
   const councilMintAccount = existingCouncilMintPk && (await tryGetMint(connection, existingCouncilMintPk));
-  const zeroCouncilTokenSupply = existingCouncilMintPk ? councilMintAccount?.account.supply.isZero() : true;
+  // const zeroCouncilTokenSupply = existingCouncilMintPk ? councilMintAccount?.account.supply.isZero() : true;
   const councilMintHasMintAuthority = councilMintAccount ? !!councilMintAccount.account.mintAuthority : true;
 
   let communityMintPk = existingCommunityMintPk;
@@ -315,9 +315,9 @@ export const createCommunityDao = async (
 
   let councilMintPk;
 
-  if (zeroCommunityTokenSupply && zeroCouncilTokenSupply) {
-    throw new Error("no tokens exist that could govern this DAO");
-  }
+  // if (zeroCommunityTokenSupply && zeroCouncilTokenSupply) {
+  //   throw new Error("no tokens exist that could govern this DAO");
+  // }
 
   if (!existingCouncilMintPk && createCouncil) {
     councilMintPk = await withCreateMint(connection, mintsSetupInstructions, mintsSetupSigners, walletPk, null, 0, walletPk);
@@ -426,18 +426,18 @@ export const createCommunityDao = async (
   const nativeTreasuryAddress = await withCreateNativeTreasury(realmInstructions, programIdPk, programVersion, mainGovernancePk, walletPk);
 
   if (transferCommunityMintAuthority) {
-    const ix = Token.createSetAuthorityInstruction(TOKEN_PROGRAM_ID, communityMintPk, nativeTreasuryAddress, "MintTokens", walletPk, []);
+    const ix = createSetAuthorityInstruction(communityMintPk, walletPk, AuthorityType.MintTokens, nativeTreasuryAddress, []);
     if (communityMintAccount?.account.freezeAuthority) {
-      const freezeMintAuthorityPassIx = Token.createSetAuthorityInstruction(TOKEN_PROGRAM_ID, communityMintPk, nativeTreasuryAddress, "FreezeAccount", walletPk, []);
+      const freezeMintAuthorityPassIx = createSetAuthorityInstruction(communityMintPk, walletPk, AuthorityType.FreezeAccount, nativeTreasuryAddress, []);
       realmInstructions.push(freezeMintAuthorityPassIx);
     }
     realmInstructions.push(ix);
   }
 
   if (councilMintPk && councilMintHasMintAuthority && transferCouncilMintAuthority) {
-    const ix = Token.createSetAuthorityInstruction(TOKEN_PROGRAM_ID, councilMintPk, nativeTreasuryAddress, "MintTokens", walletPk, []);
+    const ix = createSetAuthorityInstruction(councilMintPk, walletPk, AuthorityType.MintTokens, nativeTreasuryAddress, []);
     if (councilMintAccount?.account.freezeAuthority) {
-      const freezeMintAuthorityPassIx = Token.createSetAuthorityInstruction(TOKEN_PROGRAM_ID, councilMintPk, nativeTreasuryAddress, "FreezeAccount", walletPk, []);
+      const freezeMintAuthorityPassIx = createSetAuthorityInstruction(councilMintPk, walletPk, AuthorityType.FreezeAccount, nativeTreasuryAddress, []);
       realmInstructions.push(freezeMintAuthorityPassIx);
     }
     realmInstructions.push(ix);
@@ -448,7 +448,7 @@ export const createCommunityDao = async (
     withSetRealmAuthority(realmInstructions, programIdPk, programVersion, realmPk, walletPk, mainGovernancePk, SetRealmAuthorityAction.SetChecked);
   }
 
-  console.log(
+  return {
     mainGovernancePk,
     communityMintPk,
     councilMintPk,
@@ -461,8 +461,8 @@ export const createCommunityDao = async (
     walletPk,
     programIdPk,
     programVersion,
-    minCommunityTokensToCreateAsMintValue
-  );
+    minCommunityTokensToCreateAsMintValue,
+  };
 };
 
 const parseMintMaxVoteWeight = (useSupplyFactor: boolean, communityMintDecimals: number, supplyFactor?: number, absoluteValue?: number) => {

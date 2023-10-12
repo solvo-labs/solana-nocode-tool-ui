@@ -1,7 +1,7 @@
-import { Connection, PublicKey, sendAndConfirmRawTransaction } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, sendAndConfirmRawTransaction } from "@solana/web3.js";
 import { ProgramAccount, Realm, TokenOwnerRecord, getAllTokenOwnerRecords, getRealm, getRealms, getTokenOwnerRecordsByOwner } from "@solana/spl-governance";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-import { createMultisigdDao, daoMints, mintCouncilTokensToMembers } from "./utils";
+import { createCommunityDao, createMultisigdDao, daoMints, mintCouncilTokensToMembers } from "./utils";
 import { GOVERNANCE_PROGRAM_ID } from "./constants";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
@@ -79,8 +79,6 @@ export class DAO {
 
     const signedTx = await this.wallet.signAllTransactions(transactions);
 
-    console.log(signedTx);
-
     const transactionsSignatures: string[] = [];
 
     for (const signed of signedTx) {
@@ -102,5 +100,43 @@ export class DAO {
     }
 
     return { daoPk };
+  };
+
+  createCommunityDao = async () => {
+    const {
+      // mainGovernancePk,
+      // communityMintPk,
+      // councilMintPk,
+      realmPk,
+      realmInstructions,
+      realmSigners,
+      mintsSetupInstructions,
+      mintsSetupSigners,
+      councilMembersInstructions,
+      // walletPk,
+      // programIdPk,
+      // programVersion,
+      // minCommunityTokensToCreateAsMintValue,
+    } = await createCommunityDao(
+      this.connection,
+      this.wallet.publicKey,
+      "commu-111",
+      true,
+      false,
+      [this.wallet.publicKey],
+      10,
+      1,
+      false,
+      false
+      // new PublicKey("DhNPVnEss5aiZZfbFQajjj5VbjwcvuQLbXWYRpkzueXP"),
+      // new PublicKey("EqFSSoGJjgMhKKNnY1bg2UEbfwSmU5kPikEwn5tQc8wp")
+    );
+
+    const instructions: TransactionInstruction[] = [...realmInstructions, ...mintsSetupInstructions, ...councilMembersInstructions];
+    const transaction = new Transaction().add(...instructions);
+
+    const signers: Keypair[] = [...realmSigners, ...mintsSetupSigners];
+
+    return { transaction, signers, realmPk };
   };
 }
