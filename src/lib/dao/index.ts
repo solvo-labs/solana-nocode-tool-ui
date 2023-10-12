@@ -1,5 +1,7 @@
 import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, sendAndConfirmRawTransaction } from "@solana/web3.js";
 import {
+  GoverningTokenConfigAccountArgs,
+  GoverningTokenType,
   ProgramAccount,
   Proposal,
   Realm,
@@ -116,37 +118,46 @@ export class DAO {
     return { daoPk };
   };
 
-  createCommunityDao = async () => {
-    const {
-      // mainGovernancePk,
-      // communityMintPk,
-      // councilMintPk,
-      realmPk,
-      realmInstructions,
-      realmSigners,
-      mintsSetupInstructions,
-      mintsSetupSigners,
-      councilMembersInstructions,
-      // walletPk,
-      // programIdPk,
-      // programVersion,
-      // minCommunityTokensToCreateAsMintValue,
-    } = await createCommunityDao(
+  createCommunityDao = async (
+    name: string,
+    useSupplyFactor: boolean,
+    createCouncil: boolean,
+    councilWalletPks: PublicKey[],
+    communityYesVotePercentage: number | "disabled",
+    councilYesVotePercentage: number | "disabled",
+    transferCommunityMintAuthority: boolean,
+    transferCouncilMintAuthority: boolean,
+    existingCommunityMintPk?: PublicKey | undefined,
+    existingCouncilMintPk?: PublicKey | undefined
+  ) => {
+    const { realmPk, realmInstructions, realmSigners, mintsSetupInstructions, mintsSetupSigners, councilMembersInstructions } = await createCommunityDao(
       this.connection,
       this.wallet.publicKey,
-      "commu-222",
-      true,
-      false,
-      [],
-      10,
-      1,
-      false,
-      false,
-      new PublicKey("GEspYm1aBLExWHwQEofPgs4KnHNc3bGEDHierZGdo35U")
-      // new PublicKey("EqFSSoGJjgMhKKNnY1bg2UEbfwSmU5kPikEwn5tQc8wp")
+      name,
+      useSupplyFactor,
+      createCouncil,
+      councilWalletPks,
+      communityYesVotePercentage,
+      councilYesVotePercentage,
+      transferCommunityMintAuthority,
+      transferCouncilMintAuthority,
+      existingCommunityMintPk,
+      existingCouncilMintPk,
+      undefined,
+      createCouncil || existingCouncilMintPk
+        ? new GoverningTokenConfigAccountArgs({
+            tokenType: GoverningTokenType.Membership,
+            voterWeightAddin: undefined,
+            maxVoterWeightAddin: undefined,
+          })
+        : new GoverningTokenConfigAccountArgs({
+            tokenType: GoverningTokenType.Dormant,
+            voterWeightAddin: undefined,
+            maxVoterWeightAddin: undefined,
+          })
     );
 
-    const instructions: TransactionInstruction[] = [...realmInstructions, ...mintsSetupInstructions, ...councilMembersInstructions];
+    const instructions: TransactionInstruction[] = [...mintsSetupInstructions, ...realmInstructions, ...councilMembersInstructions];
     const transaction = new Transaction().add(...instructions);
 
     const signers: Keypair[] = [...realmSigners, ...mintsSetupSigners];
