@@ -69,7 +69,7 @@ export class DAO {
 
   getProposals = async (dao: PublicKey): Promise<ProgramAccount<Proposal>[]> => {
     const proposals = await getAllProposals(this.connection, GOVERNANCE_PROGRAM_ID, dao);
-
+    console.log(proposals)
     return proposals[0];
   };
 
