@@ -61,9 +61,7 @@ export class DAO {
     const recentBlockhash = await this.connection.getLatestBlockhash();
     const daoMintResult = await daoMints(this.connection, this.wallet, recentBlockhash);
 
-    const finalMultiSigWallets = [...multiSigWallets, this.wallet.publicKey];
-
-    const mintResult = await mintCouncilTokensToMembers(finalMultiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
+    const mintResult = await mintCouncilTokensToMembers(multiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
 
     const { daoPk, transaction: daoTransaction } = await createMultisigdDao(
       name,
@@ -120,15 +118,15 @@ export class DAO {
     } = await createCommunityDao(
       this.connection,
       this.wallet.publicKey,
-      "commu-111",
+      "commu-222",
       true,
       false,
-      [this.wallet.publicKey],
+      [],
       10,
       1,
       false,
-      false
-      // new PublicKey("DhNPVnEss5aiZZfbFQajjj5VbjwcvuQLbXWYRpkzueXP"),
+      false,
+      new PublicKey("GEspYm1aBLExWHwQEofPgs4KnHNc3bGEDHierZGdo35U")
       // new PublicKey("EqFSSoGJjgMhKKNnY1bg2UEbfwSmU5kPikEwn5tQc8wp")
     );
 
