@@ -1,12 +1,16 @@
-import {Box, Modal, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Button, Grid, Modal, Stack, Typography} from "@mui/material";
 import React from "react";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import MemberCard from "./MemberCard.tsx";
+import MemberDetail from "./MemberDetail.tsx";
 
 const style = {
     position: 'absolute' as 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: "70%",
+    width: "80%",
     height: "60%",
     bgcolor: 'background.paper',
     border: '1px solid black',
@@ -20,49 +24,50 @@ type Props = {
     handleClose: () => void;
     open: boolean;
     daoName: string;
+    members: any[] | undefined;
+    selectedMember: any;
+    handleSelectMember: () => void;
 }
 
-const MembersModal:React.FC<Props> = ({handleClose, open,daoName}) => {
-    return(
+const MembersModal: React.FC<Props> = ({handleClose, open, daoName,members, handleSelectMember, selectedMember}) => {
+    return (
         <Modal
             open={open}
             onClose={handleClose}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
         >
             <Box sx={style}>
-                <Typography>{daoName}</Typography>
-                <Typography>Members</Typography>
-            </Box>
-            <Box
-                sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: 224 }}
-            >
-                <Tabs
-                    orientation="vertical"
-                    variant="scrollable"
-                    value={value}
-                    onChange={handleChange}
-                    aria-label="Vertical tabs example"
-                    sx={{ borderRight: 1, borderColor: 'divider' }}
-                >
-                    <Tab label="Item One"  />
-                    <Tab label="Item Two" />
-                    <Tab label="Item Three"/>
-                    <Tab label="Item Four"  />
-                    <Tab label="Item Five" />
-                    <Tab label="Item Six" />
-                    <Tab label="Item Seven"/>
-                </Tabs>
-                <TabPanel value={value} index={0}>
-                    Item One
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                    Item Two
-                </TabPanel>
-                <TabPanel value={value} index={2}>
-                    Item Three
-                </TabPanel>
-
+                <Grid item>
+                    <Typography variant={"subtitle2"}>{daoName}</Typography>
+                    <Typography variant={"h5"}>Members</Typography>
+                </Grid>
+                <Grid container marginTop={"1rem"}>
+                    <Grid item xl={4} lg={4} md={4} xs={12} sm={12}>
+                        <Grid container display={"flex"} justifyContent={"space-between"}>
+                            <Stack direction={"row"} spacing={2} display={"flex"} alignItems={"center"}>
+                                <PeopleAltIcon sx={{fontSize: "24px",color: "#A56BFA"}}></PeopleAltIcon>
+                                <Typography variant={"subtitle2"}>{members ? members.length : "0"} members</Typography>
+                            </Stack>
+                            <Button component="label" size={"small"} sx={{fontSize: "12px", color: "black", borderRadius: "12px"}} startIcon={<AddCircleOutlineIcon />}>
+                                New Member
+                            </Button>
+                        </Grid>
+                        <Stack spacing={2} marginTop={"1rem"}>
+                            {members && members.map((member, index: number) => (
+                                    <MemberCard
+                                        key={index}
+                                        member={member}
+                                        // index={index}
+                                        handleSelectMember={handleSelectMember}
+                                    ></MemberCard>
+                            ))}
+                        </Stack>
+                    </Grid>
+                    <Grid item xl={8} lg={8} md={8} xs={12} sm={12} paddingLeft={"2rem"}>
+                        <MemberDetail
+                            selectedMember={selectedMember}
+                        ></MemberDetail>
+                    </Grid>
+                </Grid>
             </Box>
         </Modal>
     );
