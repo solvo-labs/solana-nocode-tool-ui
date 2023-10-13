@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Avatar, Box, Card, CardContent, Grid, Stack, Tab, Theme, Typography} from "@mui/material";
+import {Avatar, Box, Card, CardContent, CircularProgress, Grid, Stack, Tab, Theme, Typography} from "@mui/material";
 import axios from "axios";
 import SearchInput from "../../components/SearchInput.tsx";
 // import FilterSelector from "../../components/FilterSelector.tsx";
@@ -16,6 +16,7 @@ import {PublicKey} from "@solana/web3.js";
 // import {bs58} from "@project-serum/anchor/dist/cjs/utils/bytes";
 import {useAnchorWallet, useConnection} from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
+import {sleep} from "../../lib/utils.ts";
 
 const useStyles = makeStyles((_theme: Theme) => ({
     card: {
@@ -25,17 +26,27 @@ const useStyles = makeStyles((_theme: Theme) => ({
     cardContent: {
         padding: "1.5rem !important",
     },
-    managementItem: {
+    managementItems: {
+        height: "40px",
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: "1rem",
+        paddingRight: "1rem",
         "&:hover": {
             backgroundColor: 'rgba(0,255,108,0.2)',
             borderRadius: "8px !important",
             cursor: "pointer",
         }
-    }
+    },
+    detailItems: {
+        paddingLeft: "1rem",
+        paddingRight: "1rem",
+    },
 }));
 
 const DaoDetails: React.FC = () => {
     const classes = useStyles();
+    const [loading, setLoading] = useState<boolean>(true);
     const wallet = useAnchorWallet();
     const {connection} = useConnection();
     const [daoInstance, setDaoInstance] = useState<DAO>();
@@ -43,7 +54,9 @@ const DaoDetails: React.FC = () => {
     const pubkey = params.pubkey;
 
     const [dao, setDao] = useState();
-    const [members, setMembers] = useState();
+    const [members, setMembers] = useState<any[]>();
+
+    const [selectedMember, setSelectedMember] = useState();
 
     const [surveys, setSurveys] = useState([
         {
@@ -69,9 +82,11 @@ const DaoDetails: React.FC = () => {
     const [filters,] = useState<FILTERS[]>(Object.values(FILTERS));
 
 
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const [membersOpen, setMembersOpen] = useState(false);
+    const handleOpen = (setState: any) => setState(true);
+    const handleClose = (setState:any) => setState(false);
+
+
 
 
     useEffect(() => {
@@ -106,13 +121,16 @@ const DaoDetails: React.FC = () => {
         setFilteredSurveys(filtered);
     };
 
-    const [tabValue, setTabValue] = React.useState<string>("1");
+    const [tabValue, setTabValue] = useState<string>("1");
 
     // @ts-ignore
     const handleChangeTabs = (event: React.SyntheticEvent, newValue: number) => {
         // @ts-ignore
         setTabValue(newValue);
     };
+
+
+
 
     useEffect(() => {
         if (wallet) {
@@ -127,15 +145,16 @@ const DaoDetails: React.FC = () => {
                 try {
                     const publickey = new PublicKey(pubkey);
                     const daoDetail = await daoInstance.getDaoDetails(publickey);
+                    await sleep(3000);
                     const members = await daoInstance.getMembers(publickey);
+                    // await sleep(3000);
                     // const proposals = await daoInstance.getProposals(publickey);
-                    console.log(daoDetail.dao)
-
 
                     // @ts-ignore
                     setMembers(members);
                     // @ts-ignore
                     setDao(daoDetail.dao);
+                    setLoading(false);
                 } catch(error) {
                     console.log(error)
                     toastr.error("someting went wrong");
@@ -143,7 +162,24 @@ const DaoDetails: React.FC = () => {
             }
         };
         init();
-    }, [daoInstance, pubkey])
+    }, [daoInstance, pubkey]);
+
+    if (loading) {
+        return (
+            <div
+                style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    textAlign: "center",
+                }}
+            >
+                <CircularProgress />
+            </div>
+        );
+    };
+
 
     return (
         <Grid container direction={"row"} spacing={2} width={"90vw"} display={"flex"} alignContent={"center"}
@@ -157,8 +193,6 @@ const DaoDetails: React.FC = () => {
                                         src="data:image/png;base64,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">Logo</Avatar>
                                 <Typography variant={"h6"}>{!dao ? "undefined" : dao?.account.name}</Typography>
                             </Stack>
-                            {/*<Divider sx={{bgcolor: "black", marginTop: "1rem"}}></Divider>*/}
-
                             <Box marginTop={"1rem"}>
                                 <TabContext value={tabValue}>
                                     <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
@@ -167,66 +201,55 @@ const DaoDetails: React.FC = () => {
                                                  value="1"/>
                                             <Tab sx={{fontSize: "0.7rem", padding: "0 !important"}} label="Details"
                                                  value="2"/>
-                                            {/*<Tab label="Item Three" value="3"/>*/}
                                         </TabList>
                                     </Box>
-                                    <TabPanel value="1" sx={{padding: "0", paddingY: "1rem"}}>
-                                        <Stack direction={"column"} spacing={2} marginX={"1rem"}>
-                                            <Stack direction={"row"} spacing={2} onClick={handleOpen}
-                                                   className={classes.managementItem}>
-                                                <PeopleAltIcon></PeopleAltIcon>
-                                                <Typography>Members</Typography>
+                                    <TabPanel value="1" sx={{padding: "0", paddingTop: "1rem"}}>
+                                        <Stack direction={"column"} spacing={1}>
+                                            <Stack direction={"row"} spacing={2} onClick={() => {
+                                                handleOpen(setMembersOpen);
+                                                setSelectedMember(members ? members[0] : undefined);
+                                            }}
+                                                   className={classes.managementItems}>
+                                                <PeopleAltIcon sx={{fontSize: "24px",color: "#A56BFA"}}></PeopleAltIcon>
+                                                <Typography variant={"subtitle2"}>Members</Typography>
                                             </Stack>
-                                            {/*<MembersModal*/}
-                                            {/*    open={open}*/}
-                                            {/*    handleClose={handleClose}*/}
-                                            {/*    daoName={dao.account.name}*/}
-                                            {/*></MembersModal>*/}
+                                            <MembersModal
+                                                open={membersOpen}
+                                                handleClose={() => {
+                                                    handleClose(setMembersOpen)
+                                                }}
+                                                daoName={dao ? dao.account.name : "def"}
+                                                members={members}
+                                                handleSelectMember={setSelectedMember}
+                                                selectedMember={selectedMember}
+                                            ></MembersModal>
                                             <Stack direction={"row"} spacing={2} onClick={() => {
                                                 console.log("Asdsda")
                                             }}
-                                                   className={classes.managementItem}>
-                                                <SettingsIcon></SettingsIcon>
-                                                <Typography>Parameters</Typography>
+                                                   className={classes.managementItems}>
+                                                <SettingsIcon sx={{fontSize: "24px",color: "#A56BFA"}}></SettingsIcon>
+                                                <Typography variant={"subtitle2"}>Parameters</Typography>
                                             </Stack>
 
                                         </Stack>
                                     </TabPanel>
-                                    <TabPanel value="2" sx={{padding: "0", paddingY: "1rem"}}>
+                                    <TabPanel value="2" sx={{padding: "0", paddingTop: "1rem"}}>
                                         {dao && (
-                                            <Stack>
+                                            <Stack className={classes.detailItems}>
                                                 <Typography variant={"subtitle2"}>Details</Typography>
                                                 <Typography variant={"subtitle2"}>Token: {}</Typography>
                                                 <Typography variant={"subtitle2"}>Website:</Typography>
                                                 <Typography variant={"subtitle2"}>Program Version:</Typography>
-                                                {/*<Typography variant={"subtitle2"}>X:</Typography>*/}
                                             </Stack>
                                         )}
                                     </TabPanel>
-                                    {/*<TabPanel value="3">Item Three</TabPanel>*/}
                                 </TabContext>
                             </Box>
-                            {/*<TabPanel value={"1"}>*/}
-                            {/*    Item One*/}
-                            {/*</TabPanel>*/}
-                            {/*<TabPanel value={"2"}>*/}
-                            {/*    Item Two*/}
-                            {/*</TabPanel>*/}
-                            {/*<TabPanel value={"3"}>*/}
-                            {/*    Item Three*/}
-                            {/*</TabPanel>*/}
-
-
                         </CardContent>
                     </Card>
                     <Card className={classes.card}>
                         <CardContent>
                             <Typography variant={"h6"}>My Governance Power</Typography>
-                        </CardContent>
-                    </Card>
-                    <Card className={classes.card}>
-                        <CardContent>
-                            <Typography variant={"h6"}>NFT's</Typography>
                         </CardContent>
                     </Card>
                     <Card className={classes.card}>
