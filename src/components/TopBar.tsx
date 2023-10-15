@@ -114,7 +114,7 @@ const TopBar: React.FC = () => {
   };
 
   return (
-    <div>
+    <>
       <AppBar className={classes.appBar}>
         <Container maxWidth="xl">
           <Toolbar disableGutters>
@@ -270,7 +270,7 @@ const TopBar: React.FC = () => {
           </Toolbar>
         </Container>
       </AppBar>
-    </div>
+    </>
   );
 };
 

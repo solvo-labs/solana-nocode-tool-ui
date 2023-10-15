@@ -1,15 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { DAO } from "../../lib/dao/index";
-import { Box, CircularProgress, Tab } from "@mui/material";
+import { Box, CircularProgress, Grid, Tab } from "@mui/material";
 import { Realm, ProgramAccount } from "@solana/spl-governance";
 import ListDaos from "../../components/ListDaos";
 import toastr from "toastr";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { CustomButton } from "../../components/CustomButton";
 import { useNavigate } from "react-router-dom";
+import { makeStyles } from "@mui/styles";
+
+const useStyles = makeStyles(() => ({
+  gridContainer: {
+    display: "flex !important",
+    justifyContent: "center !important",
+    alignItems: "flex-start !important",
+    alignContent: "flex-start !important",
+    padding: "16px !important",
+    height: "100% !important",
+    width: "100vw !important",
+  },
+  gridItem: {
+    padding: "16px !important",
+  },
+}));
 
 export const Dao = () => {
+  const classes = useStyles();
+
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<string>("1");
   const characterLimit = 50;
@@ -73,28 +91,29 @@ export const Dao = () => {
   }
 
   return (
-    <div style={{ padding: "25px" }}>
-      <TabContext value={activeTab}>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <div></div>
-          <TabList
-            onChange={(_event: React.SyntheticEvent, newValue: string) => {
-              setActiveTab(newValue);
-            }}
-            style={{ marginBottom: "5px" }}
-          >
-            <Tab value="1" style={{ outline: "none", fontWeight: "bold", marginRight: "5px" }} label="Dao's" />
-            <Tab value="2" style={{ outline: "none", fontWeight: "bold" }} label="My Dao's" />
-          </TabList>
-          <CustomButton label="create dao" disable={false} onClick={() => navigate("/create-dao")} />
-        </Box>
-        <TabPanel style={{ padding: "0px" }} value="1">
-          <ListDaos daos={daos} characterLimit={characterLimit} />
-        </TabPanel>
-        <TabPanel style={{ padding: "0px" }} value="2">
-          <ListDaos daos={myDaos} characterLimit={characterLimit} />
-        </TabPanel>
-      </TabContext>
-    </div>
+    <Grid container spacing={2} className={classes.gridContainer}>
+      <Grid item xs={12} className={classes.gridItem}>
+        <TabContext value={activeTab}>
+          <Box style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", padding: "20px" }}>
+            <TabList
+              onChange={(_event: React.SyntheticEvent, newValue: string) => {
+                setActiveTab(newValue);
+              }}
+              style={{ marginBottom: "5px" }}
+            >
+              <Tab value="1" style={{ outline: "none", fontWeight: "bold", marginRight: "5px" }} label="Dao's" />
+              <Tab value="2" style={{ outline: "none", fontWeight: "bold" }} label="My Dao's" />
+            </TabList>
+            <CustomButton label="create dao" disable={false} onClick={() => navigate("/create-dao")} />
+          </Box>
+          <TabPanel style={{ padding: "0px" }} value="1">
+            <ListDaos daos={daos} characterLimit={characterLimit} />
+          </TabPanel>
+          <TabPanel style={{ padding: "0px" }} value="2">
+            <ListDaos daos={myDaos} characterLimit={characterLimit} />
+          </TabPanel>
+        </TabContext>
+      </Grid>
+    </Grid>
   );
 };

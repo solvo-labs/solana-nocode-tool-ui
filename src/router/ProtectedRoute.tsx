@@ -1,20 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { makeStyles } from "@mui/styles";
-import { Grid, LinearProgress, Theme } from "@mui/material";
+import { LinearProgress } from "@mui/material";
 import TopBar from "../components/TopBar";
 import { useWallet } from "@solana/wallet-adapter-react";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStyles = makeStyles((_theme: Theme) => ({
-  container: {
-    color: "#FFFFFF",
-    justifyContent: "center",
-  },
-}));
-
 const ProtectedRoute: React.FC = () => {
-  const classes = useStyles();
   const [loading, setLoading] = useState<boolean>(true);
 
   const { connected, publicKey, connecting } = useWallet();
@@ -42,6 +32,7 @@ const ProtectedRoute: React.FC = () => {
           alignItems: "center",
           height: "100vh",
           width: "50vw",
+          margin: 0,
         }}
       >
         <LinearProgress color="inherit" style={{ width: "80%" }} />
@@ -50,14 +41,14 @@ const ProtectedRoute: React.FC = () => {
   }
 
   return connected ? (
-    <Grid container spacing={0} className={classes.container}>
-      <TopBar />
-      <Grid item xl={12} lg={12} md={12} xs={12} sm={12} spacing={0} width={"auto"} height={"100vh"} paddingTop={{ xl: "8rem", lg: "8rem", md: "8rem", sm: "4rem", xs: "4rem" }}>
-        <Grid container direction={"column"} spacing={0} alignContent={"center"}>
-          <Outlet />
-        </Grid>
-      </Grid>
-    </Grid>
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      <div style={{ height: "96px" }}>
+        <TopBar />
+      </div>
+      <div style={{ height: `calc(100vh - 96px)`, display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Outlet />
+      </div>
+    </div>
   ) : (
     <Navigate to="/login" />
   );

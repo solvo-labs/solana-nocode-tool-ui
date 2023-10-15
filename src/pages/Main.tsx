@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Grid, Theme } from "@mui/material";
+import { Grid } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Profile, { ProfileLoading } from "../components/Profile";
 import SolPrice, { SolPriceLoading } from "../components/SolPrice";
@@ -20,20 +20,17 @@ import { fetchUserTokens } from "../lib";
 import { marketInfo } from "../api/solscan";
 import RegisterToken, { RegisterTokenLoading } from "../components/NonRegisteredToken";
 
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    [theme.breakpoints.up("xl")]: {
-      minWidth: "80vw !important",
-      maxWidth: "80vw !important",
-    },
-    marginBottom: "1rem !important",
-    [theme.breakpoints.down("xl")]: {
-      maxWidth: "90vw",
-      minWidth: "90vw",
-    },
-    [theme.breakpoints.down("md")]: {
-      marginTop: "2rem !important",
-    },
+const useStyles = makeStyles(() => ({
+  gridContainer: {
+    display: "flex !important",
+    justifyContent: "center !important",
+    alignItems: "flex-start !important",
+    alignContent: "flex-start !important",
+    padding: "16px !important",
+    height: "100% !important",
+  },
+  gridItem: {
+    padding: "16px !important",
   },
 }));
 
@@ -143,21 +140,6 @@ const Main: React.FC = () => {
     };
   }, [connection, publicKey]);
 
-  // useEffect(() => {
-  //   const marketInfoFunction = async () => {
-  //     const returnValue = await networkInfo();
-  //     setChain(returnValue);
-  //     setNetworkLoading(false);
-  //   };
-  //   marketInfoFunction();
-  //   const interval = setInterval(() => {
-  //     marketInfoFunction();
-  //   }, 5000);
-  //   return () => {
-  //     clearInterval(interval);
-  //   };
-  // }, []);
-
   useEffect(() => {
     const init = async () => {
       const returnValue = await connection.getBlockHeight();
@@ -189,11 +171,10 @@ const Main: React.FC = () => {
   }, []);
 
   return (
-    <Grid container spacing={2} className={classes.container}>
-      {/* --------------------------------------------------------------------------------------------- en dis grid */}
-      <Grid item xl={4} lg={4} md={4} sm={12} xs={12}>
+    <Grid container spacing={2} className={classes.gridContainer}>
+      <Grid item xl={4} lg={4} md={4} sm={12} xs={12} className={classes.gridItem}>
         <Grid container spacing={2}>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12} className={classes.gridItem}>
             {walletLoading ? (
               <ProfileLoading />
             ) : (
@@ -207,33 +188,24 @@ const Main: React.FC = () => {
               ></Profile>
             )}
           </Grid>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12} className={classes.gridItem}>
             {priceLoading ? <SolPriceLoading /> : <SolPrice data={solInfo ? solInfo : undefined} />}
           </Grid>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12} className={classes.gridItem}>
             {<CurrentBlock lastBlock={lastBlockData} loading={currentBlockLoading}></CurrentBlock>}
           </Grid>
-          {/* <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            {networkLoading ? <SolNetworkLoading /> : <SolNetwork data={chain}></SolNetwork>}
-          </Grid> */}
-          {/* <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            <SolTotalStake/>
-          </Grid>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-            <SolSupply/>
-          </Grid> */}
         </Grid>
       </Grid>
-      {/* --------------------------------------------------------------------------------------------- en dis grid */}
-      <Grid item xl={8} lg={8} md={8} sm={12} xs={12}>
+
+      <Grid item xl={8} lg={8} md={8} sm={12} xs={12} className={classes.gridItem}>
         <Grid container spacing={2}>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12} className={classes.gridItem}>
             {stakesLoading ? <StakesLoading /> : <ActiveStake navigate={() => navigate("/stake")} stakes={stakes}></ActiveStake>}
           </Grid>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12} className={classes.gridItem}>
             {vestingsLoading ? <VestingLoading /> : <ActiveVesting navigate={() => navigate("/vesting-list")} vestings={vestingList}></ActiveVesting>}
           </Grid>
-          <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+          <Grid item xl={12} lg={12} md={12} sm={12} xs={12} className={classes.gridItem}>
             {nonRegisteredTokenLoading ? <RegisterTokenLoading /> : <RegisterToken tokens={nonRegisteredToken}></RegisterToken>}
           </Grid>
         </Grid>
