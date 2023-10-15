@@ -55,7 +55,7 @@ const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members, ha
                     key={index}
                     member={member}
                     // index={index}
-                    handleSelectMember={() => handleSelectMember}
+                    handleSelectMember={handleSelectMember}
                   ></MemberCard>
                 ))}
             </Stack>
