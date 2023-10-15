@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useState} from "react";
 import {Avatar, Box, Card, CardContent, CircularProgress, Grid, Stack, Tab, Theme, Typography} from "@mui/material";
 import axios from "axios";
 import SearchInput from "../../components/SearchInput.tsx";
-// import FilterSelector from "../../components/FilterSelector.tsx";
 import {FILTERS} from "../../utils/enum.ts";
 import FilterSelector from "../../components/FilterSelector.tsx";
 import {makeStyles} from "@mui/styles";
@@ -17,11 +16,10 @@ import {PublicKey} from "@solana/web3.js";
 import {useAnchorWallet, useConnection} from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
 import {sleep} from "../../lib/utils.ts";
-import {ProposalState, VoteKind, VoteTypeKind} from "@solana/spl-governance";
+import {ProposalState, VoteTypeKind} from "@solana/spl-governance";
 import ExecutableProposalCard from "../../components/ProposalComponent/ExecutableProposalCard.tsx";
 import NonExecutableProposalCard from "../../components/ProposalComponent/NonExecutableProposalCard.tsx";
 import ConcludedProposal from "../../components/ProposalComponent/ConcludedProposal.tsx";
-import {PhantomWalletAdapter, UnsafeBurnerWalletAdapter} from "@solana/wallet-adapter-wallets";
 
 const useStyles = makeStyles((_theme: Theme) => ({
     card: {
@@ -63,24 +61,6 @@ const DaoDetails: React.FC = () => {
     const [proposals, setProposals] = useState<any[]>();
 
     const [selectedMember, setSelectedMember] = useState();
-
-    const [surveys, setSurveys] = useState([
-        {
-            id: 1,
-            baslik: "Yeni survey",
-            status: "Draft",
-        },
-        {
-            id: 2,
-            baslik: "survey 2",
-            status: "Completed",
-        },
-        {
-            id: 3,
-            baslik: "survey 3",
-            status: "Cancelled",
-        },
-    ]);
 
     const proposalMain = [
         {
@@ -645,17 +625,18 @@ const DaoDetails: React.FC = () => {
         }
     ];
 
-    const [selectedFilter, setSelectedFilter] = useState<string>("");
-
+    const [selectedFilter, setSelectedFilter] = useState<any[]>([]);
     const [search, setSearch] = useState("");
-    const [filteredSurveys, setFilteredSurveys] = useState(surveys);
-    const [filters] = useState<FILTERS[]>(Object.values(FILTERS));
+    const [searchedProposal, setSearchedProposal] = useState<any[]>([]);
+    // const [filters, setFilters] = useState<string[]>([]);
+    // const [filteredProposal, setFilteredProposal] = useState([]);
+    const [filtersTitle] = useState<FILTERS[]>(Object.values(FILTERS));
 
     const [membersOpen, setMembersOpen] = useState(false);
     const handleOpen = (setState: any) => setState(true);
     const handleClose = (setState: any) => setState(false);
 
-    const filterFlag = useMemo(() => {
+    const searchFlag = useMemo(() => {
         return search != "";
     }, [search]);
 
@@ -671,15 +652,22 @@ const DaoDetails: React.FC = () => {
     }, []);
 
     // @ts-ignore
-    const handleFilter = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const newFilter = event.target.value;
-
-        if (newFilter === "") {
-            setFilteredSurveys(surveys);
-        } else {
-            setFilteredSurveys(surveys.filter((survey) => survey.status === newFilter));
-        }
-    };
+    // const handleFilter = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    //     console.log(event.target.checked)
+    //         // (e: any) => {
+    //         // if (!filters.includes(filter) && e.target.checked) {
+    //         //     filters.push(filter);
+    //         // } else if (filters.includes(filter) && !e.target.checked) {
+    //         //     filters.filter((filterToDelete, index: number) => {
+    //         //         if (filterToDelete == filter) {
+    //         //             selectedFilters.splice(index, 1)
+    //         //         }
+    //         //     })
+    //         //
+    //         // }
+    //         // console.log(filters)
+    //
+    // };
 
     // @ts-ignore
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -688,7 +676,8 @@ const DaoDetails: React.FC = () => {
         setSearch(inputValue);
         if (proposals) {
             const filtered = proposals.filter((proposal) => proposal.account.name.toLowerCase().includes(inputValue.toLowerCase()));
-            setFilteredSurveys(filtered);
+            // @ts-ignore
+            setSearchedProposal(filtered);
         }
     };
 
@@ -714,12 +703,10 @@ const DaoDetails: React.FC = () => {
                     const publickey = new PublicKey(pubkey);
                     const daoDetail = await daoInstance.getDaoDetails(publickey);
                     // await sleep(3000);
-                    //   const members = await daoInstance.getMembers(publickey);
+                    // const members = await daoInstance.getMembers(publickey);
                     await sleep(3000);
                     // const proposals = await daoInstance.getProposals(publickey);
-                    // console.log(proposals)
                     setProposals(proposalMain);
-                    //   console.log("aaa", proposals);
                     const result = proposalMain.map((proposal: any) => {
                         return {
                             account: {
@@ -735,9 +722,8 @@ const DaoDetails: React.FC = () => {
                         }
                     })
                     setProposals(result);
-                    // .account.accountType == GovernanceAccountType.ProposalV2
                     // @ts-ignore
-                    //   setMembers(members);
+                    // setMembers(members);
                     // @ts-ignore
                     setDao(daoDetail.dao);
                     setLoading(false);
@@ -749,6 +735,8 @@ const DaoDetails: React.FC = () => {
         };
         init();
     }, [daoInstance, pubkey]);
+
+    // console.log(selectedFilter);
 
     if (loading) {
         return (
@@ -765,6 +753,7 @@ const DaoDetails: React.FC = () => {
             </div>
         );
     }
+
 
     return (
         <Grid container direction={"row"} spacing={2} width={"90vw"} display={"flex"} alignContent={"center"}>
@@ -813,7 +802,7 @@ const DaoDetails: React.FC = () => {
                                                 }}
                                                 daoName={dao ? dao.account.name : "def"}
                                                 members={members}
-                                                handleSelectMember={setSelectedMember}
+                                                handleSelectMember={(e: any) => setSelectedMember(e)}
                                                 selectedMember={selectedMember}
                                             ></MembersModal>
                                             <Stack
@@ -861,16 +850,19 @@ const DaoDetails: React.FC = () => {
                         <Typography variant={"h5"}>Proposals</Typography>
                         <Stack direction={"row"} marginTop={"1rem"} spacing={2} display={"flex"} alignItems={"center"}>
                             <SearchInput onChange={handleSearch}></SearchInput>
-                            <FilterSelector filters={filters} selectedFilter={selectedFilter}
-                                            setFilter={() => setSelectedFilter}></FilterSelector>
+                            <FilterSelector
+                                filters={filtersTitle}
+                                selectedFilters={selectedFilter}
+                                setSelectedFilters={setSelectedFilter}
+                            ></FilterSelector>
                         </Stack>
                         <Stack direction={"row"} marginTop={"1rem"} spacing={2}>
                             <Typography variant={"body2"}>{proposals ? proposals.length : "0"} proposal</Typography>
                         </Stack>
                         <Stack direction={"column"} marginTop={"1rem"} spacing={2}>
-                            {(proposals && !filterFlag) &&
+                            {(proposals && !searchFlag) &&
                                 proposals
-                                    .filter(onGoingProposal => onGoingProposal.account.state === ProposalState.Voting)
+                                    .filter(onGoingProposal => onGoingProposal.account.state == ProposalState.Voting)
                                     .map(onGoingProposal => (
                                         onGoingProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
                                             <ExecutableProposalCard title={onGoingProposal.account.name}/>
@@ -879,10 +871,10 @@ const DaoDetails: React.FC = () => {
                                         )
                                     ))
                             }
-                            {(proposals && !filterFlag) && proposals.filter((concludedProposal) => concludedProposal.account.state != ProposalState.Voting).map((proposal) => (
+                            {(proposals && !searchFlag) && proposals.filter((concludedProposal) => concludedProposal.account.state != ProposalState.Voting).map((proposal) => (
                                 <ConcludedProposal title={proposal.account.name}></ConcludedProposal>
                             ))}
-                            {filterFlag && filteredSurveys.filter(onGoingProposal =>
+                            {searchFlag && searchedProposal.filter(onGoingProposal =>
                                 onGoingProposal.account.state == ProposalState.Voting)
                                 .map(filteredProposal => (
                                     filteredProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
@@ -891,7 +883,7 @@ const DaoDetails: React.FC = () => {
                                         <NonExecutableProposalCard title={filteredProposal.account.name}/>
                                     )
                                 ))}
-                            {filterFlag && filteredSurveys.filter((concludedProposal) => concludedProposal.account.state != ProposalState.Voting).map((filteredProposal) => (
+                            {searchFlag && searchedProposal.filter((concludedProposal) => concludedProposal.account.state != ProposalState.Voting).map((filteredProposal) => (
                                 <ConcludedProposal title={filteredProposal.account.name}></ConcludedProposal>
                             ))}
                         </Stack>
