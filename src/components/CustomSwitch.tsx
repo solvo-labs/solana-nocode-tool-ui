@@ -2,7 +2,7 @@ import { styled } from '@mui/material/styles';
 import Switch from '@mui/material/Switch';
 
 // @ts-ignore
-const CustomRadio = styled(Switch)(({ theme: Theme }) => ({
+const CustomSwitch = styled(Switch)(({ theme: Theme }) => ({
     padding: 8,
     '& .MuiSwitch-track': {
         borderRadius: 12,
@@ -47,4 +47,4 @@ const CustomRadio = styled(Switch)(({ theme: Theme }) => ({
     },
 }));
 
-export default CustomRadio;
+export default CustomSwitch;
