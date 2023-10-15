@@ -1,8 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, Divider, Grid, Typography } from "@mui/material";
 import axios from "axios";
+import { makeStyles } from "@mui/styles";
+
+const useStyles = makeStyles(() => ({
+  gridContainer: {
+    display: "flex !important",
+    justifyContent: "center !important",
+    alignItems: "flex-start !important",
+    alignContent: "flex-start !important",
+    padding: "16px !important",
+    height: "100% !important",
+    width: "100vw !important",
+  },
+  gridItem: {
+    padding: "50px !important",
+  },
+}));
 
 const DaoDetails: React.FC = () => {
+  const classes = useStyles();
+
   const [surveys, setSurveys] = useState([
     {
       id: 1,
@@ -55,9 +73,8 @@ const DaoDetails: React.FC = () => {
   };
 
   return (
-    <Grid container spacing={2} minWidth={"100vw"} marginBottom={"40px"}>
-      <Grid item xs={1} style={{ marginTop: "20px" }}></Grid>
-      <Grid item xs={3} style={{ marginTop: "20px" }}>
+    <Grid container spacing={2} className={classes.gridContainer}>
+      <Grid item xs={4} style={{ marginTop: "20px" }} className={classes.gridItem}>
         <div style={{ marginLeft: "25px", backgroundColor: "white", color: "black", borderRadius: "8px" }}>
           <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", padding: "20px" }}>
             <Avatar style={{ marginRight: "10px" }}>Logo</Avatar>
@@ -96,8 +113,7 @@ const DaoDetails: React.FC = () => {
           </div>
         </div>
       </Grid>
-      <Grid item xs={1} style={{ marginTop: "20px" }}></Grid>
-      <Grid item xs={6} style={{ marginTop: "20px" }}>
+      <Grid item xs={8} style={{ marginTop: "20px" }} className={classes.gridItem}>
         <Typography style={{ padding: "20px" }}>Proposal</Typography>
         <Divider />
         <div style={{ padding: "20px" }}>
@@ -155,7 +171,6 @@ const DaoDetails: React.FC = () => {
           </ul>
         </div>
       </Grid>
-      <Grid item xs={1} style={{ marginTop: "20px" }}></Grid>
     </Grid>
   );
 };

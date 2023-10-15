@@ -290,259 +290,251 @@ export const Raffle = () => {
   }
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        width: "100%",
-        overflowY: "auto",
-        overflowX: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <Grid container className={classes.tableContainer}>
-        <h2 style={{ margin: 0 }}>Active Raffles</h2>
-        <Grid item className={classes.buttonItem}>
-          <Button variant="contained" color="primary" size="small" onClick={() => setShowRaffleModal(true)}>
-            CREATE A NEW RAFFLE
-          </Button>
-        </Grid>
-        <Grid item justifyContent={"center"} className={classes.tableItem} sx={{ flexDirection: "column !important" }}>
-          {activeLotteries.length !== 0 ? (
-            <div>
-              <TableContainer component={Paper} className={classes.table}>
-                <Table aria-label="proposal table" stickyHeader style={{ minWidth: "800px" }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell
-                        align="center"
-                        style={{
-                          paddingRight: "8px",
-                          borderBottom: "1px solid #2C6495",
-                        }}
-                      >
-                        <Typography noWrap className={classes.tableHeader} variant="subtitle1">
-                          Actions
-                        </Typography>
-                      </TableCell>
-
-                      <TableCell
-                        align="right"
-                        style={{
-                          paddingRight: "8px",
-                          borderBottom: "1px solid #2C6495",
-                        }}
-                      >
-                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
-                          Raffle No #
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                        style={{
-                          paddingRight: "8px",
-                          borderBottom: "1px solid #2C6495",
-                        }}
-                      >
-                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
-                          Ticket Count
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                        style={{
-                          paddingRight: "8px",
-                          borderBottom: "1px solid #2C6495",
-                        }}
-                      >
-                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
-                          Ticket Price
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                        style={{
-                          paddingRight: "8px",
-                          borderBottom: "1px solid #2C6495",
-                        }}
-                      >
-                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
-                          Prize
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                        style={{
-                          paddingRight: "8px",
-                          borderBottom: "1px solid #2C6495",
-                        }}
-                      >
-                        <Typography className={classes.tableHeader} noWrap variant="subtitle1">
-                          Authority
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {activeLotteries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((lottery: any, index: number) => (
-                      <TableRow
-                        key={index}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell>
-                          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
-                            {lottery.winnerId === null && (
-                              <Button
-                                variant="contained"
-                                color="secondary"
-                                size="small"
-                                onClick={() => {
-                                  buyTicket(lottery.id);
-                                }}
-                              >
-                                Buy Ticket
-                              </Button>
-                            )}
-
-                            {lottery.authority.toBase58() === publicKey?.toBase58() && lottery.winnerId === null && (
-                              <Button
-                                variant="contained"
-                                color="secondary"
-                                size="small"
-                                onClick={() => {
-                                  pickWinner(lottery.id);
-                                }}
-                              >
-                                Pick Winner
-                              </Button>
-                            )}
-
-                            {lottery.winnerId !== null && (
-                              <Button
-                                variant="contained"
-                                color="secondary"
-                                size="small"
-                                onClick={() => {
-                                  claim(lottery.id);
-                                }}
-                              >
-                                Check && Claim
-                              </Button>
-                            )}
-                          </div>
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Grid container className={classes.tableContainer}>
+          <h2 style={{ margin: 0 }}>Active Raffles</h2>
+          <Grid item className={classes.buttonItem}>
+            <Button variant="contained" color="primary" size="small" onClick={() => setShowRaffleModal(true)}>
+              CREATE A NEW RAFFLE
+            </Button>
+          </Grid>
+          <Grid item justifyContent={"center"} className={classes.tableItem} sx={{ flexDirection: "column !important" }}>
+            {activeLotteries.length !== 0 ? (
+              <div>
+                <TableContainer component={Paper} className={classes.table}>
+                  <Table aria-label="proposal table" stickyHeader style={{ minWidth: "800px" }}>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell
+                          align="center"
+                          style={{
+                            paddingRight: "8px",
+                            borderBottom: "1px solid #2C6495",
+                          }}
+                        >
+                          <Typography noWrap className={classes.tableHeader} variant="subtitle1">
+                            Actions
+                          </Typography>
                         </TableCell>
 
-                        <TableCell align="right">{lottery.id}</TableCell>
-                        <TableCell align="right">{lottery.lastTicketId}</TableCell>
-                        <TableCell align="right">{lottery.ticketPrice / LAMPORTS_PER_SOL} SOL</TableCell>
-                        <TableCell align="right">{(lottery.ticketPrice * lottery.lastTicketId) / LAMPORTS_PER_SOL} SOL</TableCell>
-                        <TableCell align="right">{lottery.authority.toBase58()}</TableCell>
+                        <TableCell
+                          align="right"
+                          style={{
+                            paddingRight: "8px",
+                            borderBottom: "1px solid #2C6495",
+                          }}
+                        >
+                          <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                            Raffle No #
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          style={{
+                            paddingRight: "8px",
+                            borderBottom: "1px solid #2C6495",
+                          }}
+                        >
+                          <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                            Ticket Count
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          style={{
+                            paddingRight: "8px",
+                            borderBottom: "1px solid #2C6495",
+                          }}
+                        >
+                          <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                            Ticket Price
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          style={{
+                            paddingRight: "8px",
+                            borderBottom: "1px solid #2C6495",
+                          }}
+                        >
+                          <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                            Prize
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          style={{
+                            paddingRight: "8px",
+                            borderBottom: "1px solid #2C6495",
+                          }}
+                        >
+                          <Typography className={classes.tableHeader} noWrap variant="subtitle1">
+                            Authority
+                          </Typography>
+                        </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={activeLotteries.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </div>
-          ) : (
-            <Grid
-              item
-              md={12}
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                display: "flex",
-              }}
-            >
-              <Card
+                    </TableHead>
+                    <TableBody>
+                      {activeLotteries.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((lottery: any, index: number) => (
+                        <TableRow
+                          key={index}
+                          sx={{
+                            "&:last-child td, &:last-child th": { border: 0 },
+                          }}
+                        >
+                          <TableCell>
+                            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+                              {lottery.winnerId === null && (
+                                <Button
+                                  variant="contained"
+                                  color="secondary"
+                                  size="small"
+                                  onClick={() => {
+                                    buyTicket(lottery.id);
+                                  }}
+                                >
+                                  Buy Ticket
+                                </Button>
+                              )}
+
+                              {lottery.authority.toBase58() === publicKey?.toBase58() && lottery.winnerId === null && (
+                                <Button
+                                  variant="contained"
+                                  color="secondary"
+                                  size="small"
+                                  onClick={() => {
+                                    pickWinner(lottery.id);
+                                  }}
+                                >
+                                  Pick Winner
+                                </Button>
+                              )}
+
+                              {lottery.winnerId !== null && (
+                                <Button
+                                  variant="contained"
+                                  color="secondary"
+                                  size="small"
+                                  onClick={() => {
+                                    claim(lottery.id);
+                                  }}
+                                >
+                                  Check && Claim
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+
+                          <TableCell align="right">{lottery.id}</TableCell>
+                          <TableCell align="right">{lottery.lastTicketId}</TableCell>
+                          <TableCell align="right">{lottery.ticketPrice / LAMPORTS_PER_SOL} SOL</TableCell>
+                          <TableCell align="right">{(lottery.ticketPrice * lottery.lastTicketId) / LAMPORTS_PER_SOL} SOL</TableCell>
+                          <TableCell align="right">{lottery.authority.toBase58()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={activeLotteries.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </div>
+            ) : (
+              <Grid
+                item
+                md={12}
                 style={{
-                  backgroundColor: "white",
-                  borderRadius: "1rem",
-                  padding: "5rem 2.5rem",
-                  margin: "2rem",
-                  boxShadow: "0 0 10px 0 rgba(0,0,0,0.1)",
                   justifyContent: "center",
                   alignItems: "center",
                   display: "flex",
                 }}
               >
-                <Typography
+                <Card
                   style={{
-                    color: "#1689c5",
-                    fontSize: "30px",
-                    fontWeight: "bold",
+                    backgroundColor: "white",
+                    borderRadius: "1rem",
+                    padding: "5rem 2.5rem",
+                    margin: "2rem",
+                    boxShadow: "0 0 10px 0 rgba(0,0,0,0.1)",
                     justifyContent: "center",
                     alignItems: "center",
                     display: "flex",
                   }}
                 >
-                  There are no stakes
-                </Typography>
-              </Card>
-            </Grid>
-          )}
+                  <Typography
+                    style={{
+                      color: "#1689c5",
+                      fontSize: "30px",
+                      fontWeight: "bold",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      display: "flex",
+                    }}
+                  >
+                    There are no stakes
+                  </Typography>
+                </Card>
+              </Grid>
+            )}
+          </Grid>
         </Grid>
-      </Grid>
-      <Modal
-        className={classes.modal}
-        open={showRaffleModal}
-        onClose={() => {
-          setShowRaffleModal(false);
-          setNewTicketPrice(0);
-        }}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box
-          sx={{
-            borderRadius: "8px",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            border: "2px solid #000",
-            boxShadow: 24,
-            p: 1,
+        <Modal
+          className={classes.modal}
+          open={showRaffleModal}
+          onClose={() => {
+            setShowRaffleModal(false);
+            setNewTicketPrice(0);
           }}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
         >
-          <div className={classes.modalContent}>
-            <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
-              Create A New Raffle
-            </Typography>
-            <div>
-              <CustomInput
-                placeHolder="Ticket Price"
-                label="Ticket Price"
-                id="amnewTicketPriceunt"
-                name="newTicketPrice"
-                type="text"
-                value={newTicketPrice}
-                onChange={(e: any) => setNewTicketPrice(e.target.value)}
-                disable={false}
-              ></CustomInput>
-              <Divider sx={{ margin: 1 }} />
-              <div style={{ textAlign: "center" }}>
-                <Button disabled={newTicketPrice <= 0} variant="contained" color="primary" size="small" onClick={() => create()}>
-                  Create Raffle
-                </Button>
+          <Box
+            sx={{
+              borderRadius: "8px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              p: 1,
+            }}
+          >
+            <div className={classes.modalContent}>
+              <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
+                Create A New Raffle
+              </Typography>
+              <div>
+                <CustomInput
+                  placeHolder="Ticket Price"
+                  label="Ticket Price"
+                  id="amnewTicketPriceunt"
+                  name="newTicketPrice"
+                  type="text"
+                  value={newTicketPrice}
+                  onChange={(e: any) => setNewTicketPrice(e.target.value)}
+                  disable={false}
+                ></CustomInput>
+                <Divider sx={{ margin: 1 }} />
+                <div style={{ textAlign: "center" }}>
+                  <Button disabled={newTicketPrice <= 0} variant="contained" color="primary" size="small" onClick={() => create()}>
+                    Create Raffle
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </Box>
-      </Modal>
-    </div>
+          </Box>
+        </Modal>
+      </Grid>
+    </Grid>
   );
 };

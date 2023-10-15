@@ -1,32 +1,78 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Card, CardContent, Slider, Step, StepLabel, Stepper, TextField, Typography } from "@mui/material";
-import remove from "../../assets/remove.png";
-import { CustomButton } from "../../components/CustomButton";
+import { Grid } from "@mui/material";
 import { DAO } from "../../lib/dao";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
+import DaoCreateCard from "../../components/DaoCreateCard";
+import MultisignDaoDetails from "../../components/MultisignDaoDetails";
+import { CustomButton } from "../../components/CustomButton";
+import Threshold from "../../components/Threshold";
+import PreviewDao from "../../components/PreviewDao";
+import { makeStyles } from "@mui/styles";
+import CommunityDaoDetails from "../../components/CommunityDaoDetails";
+import CommunityDaoToken from "../../components/CommunityDaoToken";
+import CommunityDaoCouncil from "../../components/CommunityDaoCouncil";
+import DaoStepper from "../../components/DaoStepper";
+
+const useStyles = makeStyles(() => ({
+  gridContainer: {
+    display: "flex !important",
+    justifyContent: "center !important",
+    alignItems: "flex-start !important",
+    alignContent: "flex-start !important",
+    padding: "16px !important",
+    height: "100% !important",
+  },
+  grid: {
+    display: "flex !important",
+    justifyContent: "center !important",
+    alignItems: "center !important",
+    padding: "16px !important",
+  },
+  daoInfosCommunity: {
+    display: "flex !important",
+    flexDirection: "column",
+    justifyContent: "center !important",
+    alignItems: "center !important",
+    padding: "16px !important",
+  },
+}));
 
 export const CreateDao = () => {
+  const classes = useStyles();
+
   const [daoInstance, setDaoInstance] = useState<DAO>();
   const [activeStep, setActiveStep] = useState<number>(0);
-  const [skipped, setSkipped] = useState(new Set<number>());
   const [multisign, setMultisign] = useState<boolean>(false);
   const [community, setCommunity] = useState<boolean>(false);
-  const [DAONameInputText, setDAONameInputText] = useState<string>("");
-  const [threshold, setThreshold] = useState<number>(0);
-  const steps = ["Dao Category Selection", "DAO Info's", "Threshold", "Preview & confirm"];
+  const [daoName, setDaoName] = useState<string>("");
+  const [communityDaoName, setCommunityDaoName] = useState<string>("");
+  const [daoTokensForCommunity] = useState(["Oliver Hansen"]);
+  const [choosenDaoTokenName, setChoosenDaoTokenName] = useState<string[]>([]);
+  const [createdDaoToken, setCreatedDaoToken] = useState<any[]>([]);
+  const [daoCouncilToken, setDaoCouncilToken] = useState<boolean>(false);
+  const [daoCommunityTokenChecked, setDaoCommunityTokenChecked] = useState<boolean>(false);
+  const [threshold, setThreshold] = useState<number>(60);
+  const [minNumberToEditDao, setMinNumberToEditDao] = useState<number>(1);
+  const [communityThreshold, setCommunityThreshold] = useState<number>(60);
+  const [afterCommunityThreshold, setAfterCommunityThreshold] = useState<number>(60);
+  const [steps] = useState<string[]>(["Dao Category Selection", "DAO Info's", "Threshold", "Preview & confirm"]);
   const wallet = useAnchorWallet();
   const { connection } = useConnection();
   const { publicKey } = useWallet();
   const [publicKeys, setPublicKeys] = useState<string[]>([publicKey?.toBase58() || ""]);
+  const [councilMembers, setCouncilMembers] = useState<string[]>([publicKey?.toBase58() || ""]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const isStepOptional = (_step: number) => {
-    return false;
+  const handleUseToken = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDaoCommunityTokenChecked(event.target.checked);
+    if (!daoCommunityTokenChecked) {
+      setChoosenDaoTokenName([]);
+    }
   };
 
-  const isStepSkipped = (step: number) => {
-    return skipped.has(step);
+  const handleChoosenDaoToken = (event: any) => {
+    console.log("event.target.value", event.target.value);
+    setChoosenDaoTokenName(event.target.value);
   };
 
   const handleNext = () => {
@@ -34,11 +80,30 @@ export const CreateDao = () => {
       console.log("Create DAO function should be called here.");
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-      setSkipped((prevSkipped) => {
-        const newSkipped = new Set(prevSkipped.values());
-        newSkipped.delete(activeStep);
-        return newSkipped;
-      });
+    }
+
+    if (activeStep === 3) {
+      createDao();
+    }
+  };
+
+  const handleNextMultisign = () => {
+    setMultisign(true);
+    setCommunity(false);
+    if (activeStep === steps.length - 1) {
+      console.log("Create DAO function should be called here.");
+    } else {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    }
+  };
+
+  const handleNextCommunity = () => {
+    setMultisign(false);
+    setCommunity(true);
+    if (activeStep === steps.length - 1) {
+      console.log("Create DAO function should be called here.");
+    } else {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
 
@@ -46,45 +111,66 @@ export const CreateDao = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSkip = () => {
-    if (!isStepOptional(activeStep)) {
-      throw new Error("You can't skip a step that isn't optional.");
-    }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped((prevSkipped) => {
-      const newSkipped = new Set(prevSkipped.values());
-      newSkipped.add(activeStep);
-      return newSkipped;
-    });
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-    setSkipped(new Set<number>());
-  };
-
   const handleDAOName = (e: any) => {
-    setDAONameInputText(e.target.value);
+    setDaoName(e.target.value);
+  };
+
+  const handleCommunityDaoName = (e: any) => {
+    setCommunityDaoName(e.target.value);
+  };
+
+  const createNewDaoToken = (e: any) => {
+    if (e.code === "Enter") setCreatedDaoToken([...createdDaoToken, e.target.value]);
   };
 
   const handleDAOMembers = (e: any) => {
-    if (e.code === "Enter") {
+    if (e.target.value && e.code === "Enter") {
       setPublicKeys([...publicKeys, e.target.value]);
     }
   };
 
   const onBlurHandleDAOMembers = (e: any) => {
-    if (e.code === "Enter") {
+    if (e.target.value) {
       setPublicKeys([...publicKeys, e.target.value]);
     }
   };
 
-  const removeHash = (indexToRemove: number) => {
+  const handleCouncilMembers = (e: any) => {
+    if (e.target.value && e.code === "Enter") {
+      setCouncilMembers([...councilMembers, e.target.value]);
+    }
+  };
+
+  const onBlurHandleCouncilMembers = (e: any) => {
+    if (e.target.value && e.code === "Enter") {
+      setCouncilMembers([...councilMembers, e.target.value]);
+    }
+  };
+
+  const removeHash = (e: any) => {
+    console.log("e", e);
     setPublicKeys((prevHashArr) => {
       const updatedHashArr = [...prevHashArr];
-      updatedHashArr.splice(indexToRemove, 1);
+      updatedHashArr.splice(e, 1);
       return updatedHashArr;
+    });
+  };
+
+  const removeCouncilMembers = (e: any) => {
+    console.log("e", e);
+    setCouncilMembers((prevCouncilMembers) => {
+      const updatedCouncilMembers = [...prevCouncilMembers];
+      updatedCouncilMembers.splice(e, 1);
+      return updatedCouncilMembers;
+    });
+  };
+
+  const removeCreatedDaoTokens = (e: any) => {
+    console.log("e", e);
+    setCreatedDaoToken((prevDaoTokens) => {
+      const updatedDaoTokens = [...prevDaoTokens];
+      updatedDaoTokens.splice(e, 1);
+      return updatedDaoTokens;
     });
   };
 
@@ -92,12 +178,30 @@ export const CreateDao = () => {
     setThreshold(e.target.value);
   };
 
+  const handleAfterCommunityThresholdRange = (e: any) => {
+    setAfterCommunityThreshold(e.target.value);
+  };
+
+  const handleCommunityThresholdRange = (e: any) => {
+    setCommunityThreshold(e.target.value);
+  };
+
+  const handleDaoCouncilToken = () => {
+    setDaoCouncilToken(!daoCouncilToken);
+  };
+
+  const handleMinNumberToEditDao = (e: any) => {
+    setMinNumberToEditDao(e.target.value);
+  };
+
   useEffect(() => {
+    console.log("communityDaoName", communityDaoName);
+
     if (wallet) {
       const dao = new DAO(connection, wallet);
       setDaoInstance(dao);
     }
-  }, [connection, wallet]);
+  }, [communityDaoName, connection, wallet]);
 
   const createDao = async () => {
     if (daoInstance) {
@@ -105,7 +209,7 @@ export const CreateDao = () => {
         const publicKeyList = publicKeys.map((pk) => new PublicKey(pk));
         console.log("publicKeyList", publicKeyList);
 
-        const result = await daoInstance.createMultisigDao(publicKeyList, DAONameInputText, threshold);
+        const result = await daoInstance.createMultisigDao(publicKeyList, daoName, threshold);
         console.log("result", result);
 
         console.log(result);
@@ -116,237 +220,131 @@ export const CreateDao = () => {
   };
 
   return (
-    <div>
-      <Box sx={{ width: "100%" }}>
-        <Stepper activeStep={activeStep}>
-          {steps.map((label, index) => {
-            const stepProps: { completed?: boolean } = {};
-            if (isStepSkipped(index)) {
-              stepProps.completed = false;
-            }
-            return (
-              <Step key={label} {...stepProps}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            );
-          })}
-        </Stepper>
-        {activeStep === steps.length ? (
-          <>
-            <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you're finished</Typography>
-            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-              <Box sx={{ flex: "1 1 auto" }} />
-              <Button onClick={handleReset}>Reset</Button>
-            </Box>
-          </>
-        ) : (
-          <>
-            {activeStep === 0 && (
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "50px", height: "300px", width: "100%" }}>
-                <div>
-                  <Card
-                    onClick={() => {
-                      setMultisign(true);
-                      setCommunity(false);
-                      handleNext();
-                    }}
-                    sx={{
-                      borderRadius: "16px",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      maxWidth: 420,
-                      height: "200px",
-                      cursor: "pointer",
-                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                      transition: "transform 0.2s",
-                      "&:hover": { border: "1px solid #000", transform: "scale(1.05)" },
-                    }}
-                  >
-                    <CardContent>
-                      <Typography sx={{ fontSize: "20px", marginBottom: "10px", fontWeight: "600" }} variant="h6">
-                        Multi-Signature Wallet
-                      </Typography>
-                      <Typography sx={{ fontSize: "18px" }}>A "multisig" is a shared wallet, typically with two or more members authorizing transactions.</Typography>
-                    </CardContent>
-                  </Card>
-                </div>
-                <div style={{ marginLeft: "50px" }}>
-                  <Card
-                    onClick={() => {
-                      setMultisign(false);
-                      setCommunity(true);
-                      handleNext();
-                    }}
-                    sx={{
-                      borderRadius: "16px",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      maxWidth: 420,
-                      height: "200px",
-                      cursor: "pointer",
-                      boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-                      transition: "transform 0.2s",
-                      "&:hover": { border: "1px solid #000", transform: "scale(1.05)" },
-                    }}
-                  >
-                    <CardContent>
-                      <Typography sx={{ fontSize: "20px", marginBottom: "10px", fontWeight: "600" }} variant="h6">
-                        Community Token DAO
-                      </Typography>
-                      <Typography sx={{ fontSize: "18px" }}>DAO members use a community token to denote their membership and allow them to vote on proposals.</Typography>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            )}
-            {activeStep === 1 && multisign === true && (
-              <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", padding: "50px", minHeight: "300px", width: "100%" }}>
-                <div style={{ width: "100%" }}>
-                  <Typography sx={{ fontSize: "40px", fontWeight: "600" }}>Let's get started</Typography>
-                  <Typography sx={{ paddingTop: "20px", fontSize: "25px", fontWeight: "600" }}>What is the name of your wallet?</Typography>
-                  <Typography>It's best to choose a descriptive, memorable name for you and your members.</Typography>
-                </div>
-                <div style={{ width: "100%", margin: "20px 0 20px 0" }}>
-                  <TextField sx={{ width: "100%" }} id="dao-name" label="e.g. DAO Name" variant="standard" onChange={handleDAOName} />
-                </div>
-                {DAONameInputText && (
-                  <div style={{ width: "100%" }}>
-                    <div
-                      style={{ padding: "20px 20px 20px 0", display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}
-                    >
-                      <Typography sx={{ fontSize: "40px", fontWeight: "600" }}>
-                        Next, invite members <br /> with their Solana Wallet Address.
-                      </Typography>
-                      <Typography sx={{ paddingTop: "20px", fontSize: "25px", fontWeight: "600" }}>Invite members {publicKeys.length}</Typography>
-                      <Typography>Add Solana wallet addressses, separated by a comma or line-break.</Typography>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start", width: "100%" }}>
-                      <div>
-                        {publicKeys.map((hash, index) => (
-                          <div key={index} style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", marginBottom: "10px" }}>
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                background: "linear-gradient(90deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
-                                padding: "15px",
-                                textAlign: "center",
-                                borderRadius: "50%",
-                                width: "20px",
-                                height: "20px",
-                                marginRight: "10px",
-                              }}
-                            >
-                              <Typography>{index === 0 ? "Me:" : `${index + 1}:`}</Typography>
-                            </div>
-                            <div key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                              {hash} <img onClick={() => removeHash(index)} style={{ width: "20px", marginLeft: "10px", cursor: "pointer" }} src={remove} alt="remove icon" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div style={{ width: "100%", margin: "20px 0 20px 0" }}>
-                      <TextField sx={{ width: "100%" }} id="dao-members" label="e.g. hash" variant="standard" onKeyDown={handleDAOMembers} onBlur={onBlurHandleDAOMembers} />
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+    <>
+      <Grid container spacing={2} className={classes.gridContainer}>
+        <Grid item xs={8} className={classes.grid}>
+          <DaoStepper activeStep={activeStep} steps={steps} />
+        </Grid>
 
-            {activeStep === 1 && community === true && <div>Community adımın içeriği burada olacak.</div>}
-
-            {activeStep === 2 && multisign === true && (
-              <div style={{ padding: "50px 0", minHeight: "300px", width: "100%" }}>
-                <div style={{ width: "100%" }}>
-                  <Typography sx={{ fontSize: "40px", fontWeight: "600" }}>
-                    Next, set your wallet's <br /> approval threshold.
-                  </Typography>
-                  <Typography sx={{ paddingTop: "20px" }}>Adjust the percentage to determine votes needed to pass a proposal</Typography>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginTop: "20px",
-                    padding: "30px",
-                    background: "linear-gradient(45deg, rgba(42,229,157,1) 0%, rgba(168,103,253,1) 100%)",
-                    borderRadius: "16px",
-                    color: "black",
-                  }}
-                >
-                  <div style={{ border: "1px solid #000", padding: "10px", margin: "10px", borderRadius: "8px", minWidth: "50px", textAlign: "center" }}>{threshold}%</div>
-                  0%
-                  <Slider
-                    style={{ margin: "20px", height: "15px", color: "#47DDA5", width: "100%" }}
-                    defaultValue={50}
-                    aria-label="Default"
-                    valueLabelDisplay="off"
-                    onChange={(e) => handleThresholdRange(e)}
-                  />
-                  100%
-                </div>
-                <div style={{ marginTop: "20px", backgroundColor: "#3d3d3d", width: "100%", borderRadius: "16px" }}>
-                  <Typography sx={{ padding: "20px" }}>
-                    Member Percentage <br />
-                    With <span style={{ color: "#43DAA5", fontWeight: "600" }}>{publicKeys.length}</span> members added to your wallet, <br />{" "}
-                    <span style={{ color: "#43DAA5", fontWeight: "600" }}>{Math.ceil(threshold / (100 / publicKeys.length))}</span> members would need to approve a proposal for it
-                    to pass.
-                  </Typography>
-                </div>
-              </div>
-            )}
-            {activeStep === 3 && multisign === true && (
-              <div style={{ padding: "50px 0", minHeight: "300px", width: "100%" }}>
-                <div style={{ width: "100%" }}>
-                  <Typography sx={{ fontSize: "40px", fontWeight: "600" }}>
-                    Nearly done, let's check <br /> that things look right.
-                  </Typography>
-                </div>
-                <div style={{ marginTop: "20px", backgroundColor: "#3d3d3d", width: "100%", borderRadius: "16px" }}>
-                  <Typography sx={{ padding: "20px" }}>
-                    DAO Name <br />
-                    {DAONameInputText}
-                  </Typography>
-                </div>
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px", width: "100%", borderRadius: "16px" }}>
-                  <div style={{ marginTop: "20px", backgroundColor: "#3d3d3d", width: "50%", borderRadius: "16px" }}>
-                    <Typography sx={{ padding: "20px" }}>
-                      Invited members <br />
-                      {publicKeys.length}
-                    </Typography>
-                  </div>
-                  <div style={{ margin: "20px 0 0 10px", backgroundColor: "#3d3d3d", width: "50%", borderRadius: "16px" }}>
-                    <Typography sx={{ padding: "20px" }}>
-                      Approval threshold <br />
-                      {threshold}
-                    </Typography>
-                  </div>
-                </div>
-                <div style={{ paddingTop: "40px", width: "100%", borderRadius: "16px", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-                  <CustomButton label={"Create DAO"} disable={false} onClick={createDao} />
-                </div>
-              </div>
-            )}
-            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-              <Button color="inherit" disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
-                Back
-              </Button>
-              <Box sx={{ flex: "1 1 auto" }} />
-              {isStepOptional(activeStep) && (
-                <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-                  Skip
-                </Button>
-              )}
-              <Button onClick={handleNext}>{activeStep === steps.length - 1 ? "Finish" : "Next"}</Button>
-            </Box>
-          </>
+        {activeStep === 0 && (
+          <Grid item xs={8} className={classes.grid} style={{ minHeight: "350px !important" }}>
+            <DaoCreateCard
+              title={"Multi-Signature Wallet"}
+              description={"A 'multisig' is a shared wallet, typically with two or more members authorizing transactions."}
+              onClick={handleNextMultisign}
+            />
+            <DaoCreateCard
+              title={"Community Token DAO"}
+              description={"DAO members use a community token to denote their membership and allow them to vote on proposals."}
+              onClick={handleNextCommunity}
+            />
+          </Grid>
         )}
-      </Box>
-    </div>
+
+        {activeStep === 1 && multisign === true && (
+          <Grid item xs={8} className={classes.grid}>
+            <MultisignDaoDetails
+              onChange={handleDAOName}
+              daoName={daoName}
+              publicKeys={publicKeys}
+              removeHash={removeHash}
+              handleDAOMembers={handleDAOMembers}
+              onBlur={onBlurHandleDAOMembers}
+            />
+          </Grid>
+        )}
+
+        {activeStep === 1 && community === true && (
+          <Grid item xs={8} className={classes.daoInfosCommunity}>
+            <CommunityDaoDetails onChange={handleCommunityDaoName} />
+
+            <CommunityDaoToken
+              daoCommunityTokenChecked={daoCommunityTokenChecked}
+              handleUseToken={handleUseToken}
+              createNewDaoToken={createNewDaoToken}
+              daoTokensForCommunity={daoTokensForCommunity}
+              choosenDaoTokenName={choosenDaoTokenName}
+              handleChoosenDaoToken={handleChoosenDaoToken}
+              createdDaoToken={createdDaoToken}
+              removeCreatedDaoTokens={removeCreatedDaoTokens}
+              handleCommunityThresholdRange={handleCommunityThresholdRange}
+              communityThreshold={communityThreshold}
+              handleMinNumberToEditDao={handleMinNumberToEditDao}
+            />
+
+            <CommunityDaoCouncil
+              daoCouncilToken={daoCouncilToken}
+              handleDaoCouncilToken={handleDaoCouncilToken}
+              councilMembers={councilMembers}
+              removeCouncilMembers={removeCouncilMembers}
+              handleCouncilMembers={handleCouncilMembers}
+              onBlurHandleCouncilMembers={onBlurHandleCouncilMembers}
+            />
+          </Grid>
+        )}
+
+        {activeStep === 2 && multisign === true && (
+          <Grid item xs={8} className={classes.grid}>
+            <Threshold
+              title={"Next, set your wallet's approval threshold."}
+              description={"Adjust the percentage to determine votes needed to pass a proposal"}
+              typeOfDao={"multisign"}
+              threshold={threshold}
+              onChange={handleThresholdRange}
+              publicKeys={publicKeys}
+            />
+          </Grid>
+        )}
+
+        {activeStep === 2 && community === true && (
+          <Grid item xs={8} className={classes.grid}>
+            <Threshold
+              title={"Next, set your DAO's council approval threshold."}
+              description={"Adjust the percentage to determine votes needed to pass a proposal"}
+              typeOfDao={"community"}
+              threshold={threshold}
+              onChange={handleAfterCommunityThresholdRange}
+              publicKeys={publicKeys}
+            />
+          </Grid>
+        )}
+
+        {activeStep === 3 && multisign === true && (
+          <Grid item xs={8} className={classes.grid}>
+            <PreviewDao typeOfDao={"multisign"} daoName={daoName} publicKeys={publicKeys} threshold={threshold} minNumberToEditDao={0} communityThreshold={0} />
+          </Grid>
+        )}
+
+        {activeStep === 3 && community === true && (
+          <Grid item xs={8} className={classes.grid}>
+            <PreviewDao
+              typeOfDao={"community"}
+              daoName={daoName}
+              publicKeys={councilMembers}
+              threshold={afterCommunityThreshold}
+              communityThreshold={communityThreshold}
+              minNumberToEditDao={minNumberToEditDao}
+            />
+          </Grid>
+        )}
+
+        {activeStep !== 0 && (
+          <Grid item xs={8} className={classes.grid}>
+            <Grid container spacing={2} className={classes.grid}>
+              <Grid item xs={6} style={{ display: "flex", justifyContent: "flex-start" }}>
+                <CustomButton label={"Back"} disable={activeStep === 0 ? true : false} onClick={handleBack} />
+              </Grid>
+              <Grid item xs={6} style={{ display: "flex", justifyContent: "flex-end" }}>
+                <CustomButton
+                  label={activeStep === steps.length - 1 && community ? "Create Community Token Dao" : activeStep === steps.length - 1 && multisign ? "CreateDao" : "Next"}
+                  disable={false}
+                  onClick={handleNext}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+        )}
+      </Grid>
+    </>
   );
 };
