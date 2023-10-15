@@ -275,11 +275,11 @@ export const createCommunityDao = async (
   transferCouncilMintAuthority: boolean,
   existingCommunityMintPk?: PublicKey,
   existingCouncilMintPk?: PublicKey,
+  communityTokenConfig?: GoverningTokenConfigAccountArgs,
+  councilTokenConfig?: GoverningTokenConfigAccountArgs,
   communityMintSupplyFactor?: number,
   communityAbsoluteMaxVoteWeight?: number,
   tokensToGovernThreshold?: number,
-  communityTokenConfig?: GoverningTokenConfigAccountArgs,
-  councilTokenConfig?: GoverningTokenConfigAccountArgs,
   maxVotingTimeInDays?: number,
   skipRealmAuthority?: boolean
 ) => {

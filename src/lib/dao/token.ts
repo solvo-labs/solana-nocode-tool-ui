@@ -1,10 +1,9 @@
 // ref https://github.com/solana-labs/governance-ui
 import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
   MintLayout,
   TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
-  createInitializeMint2Instruction,
+  createInitializeMintInstruction,
   createMintToInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
@@ -32,10 +31,10 @@ export const withCreateMint = async (
       programId: TOKEN_PROGRAM_ID,
     })
   );
+
+  instructions.push(createInitializeMintInstruction(mintAccount.publicKey, decimals, ownerPk, freezeAuthorityPk));
+
   signers.push(mintAccount);
-
-  instructions.push(createInitializeMint2Instruction(mintAccount.publicKey, decimals, ownerPk, freezeAuthorityPk, TOKEN_PROGRAM_ID));
-
   return mintAccount.publicKey;
 };
 
@@ -77,12 +76,12 @@ export function parseMintAccountData(data: Buffer) {
 }
 
 export const withCreateAssociatedTokenAccount = async (instructions: TransactionInstruction[], mintPk: PublicKey, ownerPk: PublicKey, payerPk: PublicKey) => {
-  const ataPk = await getAssociatedTokenAddress(mintPk, ownerPk, true, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
-  instructions.push(createAssociatedTokenAccountInstruction(payerPk, ataPk, ownerPk, mintPk, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID));
+  const ataPk = await getAssociatedTokenAddress(mintPk, ownerPk, true);
+  instructions.push(createAssociatedTokenAccountInstruction(payerPk, ataPk, ownerPk, mintPk));
 
   return ataPk;
 };
 
 export const withMintTo = async (instructions: TransactionInstruction[], mintPk: PublicKey, destinationPk: PublicKey, mintAuthorityPk: PublicKey, amount: number) => {
-  instructions.push(createMintToInstruction(mintPk, destinationPk, mintAuthorityPk, amount, [], TOKEN_PROGRAM_ID));
+  instructions.push(createMintToInstruction(mintPk, destinationPk, mintAuthorityPk, amount, []));
 };

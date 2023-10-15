@@ -98,7 +98,7 @@ const Main: React.FC = () => {
       }
     };
     allStakesFunction();
-    const interval = setInterval(() => allStakesFunction(), 10000);
+    const interval = setInterval(() => allStakesFunction(), 20000);
     return () => {
       clearInterval(interval);
     };
@@ -116,7 +116,7 @@ const Main: React.FC = () => {
     vestingListFunction();
     const interval = setInterval(() => {
       vestingListFunction();
-    }, 10000);
+    }, 20000);
     return () => {
       clearInterval(interval);
     };
@@ -134,7 +134,7 @@ const Main: React.FC = () => {
     fetchTokenFunction();
     const interval = setInterval(() => {
       fetchTokenFunction();
-    }, 5000);
+    }, 20000);
     return () => {
       clearInterval(interval);
     };
@@ -149,7 +149,7 @@ const Main: React.FC = () => {
     init();
     const interval = setInterval(() => {
       init();
-    }, 2000);
+    }, 5000);
     return () => {
       clearInterval(interval);
     };
