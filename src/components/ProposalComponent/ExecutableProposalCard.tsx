@@ -2,8 +2,9 @@ import { Card, CardContent, Typography, CardActions, Theme, Stack, Chip, Grid, B
 import { makeStyles } from "@mui/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CustomizedProgressBars from "../CustomProgressBar";
+import React from "react";
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles((_theme: Theme) => ({
   card: {
     border: "1px solid gray",
     borderRadius: "16px !important",
@@ -15,7 +16,11 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const ExecutableProposalCard = () => {
+type Props = {
+  title: string;
+}
+
+const ExecutableProposalCard: React.FC<Props> = ({title}) => {
   const classes = useStyles();
   return (
     <CardActions
@@ -27,7 +32,7 @@ const ExecutableProposalCard = () => {
       <Card className={classes.card}>
         <CardContent sx={{ padding: "0.75rem", paddingBottom: "0.75rem !important" }}>
           <Stack direction={"row"} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
-            <Typography>BASLIKKKKKKKK</Typography>
+            <Typography>{title}</Typography>
             <Stack direction={"row"} spacing={2} justifyContent={"center"} alignItems={"center"}>
               <ThumbUpIcon sx={{ fontSize: "24px" }} color="success"></ThumbUpIcon>
               <Chip label="success" sx={{ height: "24px", fontSize: "12px" }} color="success" />
