@@ -154,35 +154,37 @@ const CommunityDaoCouncil: React.FC<CommunityDaoCouncilProps> = ({
         </div>
       </Grid>
 
-      <Grid item xs={8} className={classes.gridItem}>
-        <Typography className={classes.title}>Next, invite members with their Solana Wallet Address.</Typography>
-      </Grid>
-
       {daoCouncilToken && (
-        <Grid item xs={8} className={`${classes.gridItem}, ${classes.card}`}>
-          <Typography className={classes.description}>Invite members {councilMembers.length}</Typography>
-          <Typography>Add Solana wallet addressses, separated by a comma or line-break.</Typography>
+        <>
+          <Grid item xs={8} className={classes.gridItem}>
+            <Typography className={classes.title}>Next, invite members with their Solana Wallet Address.</Typography>
+          </Grid>
 
-          {councilMembers.map((councilMember, index) => (
-            <div key={index} className={classes.memberSide}>
-              <div className={classes.members}>
-                <Typography>{index === 0 ? "Me:" : `${index + 1}:`}</Typography>
-              </div>
-              <div className={classes.memberHashs}>
-                {councilMember} {index !== 0 ? <img onClick={() => removeCouncilMembers(index)} className={classes.removeIcon} src={remove} alt="remove icon" /> : <></>}
-              </div>
-            </div>
-          ))}
+          <Grid item xs={8} className={`${classes.gridItem}, ${classes.card}`}>
+            <Typography className={classes.description}>Invite members {councilMembers.length}</Typography>
+            <Typography>Add Solana wallet addressses, separated by a comma or line-break.</Typography>
 
-          <TextField
-            className={classes.input}
-            id="dao-members"
-            label="e.g. Council Members"
-            variant="standard"
-            onKeyDown={handleCouncilMembers}
-            onBlur={onBlurHandleCouncilMembers}
-          />
-        </Grid>
+            {councilMembers.map((councilMember, index) => (
+              <div key={index} className={classes.memberSide}>
+                <div className={classes.members}>
+                  <Typography>{index === 0 ? "Me:" : `${index + 1}:`}</Typography>
+                </div>
+                <div className={classes.memberHashs}>
+                  {councilMember} {index !== 0 ? <img onClick={() => removeCouncilMembers(index)} className={classes.removeIcon} src={remove} alt="remove icon" /> : <></>}
+                </div>
+              </div>
+            ))}
+
+            <TextField
+              className={classes.input}
+              id="dao-members"
+              label="e.g. Council Members"
+              variant="standard"
+              onKeyDown={handleCouncilMembers}
+              onBlur={onBlurHandleCouncilMembers}
+            />
+          </Grid>
+        </>
       )}
     </Grid>
   );
