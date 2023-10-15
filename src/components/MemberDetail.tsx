@@ -8,7 +8,7 @@ type Props = {
 const MemberDetail:React.FC<Props> = ({selectedMember}) => {
     return (
         <Grid>
-            <Typography>{selectedMember.pubkey.toBase58().slice(0,10)}</Typography>
+            <Typography>{selectedMember.account.governingTokenOwner.toBase58().slice(0, 5) + "..." + selectedMember.account.governingTokenOwner.toBase58().slice(-5)}</Typography>
         </Grid>
     );
 };
