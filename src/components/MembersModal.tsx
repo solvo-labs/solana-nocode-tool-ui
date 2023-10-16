@@ -1,12 +1,13 @@
 import { Box, Button, Grid, Modal, Stack, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import MemberCard from "./MemberCard.tsx";
 import MemberDetail from "./MemberDetail.tsx";
+import { ProgramAccount, TokenOwnerRecord } from "@solana/spl-governance";
 
 const style = {
-  position: "absolute" as "absolute",
+  position: "absolute" as const,
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
@@ -24,12 +25,12 @@ type Props = {
   handleClose: () => void;
   open: boolean;
   daoName: string;
-  members: any[] | undefined;
-  selectedMember: any;
-  handleSelectMember: () => void;
+  members: ProgramAccount<TokenOwnerRecord>[];
 };
 
-const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members, handleSelectMember, selectedMember }) => {
+const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members }) => {
+  const [selectedMember, setSelectedMember] = useState<ProgramAccount<TokenOwnerRecord>>(members[0]);
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Box sx={style}>
@@ -54,9 +55,10 @@ const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members, ha
                   <MemberCard
                     key={index}
                     member={member}
-                    // index={index}
-                    handleSelectMember={handleSelectMember}
-                  ></MemberCard>
+                    handleSelectMember={() => {
+                      setSelectedMember(member);
+                    }}
+                  />
                 ))}
             </Stack>
           </Grid>
