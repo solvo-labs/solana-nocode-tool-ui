@@ -7,15 +7,19 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "../token"
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { BN } from "@project-serum/anchor";
 import {
+  Governance,
   GovernanceConfig,
   GoverningTokenConfigAccountArgs,
+  InstructionData,
   MintMaxVoteWeightSource,
   MintMaxVoteWeightSourceType,
+  ProgramAccount,
   SetRealmAuthorityAction,
   VoteThreshold,
   VoteThresholdType,
   VoteTipping,
   getGovernanceProgramVersion,
+  getInstructionDataFromBase64,
   getTokenOwnerRecordAddress,
   withCreateGovernance,
   withCreateMintGovernance,
@@ -527,3 +531,56 @@ function createGovernanceThresholds(
     communityVetoVoteThreshold,
   };
 }
+
+export interface UiInstruction {
+  serializedInstruction: string;
+  additionalSerializedInstructions?: string[];
+  isValid: boolean;
+  governance: ProgramAccount<Governance> | undefined;
+  customHoldUpTime?: number;
+  prerequisiteInstructions?: TransactionInstruction[];
+  prerequisiteInstructionsSigners?: (Keypair | null)[];
+  chunkBy?: number;
+  signers?: Keypair[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export interface InstructionDataWithHoldUpTime {
+  data: InstructionData | null;
+  holdUpTime: number | undefined;
+  prerequisiteInstructions: TransactionInstruction[];
+  chunkBy?: number;
+  signers?: Keypair[];
+  prerequisiteInstructionsSigners?: (Keypair | null)[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export class InstructionDataWithHoldUpTime {
+  constructor({ instruction, governance }: { instruction: UiInstruction; governance?: ProgramAccount<Governance> }) {
+    this.data = instruction.serializedInstruction ? getInstructionDataFromBase64(instruction.serializedInstruction) : null;
+    this.holdUpTime = typeof instruction.customHoldUpTime !== "undefined" ? instruction.customHoldUpTime : governance?.account?.config.minInstructionHoldUpTime;
+    this.prerequisiteInstructions = instruction.prerequisiteInstructions || [];
+    this.chunkBy = instruction.chunkBy || 2;
+    this.prerequisiteInstructionsSigners = instruction.prerequisiteInstructionsSigners || [];
+  }
+}
+
+export function chunks<T>(array: T[], size: number): T[][] {
+  const result: Array<T[]> = [];
+  let i, j;
+  for (i = 0, j = array.length; i < j; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}
+
+export const deduplicateObjsFilter = (value: any, index: any, self: any[]) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(value));
+
+export const txBatchesToInstructionSetWithSigners = (txBatch: TransactionInstruction[], signerBatches: Keypair[][], batchIdx?: number) => {
+  return txBatch.map((tx, txIdx) => {
+    return {
+      transactionInstruction: tx,
+      signers: typeof batchIdx !== "undefined" && signerBatches.length && signerBatches[batchIdx] && signerBatches[batchIdx][txIdx] ? [signerBatches[batchIdx][txIdx]] : [],
+    };
+  });
+};
