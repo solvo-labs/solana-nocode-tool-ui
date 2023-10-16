@@ -41,7 +41,7 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 export class DAO {
   private connection: Connection;
   private wallet: Wallet;
-  private daoPublicKey: PublicKey | undefined;
+  daoPublicKey: PublicKey | undefined;
 
   constructor(connection: Connection, wallet: Wallet, daoPublickey?: PublicKey) {
     this.connection = connection;
@@ -337,7 +337,15 @@ export class DAO {
     throw "Something went wrong";
   };
 
-  vote = async (proposal: ProgramAccount<Proposal>, tokenOwnerRecord: PublicKey, voteKind: VoteKind, voteWeights?: number[]) => {
+  getTokenOwnerRecord = async (): Promise<ProgramAccount<TokenOwnerRecord> | undefined> => {
+    const myOwnDaos = await getTokenOwnerRecordsByOwner(this.connection, GOVERNANCE_PROGRAM_ID, this.wallet.publicKey);
+
+    const currentDao = myOwnDaos.find((ff) => ff.account.realm.toBase58() === this.daoPublicKey?.toBase58());
+
+    return currentDao;
+  };
+
+  vote = async (proposal: ProgramAccount<Proposal>, voteKind: VoteKind, voteWeights?: number[]) => {
     if (this.daoPublicKey) {
       const governanceAuthority = this.wallet.publicKey;
       const payer = this.wallet.publicKey;
@@ -392,6 +400,8 @@ export class DAO {
 
       const tokenMint = voteKind === VoteKind.Veto ? getVetoTokenMint(proposal, dao) : proposal.account.governingTokenMint;
       const castVoteIxs: TransactionInstruction[] = [];
+      const tokenOwnerRecord = await this.getTokenOwnerRecord();
+
       await withCastVote(
         castVoteIxs,
         GOVERNANCE_PROGRAM_ID,
@@ -400,7 +410,7 @@ export class DAO {
         proposal.account.governance,
         proposal.pubkey,
         proposal.account.tokenOwnerRecord,
-        tokenOwnerRecord,
+        tokenOwnerRecord!.pubkey,
         governanceAuthority,
         tokenMint,
         vote,

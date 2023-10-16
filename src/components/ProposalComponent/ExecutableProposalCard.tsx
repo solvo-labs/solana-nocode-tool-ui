@@ -10,6 +10,7 @@ import ThumDownAltIcon from "@mui/icons-material/ThumbDown";
 
 import { DAO } from "../../lib/dao";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import toastr from "toastr";
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -48,15 +49,19 @@ const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal }) => {
   const executeVote = async (isYes = false) => {
     const vote = isYes ? VoteKind.Approve : VoteKind.Deny;
 
-    const tx = await daoInstance.vote(proposal, proposal.account.tokenOwnerRecord, vote);
+    try {
+      const tx = await daoInstance.vote(proposal, vote);
 
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await connection.getLatestBlockhashAndContext();
+      const {
+        context: { slot: minContextSlot },
+        value: { blockhash, lastValidBlockHeight },
+      } = await connection.getLatestBlockhashAndContext();
 
-    const signature = await sendTransaction(tx, connection, { minContextSlot, signers: [] });
-    await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+      const signature = await sendTransaction(tx, connection, { minContextSlot, signers: [] });
+      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
+    } catch (error: any) {
+      toastr.error(error);
+    }
   };
 
   const modal = () => {
