@@ -2,6 +2,7 @@ import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, se
 import {
   GoverningTokenConfigAccountArgs,
   GoverningTokenType,
+  MultiChoiceType,
   ProgramAccount,
   Proposal,
   Realm,
@@ -180,7 +181,7 @@ export class DAO {
     return { transaction, signers, realmPk };
   };
 
-  createProposal = async (dao: PublicKey, name: string, descriptionLink: string) => {
+  createProposal = async (dao: PublicKey, name: string, descriptionLink: string, isMulti = false, options = ["Approve"]) => {
     const daoDetail = (await this.getDaoDetails(dao)).dao;
     const governance = daoDetail.account.authority;
     const governanceAuthority = this.wallet.publicKey;
@@ -213,6 +214,8 @@ export class DAO {
 
     const communityMint = tokenOwnerRecord[0].account.governingTokenMint;
 
+    const voteType = isMulti ? VoteType.MULTI_CHOICE(MultiChoiceType.FullWeight, 1, options.length, options.length) : VoteType.SINGLE_CHOICE;
+
     const proposalAddress = await withCreateProposal(
       instructions,
       GOVERNANCE_PROGRAM_ID,
@@ -225,8 +228,8 @@ export class DAO {
       communityMint,
       governanceAuthority,
       proposalIndex,
-      VoteType.SINGLE_CHOICE,
-      ["Approve"],
+      voteType,
+      options,
       true,
       this.wallet.publicKey
     );
