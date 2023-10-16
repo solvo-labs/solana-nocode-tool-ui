@@ -6,6 +6,7 @@ import React from "react";
 type Props = {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
+
 const SearchInput: React.FC<Props> = ({ onChange }) => {
   return (
     <Paper

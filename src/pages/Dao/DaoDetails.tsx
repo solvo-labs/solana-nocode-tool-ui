@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useEffect, useMemo, useState } from "react";
-import { Avatar, Box, Card, CardContent, CircularProgress, Grid, Stack, Tab, Theme, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, CardContent, CircularProgress, Divider, FormControlLabel, Grid, IconButton, Modal, Stack, Switch, Tab, Theme, Typography } from "@mui/material";
 import SearchInput from "../../components/SearchInput.tsx";
 import { FILTERS } from "../../utils/enum.ts";
 import FilterSelector from "../../components/FilterSelector.tsx";
@@ -19,9 +19,11 @@ import { ProgramAccount, Proposal, ProposalState, Realm, TokenOwnerRecord, VoteT
 import ExecutableProposalCard from "../../components/ProposalComponent/ExecutableProposalCard.tsx";
 import NonExecutableProposalCard from "../../components/ProposalComponent/NonExecutableProposalCard.tsx";
 import ConcludedProposal from "../../components/ProposalComponent/ConcludedProposal.tsx";
+import { CustomInput } from "../../components/CustomInput.tsx";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStyles = makeStyles((_theme: Theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   card: {
     borderRadius: "12px !important",
     width: "100%",
@@ -46,6 +48,17 @@ const useStyles = makeStyles((_theme: Theme) => ({
     paddingLeft: "1rem",
     paddingRight: "1rem",
   },
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2),
+    position: "relative", // Modal içeriği için göreceli konumlandırma
+  },
 }));
 
 const DaoDetails: React.FC = () => {
@@ -67,6 +80,13 @@ const DaoDetails: React.FC = () => {
   // const [filters, setFilters] = useState<string[]>([]);
   // const [filteredProposal, setFilteredProposal] = useState([]);
   const [filtersTitle] = useState<FILTERS[]>(Object.values(FILTERS));
+  const [showCreateProposalModal, setShowCreateProposalModal] = useState<boolean>(false);
+  const [proposalData, setProposalData] = useState<{ name: string; description: string; isMulti: boolean; options: string[] }>({
+    name: "",
+    description: "",
+    isMulti: false,
+    options: [],
+  });
 
   const [membersOpen, setMembersOpen] = useState(false);
   const handleOpen = (setState: any) => setState(true);
@@ -111,20 +131,6 @@ const DaoDetails: React.FC = () => {
           await sleep(3000);
 
           const proposals = await daoInstance.getProposals();
-          //   const result = proposals.map((proposal: any) => {
-          //     return {
-          //       account: {
-          //         denyVoteWeight: proposal.account.denyVoteWeight,
-          //         maxVoteWeight: proposal.account.maxVoteWeight,
-          //         name: proposal.account.name,
-          //         options: proposal.account.options,
-          //         state: proposal.account.state,
-          //         voteType: proposal.account.voteType,
-          //         voteThreshold: proposal.account.voteThreshold,
-          //       },
-          //       pubkey: proposal.pubkey,
-          //     };
-          //   });
 
           setProposals(proposals);
           setMembers(members);
@@ -138,8 +144,6 @@ const DaoDetails: React.FC = () => {
     };
     init();
   }, [daoInstance, pubkey]);
-
-  // console.log(selectedFilter);
 
   if (loading) {
     return (
@@ -156,6 +160,151 @@ const DaoDetails: React.FC = () => {
       </div>
     );
   }
+  console.log(proposalData);
+  const createProposalModal = () => {
+    return (
+      <Modal
+        className={classes.modal}
+        open={showCreateProposalModal}
+        onClose={() => {
+          setShowCreateProposalModal(false);
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            borderRadius: "8px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 500,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            maxHeight: 600,
+            height: "auto",
+            p: 1,
+            overflowY: "auto",
+          }}
+        >
+          <div className={classes.modalContent}>
+            <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
+              Create Proposal
+            </Typography>
+            <Typography id="modal-modal-title" variant="subtitle1" component="h2" color={"black"} align="center">
+              Fill the form for create new proposal
+            </Typography>
+            <Divider sx={{ marginBottom: "1rem", marginTop: "0.5rem", background: "black" }} />
+            <Grid gap={2} style={{ display: "flex", flexDirection: "column" }}>
+              <CustomInput
+                placeHolder="Title"
+                label="Title"
+                id="name"
+                name="name"
+                type="text"
+                value={proposalData.name || ""}
+                onChange={(e: any) => setProposalData({ ...proposalData, name: e.target.value })}
+                disable={false}
+              />
+              <CustomInput
+                placeHolder="Description"
+                label="Description"
+                id="description"
+                name="description"
+                type="text"
+                value={proposalData.description || ""}
+                onChange={(e: any) => setProposalData({ ...proposalData, description: e.target.value })}
+                disable={false}
+              />
+              <FormControlLabel
+                control={<Switch checked={proposalData.isMulti} onChange={() => setProposalData({ ...proposalData, isMulti: !proposalData.isMulti })} />}
+                label="Multi Choice (Non Executable)"
+                style={{ color: "black" }}
+              />
+              {proposalData.isMulti && (
+                <>
+                  <CustomInput
+                    placeHolder="Option-1"
+                    label="Option-1"
+                    id="option1"
+                    name="option1"
+                    type="text"
+                    value={proposalData.options[0] || ""}
+                    onChange={(e: any) => {
+                      const clonedState = { ...proposalData };
+                      clonedState.options[0] = e.target.value;
+
+                      setProposalData(clonedState);
+                    }}
+                    disable={false}
+                  />
+                  <CustomInput
+                    placeHolder="Option-2"
+                    label="Option-2"
+                    id="option2"
+                    name="option2"
+                    type="text"
+                    value={proposalData.options[1] || ""}
+                    onChange={(e: any) => {
+                      const clonedState = { ...proposalData };
+                      clonedState.options[1] = e.target.value;
+
+                      setProposalData(clonedState);
+                    }}
+                    disable={false}
+                  />
+                  {proposalData.options.slice(2).map((pd: any, index: number) => {
+                    return (
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <CustomInput
+                          placeHolder={"option-" + (index + 3)}
+                          label={"option-" + (index + 3)}
+                          id={"option-" + (index + 3)}
+                          name={"option-" + (index + 3)}
+                          type="text"
+                          value={proposalData.options[index + 2] || ""}
+                          onChange={(e: any) => {
+                            const clonedState = { ...proposalData };
+                            clonedState.options[index + 2] = e.target.value;
+
+                            setProposalData(clonedState);
+                          }}
+                          disable={false}
+                        />
+                        <IconButton
+                          onClick={() => {
+                            const clonedState = { ...proposalData };
+                            clonedState.options.splice(index + 2, 1);
+                            setProposalData(clonedState);
+                          }}
+                        >
+                          {<DeleteIcon />}
+                        </IconButton>
+                      </div>
+                    );
+                  })}
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      const clonedState = { ...proposalData };
+                      clonedState.options.push("");
+                      setProposalData(clonedState);
+                    }}
+                  >
+                    + Add Option
+                  </Button>
+                </>
+              )}
+              <Button variant="outlined">Create Proposal</Button>
+            </Grid>
+            <Divider />
+          </div>
+        </Box>
+      </Modal>
+    );
+  };
 
   return (
     <Grid container direction={"row"} spacing={2} width={"90vw"} display={"flex"} alignContent={"center"}>
@@ -247,6 +396,9 @@ const DaoDetails: React.FC = () => {
             <Stack direction={"row"} marginTop={"1rem"} spacing={2} display={"flex"} alignItems={"center"}>
               <SearchInput onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSearch(event)}></SearchInput>
               <FilterSelector filters={filtersTitle} selectedFilters={selectedFilter} setSelectedFilters={setSelectedFilter}></FilterSelector>
+              <Button variant="outlined" size="small" sx={{ width: "15rem" }} onClick={() => setShowCreateProposalModal(true)}>
+                + New Proposal
+              </Button>
             </Stack>
             <div className="scroll-container" style={{ maxHeight: "20rem", overflowY: "scroll" }}>
               <Stack direction={"row"} marginTop={"1rem"} spacing={2}>
@@ -288,6 +440,7 @@ const DaoDetails: React.FC = () => {
           </CardContent>
         </Card>
       </Grid>
+      {createProposalModal()}
     </Grid>
   );
 };
