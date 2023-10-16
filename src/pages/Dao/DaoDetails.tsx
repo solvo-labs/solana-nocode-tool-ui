@@ -95,23 +95,22 @@ const DaoDetails: React.FC = () => {
   };
 
   useEffect(() => {
-    if (wallet) {
-      const dao = new DAO(connection, wallet);
+    if (wallet && pubkey) {
+      const dao = new DAO(connection, wallet, new PublicKey(pubkey));
       setDaoInstance(dao);
     }
-  }, [connection, wallet]);
+  }, [connection, pubkey, wallet]);
 
   useEffect(() => {
     const init = async () => {
       if (daoInstance && pubkey) {
         try {
-          const publickey = new PublicKey(pubkey);
-          const daoDetail = await daoInstance.getDaoDetails(publickey);
+          const daoDetail = await daoInstance.getDaoDetails();
           // await sleep(3000);
-          const members = await daoInstance.getMembers(publickey);
+          const members = await daoInstance.getMembers();
           await sleep(3000);
 
-          const proposals = await daoInstance.getProposals(publickey);
+          const proposals = await daoInstance.getProposals();
           //   const result = proposals.map((proposal: any) => {
           //     return {
           //       account: {
@@ -260,7 +259,7 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((onGoingProposal) =>
                       onGoingProposal.account.voteType.type === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard proposal={onGoingProposal} />
+                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} />
                       ) : (
                         <NonExecutableProposalCard proposal={onGoingProposal} />
                       )
@@ -275,7 +274,7 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((filteredProposal) =>
                       filteredProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard proposal={filteredProposal} />
+                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} />
                       ) : (
                         <NonExecutableProposalCard proposal={filteredProposal} />
                       )

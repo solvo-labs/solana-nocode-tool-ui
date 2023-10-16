@@ -41,10 +41,12 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 export class DAO {
   private connection: Connection;
   private wallet: Wallet;
+  private daoPublicKey: PublicKey | undefined;
 
-  constructor(connection: Connection, wallet: Wallet) {
+  constructor(connection: Connection, wallet: Wallet, daoPublickey?: PublicKey) {
     this.connection = connection;
     this.wallet = wallet;
+    this.daoPublicKey = daoPublickey;
   }
 
   private getAllDaos = async (): Promise<ProgramAccount<Realm>[]> => {
@@ -72,28 +74,38 @@ export class DAO {
     return { myDaos, allDaos };
   };
 
-  getDaoDetails = async (
-    currentRealm: PublicKey
-  ): Promise<{
+  getDaoDetails = async (): Promise<{
     dao: ProgramAccount<Realm>;
   }> => {
-    const dao = await getRealm(this.connection, currentRealm);
+    if (this.daoPublicKey) {
+      const dao = await getRealm(this.connection, this.daoPublicKey);
 
-    return { dao };
+      return { dao };
+    }
+
+    throw "Something went wrong";
   };
 
   fetchDaos = () => {
     return this.getMyDaos();
   };
 
-  getMembers = async (dao: PublicKey): Promise<ProgramAccount<TokenOwnerRecord>[]> => {
-    return getAllTokenOwnerRecords(this.connection, GOVERNANCE_PROGRAM_ID, dao);
+  getMembers = async (): Promise<ProgramAccount<TokenOwnerRecord>[]> => {
+    if (this.daoPublicKey) {
+      return getAllTokenOwnerRecords(this.connection, GOVERNANCE_PROGRAM_ID, this.daoPublicKey);
+    }
+
+    throw "Something went wrong";
   };
 
-  getProposals = async (dao: PublicKey): Promise<ProgramAccount<Proposal>[]> => {
-    const proposals = await getAllProposals(this.connection, GOVERNANCE_PROGRAM_ID, dao);
-    console.log(proposals);
-    return proposals[0];
+  getProposals = async (): Promise<ProgramAccount<Proposal>[]> => {
+    if (this.daoPublicKey) {
+      const proposals = await getAllProposals(this.connection, GOVERNANCE_PROGRAM_ID, this.daoPublicKey);
+      console.log(proposals);
+      return proposals[0];
+    }
+
+    throw "Something went wrong";
   };
 
   createMultisigDao = async (multiSigWallets: PublicKey[], name: string, threshold: number) => {
@@ -186,213 +198,220 @@ export class DAO {
     return { transaction, signers, realmPk };
   };
 
-  createProposal = async (dao: PublicKey, name: string, descriptionLink: string, isMulti = false, options = ["Approve"]) => {
-    const daoDetail = (await this.getDaoDetails(dao)).dao;
-    const governance = daoDetail.account.authority;
-    const governanceAuthority = this.wallet.publicKey;
+  createProposal = async (name: string, descriptionLink: string, isMulti = false, options = ["Approve"]) => {
+    if (this.daoPublicKey) {
+      const daoDetail = (await this.getDaoDetails()).dao;
+      const governance = daoDetail.account.authority;
+      const governanceAuthority = this.wallet.publicKey;
 
-    const instructions: TransactionInstruction[] = [];
-    const signers: Keypair[] = [];
-    const proposalIndex = 0;
-    const prerequisiteInstructions: TransactionInstruction[] = [];
-    const prerequisiteInstructionsSigners: (Keypair | null)[] = [];
+      const instructions: TransactionInstruction[] = [];
+      const signers: Keypair[] = [];
+      const proposalIndex = 0;
+      const prerequisiteInstructions: TransactionInstruction[] = [];
+      const prerequisiteInstructionsSigners: (Keypair | null)[] = [];
 
-    const instructionsData: InstructionDataWithHoldUpTime[] = [
-      new InstructionDataWithHoldUpTime({
-        instruction: {
-          customHoldUpTime: 0,
+      const instructionsData: InstructionDataWithHoldUpTime[] = [
+        new InstructionDataWithHoldUpTime({
+          instruction: {
+            customHoldUpTime: 0,
 
-          prerequisiteInstructions: [],
-          prerequisiteInstructionsSigners: [],
-          signers: undefined,
-          chunkBy: 2,
-          serializedInstruction: "",
-          isValid: false,
-          governance: undefined,
-        },
-      }),
-    ];
+            prerequisiteInstructions: [],
+            prerequisiteInstructionsSigners: [],
+            signers: undefined,
+            chunkBy: 2,
+            serializedInstruction: "",
+            isValid: false,
+            governance: undefined,
+          },
+        }),
+      ];
 
-    const tokenOwnerRecord = await getAllTokenOwnerRecords(this.connection, daoDetail.owner, daoDetail.pubkey);
+      const tokenOwnerRecord = await getAllTokenOwnerRecords(this.connection, daoDetail.owner, daoDetail.pubkey);
 
-    const tokenOwnerRecordPk = tokenOwnerRecord[0].pubkey;
+      const tokenOwnerRecordPk = tokenOwnerRecord[0].pubkey;
 
-    const communityMint = tokenOwnerRecord[0].account.governingTokenMint;
+      const communityMint = tokenOwnerRecord[0].account.governingTokenMint;
 
-    const voteType = isMulti ? VoteType.MULTI_CHOICE(MultiChoiceType.FullWeight, 1, options.length, options.length) : VoteType.SINGLE_CHOICE;
+      const voteType = isMulti ? VoteType.MULTI_CHOICE(MultiChoiceType.FullWeight, 1, options.length, options.length) : VoteType.SINGLE_CHOICE;
 
-    const proposalAddress = await withCreateProposal(
-      instructions,
-      GOVERNANCE_PROGRAM_ID,
-      3,
-      dao,
-      governance!,
-      tokenOwnerRecordPk,
-      name,
-      descriptionLink,
-      communityMint,
-      governanceAuthority,
-      proposalIndex,
-      voteType,
-      options,
-      true,
-      this.wallet.publicKey
-    );
-
-    const signatory = this.wallet.publicKey;
-
-    await withAddSignatory(instructions, GOVERNANCE_PROGRAM_ID, 3, proposalAddress, tokenOwnerRecordPk, governanceAuthority, signatory, this.wallet.publicKey);
-
-    const signatoryRecordAddress = await getSignatoryRecordAddress(GOVERNANCE_PROGRAM_ID, proposalAddress, signatory);
-
-    const insertInstructions: TransactionInstruction[] = [];
-
-    const chunkBys = instructionsData.filter((x) => x.chunkBy).map((x) => x.chunkBy!);
-
-    const lowestChunkBy = chunkBys.length ? Math.min(...chunkBys) : 2;
-
-    for (const [index, instruction] of instructionsData.filter((x) => x.data).entries()) {
-      if (instruction.data) {
-        if (instruction.prerequisiteInstructions) {
-          prerequisiteInstructions.push(...instruction.prerequisiteInstructions);
-        }
-        if (instruction.prerequisiteInstructionsSigners) {
-          prerequisiteInstructionsSigners.push(...instruction.prerequisiteInstructionsSigners);
-        }
-        await withInsertTransaction(
-          insertInstructions,
-          GOVERNANCE_PROGRAM_ID,
-          3,
-          governance!,
-          proposalAddress,
-          tokenOwnerRecordPk,
-          governanceAuthority,
-          index,
-          0,
-          instruction.holdUpTime || 0,
-          [instruction.data],
-          this.wallet.publicKey
-        );
-      }
-    }
-
-    const isDraft = false;
-
-    if (!isDraft) {
-      console.log("isdraft");
-      withSignOffProposal(
-        insertInstructions, // SingOff proposal needs to be executed after inserting instructions hence we add it to insertInstructions
+      const proposalAddress = await withCreateProposal(
+        instructions,
         GOVERNANCE_PROGRAM_ID,
         3,
-        dao,
+        this.daoPublicKey,
         governance!,
-        proposalAddress,
-        signatory,
-        signatoryRecordAddress,
-        undefined
+        tokenOwnerRecordPk,
+        name,
+        descriptionLink,
+        communityMint,
+        governanceAuthority,
+        proposalIndex,
+        voteType,
+        options,
+        true,
+        this.wallet.publicKey
       );
+
+      const signatory = this.wallet.publicKey;
+
+      await withAddSignatory(instructions, GOVERNANCE_PROGRAM_ID, 3, proposalAddress, tokenOwnerRecordPk, governanceAuthority, signatory, this.wallet.publicKey);
+
+      const signatoryRecordAddress = await getSignatoryRecordAddress(GOVERNANCE_PROGRAM_ID, proposalAddress, signatory);
+
+      const insertInstructions: TransactionInstruction[] = [];
+
+      const chunkBys = instructionsData.filter((x) => x.chunkBy).map((x) => x.chunkBy!);
+
+      const lowestChunkBy = chunkBys.length ? Math.min(...chunkBys) : 2;
+
+      for (const [index, instruction] of instructionsData.filter((x) => x.data).entries()) {
+        if (instruction.data) {
+          if (instruction.prerequisiteInstructions) {
+            prerequisiteInstructions.push(...instruction.prerequisiteInstructions);
+          }
+          if (instruction.prerequisiteInstructionsSigners) {
+            prerequisiteInstructionsSigners.push(...instruction.prerequisiteInstructionsSigners);
+          }
+          await withInsertTransaction(
+            insertInstructions,
+            GOVERNANCE_PROGRAM_ID,
+            3,
+            governance!,
+            proposalAddress,
+            tokenOwnerRecordPk,
+            governanceAuthority,
+            index,
+            0,
+            instruction.holdUpTime || 0,
+            [instruction.data],
+            this.wallet.publicKey
+          );
+        }
+      }
+
+      const isDraft = false;
+
+      if (!isDraft) {
+        console.log("isdraft");
+        withSignOffProposal(
+          insertInstructions, // SingOff proposal needs to be executed after inserting instructions hence we add it to insertInstructions
+          GOVERNANCE_PROGRAM_ID,
+          3,
+          this.daoPublicKey,
+          governance!,
+          proposalAddress,
+          signatory,
+          signatoryRecordAddress,
+          undefined
+        );
+      }
+
+      const insertChunks = chunks(insertInstructions, lowestChunkBy);
+      const signerChunks = Array(insertChunks.length);
+
+      signerChunks.push(...chunks(signers, lowestChunkBy));
+      signerChunks.fill([]);
+
+      const deduplicatedPrerequisiteInstructions = prerequisiteInstructions.filter(deduplicateObjsFilter);
+
+      const deduplicatedPrerequisiteInstructionsSigners = prerequisiteInstructionsSigners.filter(deduplicateObjsFilter);
+
+      const prerequisiteInstructionsChunks = chunks(deduplicatedPrerequisiteInstructions, lowestChunkBy);
+
+      const prerequisiteInstructionsSignersChunks = chunks(deduplicatedPrerequisiteInstructionsSigners, lowestChunkBy).filter((keypairArray) =>
+        keypairArray.filter((keypair) => keypair)
+      );
+
+      const signersSet = [...prerequisiteInstructionsSignersChunks, [], ...signerChunks];
+
+      const txes = [...prerequisiteInstructionsChunks, instructions, ...insertChunks].map((txBatch, batchIdx) => {
+        return {
+          instructionsSet: txBatchesToInstructionSetWithSigners(txBatch, signersSet, batchIdx),
+          sequenceType: 0,
+        };
+      });
+
+      return txes;
     }
 
-    const insertChunks = chunks(insertInstructions, lowestChunkBy);
-    const signerChunks = Array(insertChunks.length);
-
-    signerChunks.push(...chunks(signers, lowestChunkBy));
-    signerChunks.fill([]);
-
-    const deduplicatedPrerequisiteInstructions = prerequisiteInstructions.filter(deduplicateObjsFilter);
-
-    const deduplicatedPrerequisiteInstructionsSigners = prerequisiteInstructionsSigners.filter(deduplicateObjsFilter);
-
-    const prerequisiteInstructionsChunks = chunks(deduplicatedPrerequisiteInstructions, lowestChunkBy);
-
-    const prerequisiteInstructionsSignersChunks = chunks(deduplicatedPrerequisiteInstructionsSigners, lowestChunkBy).filter((keypairArray) =>
-      keypairArray.filter((keypair) => keypair)
-    );
-
-    const signersSet = [...prerequisiteInstructionsSignersChunks, [], ...signerChunks];
-
-    const txes = [...prerequisiteInstructionsChunks, instructions, ...insertChunks].map((txBatch, batchIdx) => {
-      return {
-        instructionsSet: txBatchesToInstructionSetWithSigners(txBatch, signersSet, batchIdx),
-        sequenceType: 0,
-      };
-    });
-
-    return txes;
+    throw "Something went wrong";
   };
 
-  vote = async (daoPublickey: PublicKey, proposal: ProgramAccount<Proposal>, tokenOwnerRecord: PublicKey, voteKind: VoteKind, voteWeights?: number[]) => {
-    const governanceAuthority = this.wallet.publicKey;
-    const payer = this.wallet.publicKey;
-    const programVersion = 3;
+  vote = async (proposal: ProgramAccount<Proposal>, tokenOwnerRecord: PublicKey, voteKind: VoteKind, voteWeights?: number[]) => {
+    if (this.daoPublicKey) {
+      const governanceAuthority = this.wallet.publicKey;
+      const payer = this.wallet.publicKey;
+      const programVersion = 3;
 
-    const dao = (await this.getDaoDetails(daoPublickey)).dao;
+      const dao = (await this.getDaoDetails()).dao;
 
-    const isMulti = proposal.account.voteType !== VoteType.SINGLE_CHOICE;
+      const isMulti = proposal.account.voteType !== VoteType.SINGLE_CHOICE;
 
-    // It is not clear that defining these extraneous fields, `deny` and `veto`, is actually necessary.
-    // See:  https://discord.com/channels/910194960941338677/910630743510777926/1044741454175674378
-    const vote = isMulti
-      ? new Vote({
-          voteType: VoteKind.Approve,
-          approveChoices: proposal.account.options.map((_o, index) => {
-            if (voteWeights?.includes(index)) {
-              return new VoteChoice({ rank: 0, weightPercentage: 100 });
-            } else {
-              return new VoteChoice({ rank: 0, weightPercentage: 0 });
-            }
-          }),
-          deny: undefined,
-          veto: undefined,
-        })
-      : voteKind === VoteKind.Approve
-      ? new Vote({
-          voteType: VoteKind.Approve,
-          approveChoices: [new VoteChoice({ rank: 0, weightPercentage: 100 })],
-          deny: undefined,
-          veto: undefined,
-        })
-      : voteKind === VoteKind.Deny
-      ? new Vote({
-          voteType: VoteKind.Deny,
-          approveChoices: undefined,
-          deny: true,
-          veto: undefined,
-        })
-      : voteKind == VoteKind.Veto
-      ? new Vote({
-          voteType: VoteKind.Veto,
-          veto: true,
-          deny: undefined,
-          approveChoices: undefined,
-        })
-      : new Vote({
-          voteType: VoteKind.Abstain,
-          veto: undefined,
-          deny: undefined,
-          approveChoices: undefined,
-        });
+      // It is not clear that defining these extraneous fields, `deny` and `veto`, is actually necessary.
+      // See:  https://discord.com/channels/910194960941338677/910630743510777926/1044741454175674378
+      const vote = isMulti
+        ? new Vote({
+            voteType: VoteKind.Approve,
+            approveChoices: proposal.account.options.map((_o, index) => {
+              if (voteWeights?.includes(index)) {
+                return new VoteChoice({ rank: 0, weightPercentage: 100 });
+              } else {
+                return new VoteChoice({ rank: 0, weightPercentage: 0 });
+              }
+            }),
+            deny: undefined,
+            veto: undefined,
+          })
+        : voteKind === VoteKind.Approve
+        ? new Vote({
+            voteType: VoteKind.Approve,
+            approveChoices: [new VoteChoice({ rank: 0, weightPercentage: 100 })],
+            deny: undefined,
+            veto: undefined,
+          })
+        : voteKind === VoteKind.Deny
+        ? new Vote({
+            voteType: VoteKind.Deny,
+            approveChoices: undefined,
+            deny: true,
+            veto: undefined,
+          })
+        : voteKind == VoteKind.Veto
+        ? new Vote({
+            voteType: VoteKind.Veto,
+            veto: true,
+            deny: undefined,
+            approveChoices: undefined,
+          })
+        : new Vote({
+            voteType: VoteKind.Abstain,
+            veto: undefined,
+            deny: undefined,
+            approveChoices: undefined,
+          });
 
-    const tokenMint = voteKind === VoteKind.Veto ? getVetoTokenMint(proposal, dao) : proposal.account.governingTokenMint;
-    const castVoteIxs: TransactionInstruction[] = [];
-    await withCastVote(
-      castVoteIxs,
-      GOVERNANCE_PROGRAM_ID,
-      programVersion,
-      daoPublickey,
-      proposal.account.governance,
-      proposal.pubkey,
-      proposal.account.tokenOwnerRecord,
-      tokenOwnerRecord,
-      governanceAuthority,
-      tokenMint,
-      vote,
-      payer
-    );
+      const tokenMint = voteKind === VoteKind.Veto ? getVetoTokenMint(proposal, dao) : proposal.account.governingTokenMint;
+      const castVoteIxs: TransactionInstruction[] = [];
+      await withCastVote(
+        castVoteIxs,
+        GOVERNANCE_PROGRAM_ID,
+        programVersion,
+        this.daoPublicKey,
+        proposal.account.governance,
+        proposal.pubkey,
+        proposal.account.tokenOwnerRecord,
+        tokenOwnerRecord,
+        governanceAuthority,
+        tokenMint,
+        vote,
+        payer
+      );
 
-    const transaction = new Transaction();
-    transaction.add(...[...castVoteIxs]);
+      const transaction = new Transaction();
+      transaction.add(...[...castVoteIxs]);
 
-    return transaction;
+      return transaction;
+    }
+    throw "Something went wrong";
   };
 }

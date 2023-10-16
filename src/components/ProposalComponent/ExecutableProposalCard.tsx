@@ -3,10 +3,13 @@ import { makeStyles } from "@mui/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CustomizedProgressBars from "../CustomProgressBar";
 import React, { useState } from "react";
-import { ProgramAccount, Proposal } from "@solana/spl-governance";
+import { ProgramAccount, Proposal, VoteKind } from "@solana/spl-governance";
 import moment from "moment";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumDownAltIcon from "@mui/icons-material/ThumbDown";
+
+import { DAO } from "../../lib/dao";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -32,12 +35,29 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 type Props = {
+  daoInstance: DAO;
   proposal: ProgramAccount<Proposal>;
 };
 
-const ExecutableProposalCard: React.FC<Props> = ({ proposal }) => {
+const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal }) => {
   const classes = useStyles();
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
+  const { sendTransaction } = useWallet();
+  const { connection } = useConnection();
+
+  const executeVote = async (isYes = false) => {
+    const vote = isYes ? VoteKind.Approve : VoteKind.Deny;
+
+    const tx = await daoInstance.vote(proposal, proposal.account.tokenOwnerRecord, vote);
+
+    const {
+      context: { slot: minContextSlot },
+      value: { blockhash, lastValidBlockHeight },
+    } = await connection.getLatestBlockhashAndContext();
+
+    const signature = await sendTransaction(tx, connection, { minContextSlot, signers: [] });
+    await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+  };
 
   const modal = () => {
     return (
@@ -73,10 +93,22 @@ const ExecutableProposalCard: React.FC<Props> = ({ proposal }) => {
             </Typography>
             <Divider sx={{ marginBottom: "1rem", marginTop: "0.5rem", background: "black" }} />
             <Grid gap={2} style={{ display: "flex", flexDirection: "column" }}>
-              <Button variant="outlined" color="success">
+              <Button
+                variant="outlined"
+                color="success"
+                onClick={() => {
+                  executeVote(true);
+                }}
+              >
                 <b>YES</b> &nbsp; <ThumbUpAltIcon />
               </Button>
-              <Button variant="outlined" color="error">
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => {
+                  executeVote();
+                }}
+              >
                 <b>NO</b> &nbsp; <ThumDownAltIcon />
               </Button>
             </Grid>
@@ -117,7 +149,7 @@ const ExecutableProposalCard: React.FC<Props> = ({ proposal }) => {
                     <Typography sx={{ fontSize: "0.8rem" }}>{proposal.account.getYesVoteCount().toNumber()}</Typography>
                     <Typography sx={{ fontSize: "0.7rem" }}>
                       %
-                      {proposal.account.getYesVoteCount().toNumber() + proposal.account.getNoVoteCount().toNumber() > 0
+                      {proposal.account.getYesVoteCount().toNumber() + proposal.account.getNoVoteCount().toNumber() > 0 && proposal.account.getYesVoteCount().toNumber() > 0
                         ? 100 / (proposal.account.getYesVoteCount().toNumber() / proposal.account.getYesVoteCount().toNumber() + proposal.account.getNoVoteCount().toNumber())
                         : 0}
                     </Typography>
@@ -129,7 +161,7 @@ const ExecutableProposalCard: React.FC<Props> = ({ proposal }) => {
                     <Typography sx={{ fontSize: "0.8rem" }}>{proposal.account.getNoVoteCount().toNumber()}</Typography>
                     <Typography sx={{ fontSize: "0.7rem" }}>
                       %
-                      {proposal.account.getYesVoteCount().toNumber() + proposal.account.getNoVoteCount().toNumber() > 0
+                      {proposal.account.getYesVoteCount().toNumber() + proposal.account.getNoVoteCount().toNumber() > 0 && proposal.account.getNoVoteCount().toNumber() > 0
                         ? 100 / (proposal.account.getNoVoteCount().toNumber() / proposal.account.getYesVoteCount().toNumber() + proposal.account.getNoVoteCount().toNumber())
                         : 0}
                     </Typography>
