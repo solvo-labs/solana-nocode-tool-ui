@@ -14,6 +14,8 @@ import {
   MintMaxVoteWeightSource,
   MintMaxVoteWeightSourceType,
   ProgramAccount,
+  Proposal,
+  Realm,
   SetRealmAuthorityAction,
   VoteThreshold,
   VoteThresholdType,
@@ -583,4 +585,13 @@ export const txBatchesToInstructionSetWithSigners = (txBatch: TransactionInstruc
       signers: typeof batchIdx !== "undefined" && signerBatches.length && signerBatches[batchIdx] && signerBatches[batchIdx][txIdx] ? [signerBatches[batchIdx][txIdx]] : [],
     };
   });
+};
+
+export const getVetoTokenMint = (proposal: ProgramAccount<Proposal>, realm: ProgramAccount<Realm>) => {
+  const communityMint = realm.account.communityMint;
+  const councilMint = realm.account.config.councilMint;
+  const governingMint = proposal.account.governingTokenMint;
+  const vetoTokenMint = governingMint.equals(communityMint) ? councilMint : communityMint;
+  if (vetoTokenMint === undefined) throw new Error("There is no token that can veto this proposal");
+  return vetoTokenMint;
 };

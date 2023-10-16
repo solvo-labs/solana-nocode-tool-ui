@@ -7,6 +7,9 @@ import {
   Proposal,
   Realm,
   TokenOwnerRecord,
+  Vote,
+  VoteChoice,
+  VoteKind,
   VoteType,
   getAllProposals,
   getAllTokenOwnerRecords,
@@ -15,6 +18,7 @@ import {
   getSignatoryRecordAddress,
   getTokenOwnerRecordsByOwner,
   withAddSignatory,
+  withCastVote,
   withCreateProposal,
   withInsertTransaction,
   withSignOffProposal,
@@ -27,6 +31,7 @@ import {
   createMultisigdDao,
   daoMints,
   deduplicateObjsFilter,
+  getVetoTokenMint,
   mintCouncilTokensToMembers,
   txBatchesToInstructionSetWithSigners,
 } from "./utils";
@@ -314,5 +319,80 @@ export class DAO {
     });
 
     return txes;
+  };
+
+  vote = async (daoPublickey: PublicKey, proposal: ProgramAccount<Proposal>, tokenOwnerRecord: PublicKey, voteKind: VoteKind, voteWeights?: number[]) => {
+    const governanceAuthority = this.wallet.publicKey;
+    const payer = this.wallet.publicKey;
+    const programVersion = 3;
+
+    const dao = (await this.getDaoDetails(daoPublickey)).dao;
+
+    const isMulti = proposal.account.voteType !== VoteType.SINGLE_CHOICE;
+
+    // It is not clear that defining these extraneous fields, `deny` and `veto`, is actually necessary.
+    // See:  https://discord.com/channels/910194960941338677/910630743510777926/1044741454175674378
+    const vote = isMulti
+      ? new Vote({
+          voteType: VoteKind.Approve,
+          approveChoices: proposal.account.options.map((_o, index) => {
+            if (voteWeights?.includes(index)) {
+              return new VoteChoice({ rank: 0, weightPercentage: 100 });
+            } else {
+              return new VoteChoice({ rank: 0, weightPercentage: 0 });
+            }
+          }),
+          deny: undefined,
+          veto: undefined,
+        })
+      : voteKind === VoteKind.Approve
+      ? new Vote({
+          voteType: VoteKind.Approve,
+          approveChoices: [new VoteChoice({ rank: 0, weightPercentage: 100 })],
+          deny: undefined,
+          veto: undefined,
+        })
+      : voteKind === VoteKind.Deny
+      ? new Vote({
+          voteType: VoteKind.Deny,
+          approveChoices: undefined,
+          deny: true,
+          veto: undefined,
+        })
+      : voteKind == VoteKind.Veto
+      ? new Vote({
+          voteType: VoteKind.Veto,
+          veto: true,
+          deny: undefined,
+          approveChoices: undefined,
+        })
+      : new Vote({
+          voteType: VoteKind.Abstain,
+          veto: undefined,
+          deny: undefined,
+          approveChoices: undefined,
+        });
+
+    const tokenMint = voteKind === VoteKind.Veto ? getVetoTokenMint(proposal, dao) : proposal.account.governingTokenMint;
+    const castVoteIxs: TransactionInstruction[] = [];
+    await withCastVote(
+      castVoteIxs,
+      GOVERNANCE_PROGRAM_ID,
+      programVersion,
+      daoPublickey,
+      proposal.account.governance,
+      proposal.pubkey,
+      proposal.account.tokenOwnerRecord,
+      tokenOwnerRecord,
+      governanceAuthority,
+      tokenMint,
+      vote,
+      payer
+    );
+
+    const transaction = new Transaction();
+    transaction.add(...[...castVoteIxs]);
+
+    return transaction;
   };
 }
