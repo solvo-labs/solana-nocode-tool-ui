@@ -11,8 +11,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { DAO } from "../../lib/dao";
 import toastr from "toastr";
 import { useParams } from "react-router-dom";
-import { PublicKey } from "@solana/web3.js";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { PublicKey, Transaction } from "@solana/web3.js";
+import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
 import { sleep } from "../../lib/utils.ts";
 import { ProgramAccount, Proposal, ProposalState, Realm, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
@@ -88,6 +88,8 @@ const DaoDetails: React.FC = () => {
     options: [],
   });
 
+  const { sendTransaction } = useWallet();
+
   const [membersOpen, setMembersOpen] = useState(false);
   const handleOpen = (setState: any) => setState(true);
   const handleClose = (setState: any) => setState(false);
@@ -160,7 +162,25 @@ const DaoDetails: React.FC = () => {
       </div>
     );
   }
-  console.log(proposalData);
+
+  const createProposal = async () => {
+    const tx = await daoInstance?.createProposal(proposalData.name, proposalData.description, proposalData.isMulti, proposalData.isMulti ? proposalData.options : undefined);
+
+    const transactionProposal = new Transaction();
+
+    transactionProposal.add(tx![0].instructionsSet[0].transactionInstruction);
+    transactionProposal.add(tx![0].instructionsSet[1].transactionInstruction);
+    transactionProposal.add(tx![1].instructionsSet[0].transactionInstruction);
+
+    const {
+      context: { slot: minContextSlot },
+      value: { blockhash, lastValidBlockHeight },
+    } = await connection.getLatestBlockhashAndContext();
+
+    const signature = await sendTransaction(transactionProposal!, connection, { minContextSlot, signers: [] });
+    await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+  };
+
   const createProposalModal = () => {
     return (
       <Modal
@@ -255,7 +275,7 @@ const DaoDetails: React.FC = () => {
                     }}
                     disable={false}
                   />
-                  {proposalData.options.slice(2).map((pd: any, index: number) => {
+                  {proposalData.options.slice(2).map((_pd: any, index: number) => {
                     return (
                       <div style={{ display: "flex", alignItems: "center" }}>
                         <CustomInput
@@ -297,7 +317,9 @@ const DaoDetails: React.FC = () => {
                   </Button>
                 </>
               )}
-              <Button variant="outlined">Create Proposal</Button>
+              <Button variant="outlined" onClick={createProposal}>
+                Create Proposal
+              </Button>
             </Grid>
             <Divider />
           </div>
