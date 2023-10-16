@@ -2,7 +2,10 @@ import { Card, CardContent, Typography, CardActions, Theme, Stack, Chip, Grid, B
 import { makeStyles } from "@mui/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CustomizedProgressBars from "../CustomProgressBar";
+import { ProgramAccount, Proposal } from "@solana/spl-governance";
+import moment from "moment";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((_theme: Theme) => ({
   card: {
     border: "1px solid gray",
@@ -16,9 +19,9 @@ const useStyles = makeStyles((_theme: Theme) => ({
 }));
 
 type Props = {
-  title: string;
-}
-const NonExecutableProposalCard: React.FC<Props> = ({title}) => {
+  proposal: ProgramAccount<Proposal>;
+};
+const NonExecutableProposalCard: React.FC<Props> = ({ proposal }) => {
   const classes = useStyles();
   return (
     <CardActions
@@ -30,14 +33,14 @@ const NonExecutableProposalCard: React.FC<Props> = ({title}) => {
       <Card className={classes.card}>
         <CardContent>
           <Stack direction={"row"} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
-            <Typography>{title}</Typography>
+            <Typography>{proposal.account.name}</Typography>
             <Stack direction={"row"} spacing={2} justifyContent={"center"} alignItems={"center"}>
               <ThumbUpIcon sx={{ fontSize: "24px" }} color="success"></ThumbUpIcon>
               <Chip label="success" sx={{ height: "24px", fontSize: "12px" }} color="success" />
             </Stack>
           </Stack>
-          <Box sx={{ border: "1px solid black", borderRadius: "12px", maxWidth: "140px", justifyContent: "center", alignItems: "center" }}>
-            <Typography>12/12/2023</Typography>
+          <Box sx={{ border: "1px solid black", borderRadius: "12px", maxWidth: "140px", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+            <Typography>{moment.unix(proposal.account.draftAt.toNumber()).format("LLL")}</Typography>
           </Box>
           <Divider sx={{ marginTop: "0.5rem", backgroundColor: "gray" }}></Divider>
           <Stack spacing={2} marginTop={"0.5rem"}>
@@ -50,7 +53,7 @@ const NonExecutableProposalCard: React.FC<Props> = ({title}) => {
                 <Typography sx={{ fontSize: "0.7rem" }}>%0</Typography>
               </Stack>
               <Grid item width={"100%"}>
-                <CustomizedProgressBars></CustomizedProgressBars>
+                <CustomizedProgressBars value={0}></CustomizedProgressBars>
               </Grid>
             </Grid>
             <Grid container direction={"row"} marginTop={"0.5rem"}>
@@ -62,7 +65,7 @@ const NonExecutableProposalCard: React.FC<Props> = ({title}) => {
                 <Typography sx={{ fontSize: "0.7rem" }}>%0</Typography>
               </Stack>
               <Grid item width={"100%"}>
-                <CustomizedProgressBars></CustomizedProgressBars>
+                <CustomizedProgressBars value={0}></CustomizedProgressBars>
               </Grid>
             </Grid>
           </Stack>

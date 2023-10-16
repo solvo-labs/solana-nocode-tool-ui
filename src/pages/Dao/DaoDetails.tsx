@@ -15,7 +15,7 @@ import { PublicKey } from "@solana/web3.js";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
 import { sleep } from "../../lib/utils.ts";
-import { ProgramAccount, ProposalState, Realm, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
+import { ProgramAccount, Proposal, ProposalState, Realm, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
 import ExecutableProposalCard from "../../components/ProposalComponent/ExecutableProposalCard.tsx";
 import NonExecutableProposalCard from "../../components/ProposalComponent/NonExecutableProposalCard.tsx";
 import ConcludedProposal from "../../components/ProposalComponent/ConcludedProposal.tsx";
@@ -59,7 +59,7 @@ const DaoDetails: React.FC = () => {
 
   const [dao, setDao] = useState<ProgramAccount<Realm>>();
   const [members, setMembers] = useState<ProgramAccount<TokenOwnerRecord>[]>([]);
-  const [proposals, setProposals] = useState<any[]>();
+  const [proposals, setProposals] = useState<ProgramAccount<Proposal>[]>();
 
   const [selectedFilter, setSelectedFilter] = useState<any[]>([]);
   const [search, setSearch] = useState("");
@@ -111,25 +111,23 @@ const DaoDetails: React.FC = () => {
           const members = await daoInstance.getMembers(publickey);
           await sleep(3000);
 
-          //   console.log(members[0].account.governingTokenDepositAmount.toNumber());
-
           const proposals = await daoInstance.getProposals(publickey);
-          const result = proposals.map((proposal: any) => {
-            return {
-              account: {
-                denyVoteWeight: proposal.account.denyVoteWeight,
-                maxVoteWeight: proposal.account.maxVoteWeight,
-                name: proposal.account.name,
-                options: proposal.account.options,
-                state: proposal.account.state,
-                voteType: proposal.account.voteType,
-                voteThreshold: proposal.account.voteThreshold,
-              },
-              pubkey: proposal.pubkey,
-            };
-          });
+          //   const result = proposals.map((proposal: any) => {
+          //     return {
+          //       account: {
+          //         denyVoteWeight: proposal.account.denyVoteWeight,
+          //         maxVoteWeight: proposal.account.maxVoteWeight,
+          //         name: proposal.account.name,
+          //         options: proposal.account.options,
+          //         state: proposal.account.state,
+          //         voteType: proposal.account.voteType,
+          //         voteThreshold: proposal.account.voteThreshold,
+          //       },
+          //       pubkey: proposal.pubkey,
+          //     };
+          //   });
 
-          setProposals(result);
+          setProposals(proposals);
           setMembers(members);
           setDao(daoDetail.dao);
           setLoading(false);
@@ -261,10 +259,10 @@ const DaoDetails: React.FC = () => {
                   proposals
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((onGoingProposal) =>
-                      onGoingProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard title={onGoingProposal.account.name} />
+                      onGoingProposal.account.voteType.type === VoteTypeKind.SingleChoice ? (
+                        <ExecutableProposalCard proposal={onGoingProposal} />
                       ) : (
-                        <NonExecutableProposalCard title={onGoingProposal.account.name} />
+                        <NonExecutableProposalCard proposal={onGoingProposal} />
                       )
                     )}
                 {proposals &&
@@ -277,9 +275,9 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((filteredProposal) =>
                       filteredProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard title={filteredProposal.account.name} />
+                        <ExecutableProposalCard proposal={filteredProposal} />
                       ) : (
-                        <NonExecutableProposalCard title={filteredProposal.account.name} />
+                        <NonExecutableProposalCard proposal={filteredProposal} />
                       )
                     )}
                 {searchFlag &&

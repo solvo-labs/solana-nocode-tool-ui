@@ -14,10 +14,14 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
   },
 }));
 
-const CustomizedProgressBars = () => {
+type Props = {
+  value: number;
+};
+
+const CustomizedProgressBars: React.FC<Props> = ({ value }) => {
   return (
     <Box sx={{ flexGrow: 1, marginTop: "0.5rem" }}>
-      <BorderLinearProgress variant="determinate" value={80} />
+      <BorderLinearProgress variant="determinate" value={value} />
     </Box>
   );
 };
