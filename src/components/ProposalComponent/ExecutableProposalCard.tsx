@@ -1,13 +1,14 @@
-import { Card, CardContent, Typography, CardActions, Theme, Stack, Chip, Grid, Box, Divider } from "@mui/material";
+import { Card, CardContent, Typography, CardActions, Theme, Stack, Chip, Grid, Box, Divider, Modal, Button } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CustomizedProgressBars from "../CustomProgressBar";
-import React from "react";
+import React, { useState } from "react";
 import { ProgramAccount, Proposal } from "@solana/spl-governance";
 import moment from "moment";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumDownAltIcon from "@mui/icons-material/ThumbDown";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStyles = makeStyles((_theme: Theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   card: {
     border: "1px solid gray",
     borderRadius: "16px !important",
@@ -17,6 +18,17 @@ const useStyles = makeStyles((_theme: Theme) => ({
       backgroundColor: "whitesmoke !important",
     },
   },
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalContent: {
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2),
+    position: "relative", // Modal içeriği için göreceli konumlandırma
+  },
 }));
 
 type Props = {
@@ -25,10 +37,65 @@ type Props = {
 
 const ExecutableProposalCard: React.FC<Props> = ({ proposal }) => {
   const classes = useStyles();
+  const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
+
+  const modal = () => {
+    return (
+      <Modal
+        className={classes.modal}
+        open={showVoteModal}
+        onClose={() => {
+          setShowVoteModal(false);
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            borderRadius: "8px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 500,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 1,
+          }}
+        >
+          <div className={classes.modalContent}>
+            <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
+              {proposal.account.name}
+            </Typography>
+            <Typography id="modal-modal-title" variant="subtitle1" component="h2" color={"black"} align="center">
+              {proposal.account.descriptionLink}
+            </Typography>
+            <Divider sx={{ marginBottom: "1rem", marginTop: "0.5rem", background: "black" }} />
+            <Grid gap={2} style={{ display: "flex", flexDirection: "column" }}>
+              <Button variant="outlined" color="success">
+                <b>YES</b> &nbsp; <ThumbUpAltIcon />
+              </Button>
+              <Button variant="outlined" color="error">
+                <b>NO</b> &nbsp; <ThumDownAltIcon />
+              </Button>
+            </Grid>
+            <Divider />
+          </div>
+        </Box>
+      </Modal>
+    );
+  };
 
   return (
-    <CardActions onClick={() => {}} sx={{ padding: "0" }}>
-      <Card className={classes.card}>
+    <CardActions sx={{ padding: "0" }}>
+      <Card
+        className={classes.card}
+        onClick={() => {
+          setShowVoteModal(true);
+        }}
+        sx={{ cursor: "pointer" }}
+      >
         <CardContent sx={{ padding: "0.75rem", paddingBottom: "0.75rem !important" }}>
           <Stack direction={"row"} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
             <Typography>{proposal.account.name}</Typography>
@@ -94,6 +161,7 @@ const ExecutableProposalCard: React.FC<Props> = ({ proposal }) => {
           </Grid>
         </CardContent>
       </Card>
+      {modal()}
     </CardActions>
   );
 };
