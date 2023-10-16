@@ -25,17 +25,8 @@ const ProtectedRoute: React.FC = () => {
 
   if (loading || connecting) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          width: "50vw",
-          margin: 0,
-        }}
-      >
-        <LinearProgress color="inherit" style={{ width: "80%" }} />
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <LinearProgress color="inherit" style={{ width: "50vw" }} />
       </div>
     );
   }
