@@ -21,6 +21,7 @@ import NonExecutableProposalCard from "../../components/ProposalComponent/NonExe
 import ConcludedProposal from "../../components/ProposalComponent/ConcludedProposal.tsx";
 import { CustomInput } from "../../components/CustomInput.tsx";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { GOVERNANCE_PROGRAM_ID } from "../../lib/dao/constants.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
@@ -390,9 +391,17 @@ const DaoDetails: React.FC = () => {
                     {dao && (
                       <Stack className={classes.detailItems}>
                         <Typography variant={"subtitle2"}>Details</Typography>
-                        <Typography variant={"subtitle2"}>Token: {}</Typography>
-                        <Typography variant={"subtitle2"}>Website:</Typography>
-                        <Typography variant={"subtitle2"}>Program Version:</Typography>
+                        {/* <Typography variant={"subtitle2"}>Token: {}</Typography>
+                        <Typography variant={"subtitle2"}>Website:</Typography> */}
+                        <Typography variant={"subtitle2"}>Program Version: 3</Typography>
+                        <Typography variant={"subtitle2"}>
+                          Program:
+                          {
+                            <a target="_blank" href="https://solscan.io/account/GovER5Lthms3bLBqWub97yVrMmEogzX7xNjdXpPPCVZw?cluster=devnet">
+                              {GOVERNANCE_PROGRAM_ID.toBase58().slice(0, 16) + "..." + GOVERNANCE_PROGRAM_ID.toBase58().slice(-5)}
+                            </a>
+                          }
+                        </Typography>
                       </Stack>
                     )}
                   </TabPanel>
