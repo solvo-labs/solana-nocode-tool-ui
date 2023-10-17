@@ -157,7 +157,8 @@ const DaoDetails: React.FC = () => {
           const members = await daoInstance.getMembers();
 
           await sleep(3000);
-          const imAMember = members.findIndex((mm) => mm.pubkey.toBase58() === publicKey.toBase58()) > -1;
+
+          const imAMember = members.findIndex((mm) => mm.account.governingTokenOwner.toBase58() === publicKey.toBase58()) > -1;
           const tokenSupply = await connection.getTokenSupply(daoDetail.dao.account.communityMint);
           setToken(tokenSupply);
 
