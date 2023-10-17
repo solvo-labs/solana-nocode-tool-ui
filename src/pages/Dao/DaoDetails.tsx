@@ -435,7 +435,7 @@ const DaoDetails: React.FC = () => {
                       onGoingProposal.account.voteType.type === VoteTypeKind.SingleChoice ? (
                         <ExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} />
                       ) : (
-                        <NonExecutableProposalCard proposal={onGoingProposal} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} />
                       )
                     )}
                 {proposals &&
@@ -450,7 +450,7 @@ const DaoDetails: React.FC = () => {
                       filteredProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
                         <ExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} />
                       ) : (
-                        <NonExecutableProposalCard proposal={filteredProposal} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} />
                       )
                     )}
                 {searchFlag &&
