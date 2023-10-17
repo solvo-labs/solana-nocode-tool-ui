@@ -6,7 +6,7 @@ import { ProgramAccount, Proposal, ProposalOption, VoteKind } from "@solana/spl-
 import moment from "moment";
 import { DAO } from "../../lib/dao";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import toastr from "toastr";
 
@@ -19,6 +19,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     "&:hover": {
       backgroundColor: "whitesmoke !important",
     },
+    cursor: "pointer",
   },
   modal: {
     display: "flex",
@@ -48,6 +49,16 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal }) =
   const { sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
+
+  const totalVote = useMemo(() => {
+    let total = 0;
+
+    proposal.account.options.forEach((opt) => {
+      total += opt.voteWeight.toNumber();
+    });
+
+    return total;
+  }, [proposal.account.options]);
 
   const executeVote = async () => {
     try {
@@ -154,7 +165,24 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal }) =
           </Box>
           <Divider sx={{ marginTop: "0.5rem", backgroundColor: "gray" }}></Divider>
           <Stack spacing={2} marginTop={"0.5rem"}>
-            <Grid container direction={"row"}>
+            {proposal.account.options.map((opt) => {
+              return (
+                <Grid container direction={"row"}>
+                  <Stack direction={"row"} width={"100%"} justifyContent={"space-between"}>
+                    <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"flex-end"}>
+                      <Typography sx={{ fontSize: "0.8rem" }}>{opt.label}</Typography>
+                      <Typography sx={{ fontSize: "0.7rem" }}>{opt.voteWeight.toNumber()} votes</Typography>
+                    </Stack>
+                    <Typography sx={{ fontSize: "0.7rem" }}>{totalVote > 0 ? (opt.voteWeight.toNumber() / totalVote) * 100 : 0}</Typography>
+                  </Stack>
+                  <Grid item width={"100%"}>
+                    <CustomizedProgressBars value={totalVote > 0 ? (opt.voteWeight.toNumber() / totalVote) * 100 : 0}></CustomizedProgressBars>
+                  </Grid>
+                </Grid>
+              );
+            })}
+
+            {/* <Grid container direction={"row"} marginTop={"0.5rem"}>
               <Stack direction={"row"} width={"100%"} justifyContent={"space-between"}>
                 <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"flex-end"}>
                   <Typography sx={{ fontSize: "0.8rem" }}>Secenek:1</Typography>
@@ -165,19 +193,7 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal }) =
               <Grid item width={"100%"}>
                 <CustomizedProgressBars value={0}></CustomizedProgressBars>
               </Grid>
-            </Grid>
-            <Grid container direction={"row"} marginTop={"0.5rem"}>
-              <Stack direction={"row"} width={"100%"} justifyContent={"space-between"}>
-                <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"flex-end"}>
-                  <Typography sx={{ fontSize: "0.8rem" }}>Secenek:1</Typography>
-                  <Typography sx={{ fontSize: "0.7rem" }}>0 votes</Typography>
-                </Stack>
-                <Typography sx={{ fontSize: "0.7rem" }}>%0</Typography>
-              </Stack>
-              <Grid item width={"100%"}>
-                <CustomizedProgressBars value={0}></CustomizedProgressBars>
-              </Grid>
-            </Grid>
+            </Grid> */}
           </Stack>
         </CardContent>
       </Card>

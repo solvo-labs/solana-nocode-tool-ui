@@ -22,6 +22,8 @@ import {
   withCreateProposal,
   withInsertTransaction,
   withSignOffProposal,
+  getRealmConfig,
+  RealmConfigAccount,
 } from "@solana/spl-governance";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import {
@@ -81,6 +83,14 @@ export class DAO {
       const dao = await getRealm(this.connection, this.daoPublicKey);
 
       return { dao };
+    }
+
+    throw "Something went wrong";
+  };
+
+  getConfig = async (): Promise<ProgramAccount<RealmConfigAccount>> => {
+    if (this.daoPublicKey) {
+      return getRealmConfig(this.connection, this.daoPublicKey);
     }
 
     throw "Something went wrong";

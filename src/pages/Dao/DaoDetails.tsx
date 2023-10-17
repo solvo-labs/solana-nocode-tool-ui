@@ -15,7 +15,7 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
 import { sleep } from "../../lib/utils.ts";
-import { ProgramAccount, Proposal, ProposalState, Realm, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
+import { ProgramAccount, Proposal, ProposalState, Realm, RealmConfigAccount, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
 import ExecutableProposalCard from "../../components/ProposalComponent/ExecutableProposalCard.tsx";
 import NonExecutableProposalCard from "../../components/ProposalComponent/NonExecutableProposalCard.tsx";
 import ConcludedProposal from "../../components/ProposalComponent/ConcludedProposal.tsx";
@@ -88,6 +88,8 @@ const DaoDetails: React.FC = () => {
     options: [],
   });
 
+  const [daoConfig, setDaoConfig] = useState<ProgramAccount<RealmConfigAccount>>();
+
   const { sendTransaction } = useWallet();
 
   const [membersOpen, setMembersOpen] = useState(false);
@@ -130,6 +132,7 @@ const DaoDetails: React.FC = () => {
           const daoDetail = await daoInstance.getDaoDetails();
           // await sleep(3000);
           const members = await daoInstance.getMembers();
+          const config = await daoInstance.getConfig();
           await sleep(3000);
 
           const proposals = await daoInstance.getProposals();
@@ -137,6 +140,7 @@ const DaoDetails: React.FC = () => {
           setProposals(proposals);
           setMembers(members);
           setDao(daoDetail.dao);
+          setDaoConfig(config);
           setLoading(false);
         } catch (error) {
           console.log(error);
@@ -146,7 +150,7 @@ const DaoDetails: React.FC = () => {
     };
     init();
   }, [daoInstance, pubkey]);
-
+  console.log(daoConfig);
   if (loading) {
     return (
       <div
