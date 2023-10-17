@@ -226,11 +226,11 @@ export class DAO {
         }),
       ];
 
-      const tokenOwnerRecord = await getAllTokenOwnerRecords(this.connection, daoDetail.owner, daoDetail.pubkey);
+      const tokenOwnerRecord = await this.getTokenOwnerRecord();
 
-      const tokenOwnerRecordPk = tokenOwnerRecord[0].pubkey;
+      const tokenOwnerRecordPk = tokenOwnerRecord!.pubkey;
 
-      const communityMint = tokenOwnerRecord[0].account.governingTokenMint;
+      const communityMint = tokenOwnerRecord!.account.governingTokenMint;
 
       const voteType = isMulti ? VoteType.MULTI_CHOICE(MultiChoiceType.FullWeight, 1, options.length, options.length) : VoteType.SINGLE_CHOICE;
 
