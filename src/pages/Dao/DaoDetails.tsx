@@ -361,7 +361,11 @@ const DaoDetails: React.FC = () => {
                         direction={"row"}
                         spacing={2}
                         onClick={() => {
-                          handleOpen(setMembersOpen);
+                          if (members.length > 0) {
+                            handleOpen(setMembersOpen);
+                          } else {
+                            toastr.warning("There are no members for this dao.");
+                          }
                         }}
                         className={classes.managementItems}
                       >
@@ -376,14 +380,7 @@ const DaoDetails: React.FC = () => {
                         daoName={dao ? dao.account.name : "def"}
                         members={members}
                       ></MembersModal>
-                      <Stack
-                        direction={"row"}
-                        spacing={2}
-                        onClick={() => {
-                          console.log("Asdsda");
-                        }}
-                        className={classes.managementItems}
-                      >
+                      <Stack direction={"row"} spacing={2} onClick={() => {}} className={classes.managementItems}>
                         <SettingsIcon sx={{ fontSize: "24px", color: "#A56BFA" }}></SettingsIcon>
                         <Typography variant={"subtitle2"}>Parameters</Typography>
                       </Stack>

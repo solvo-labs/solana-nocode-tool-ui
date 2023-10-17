@@ -18,6 +18,7 @@ type Props = {
 
 const MemberDetail: React.FC<Props> = ({ selectedMember }) => {
   const classes = useStyles();
+
   return (
     <Grid className={classes.main}>
       <Typography variant={"h5"} marginBottom={"0.5rem"}>
