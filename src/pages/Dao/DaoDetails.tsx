@@ -1,6 +1,25 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useEffect, useMemo, useState } from "react";
-import { Avatar, Box, Button, Card, CardContent, CircularProgress, Divider, FormControlLabel, Grid, IconButton, Modal, Stack, Switch, Tab, Theme, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  List,
+  ListItemText,
+  Modal,
+  Stack,
+  Switch,
+  Tab,
+  Theme,
+  Typography,
+} from "@mui/material";
 import SearchInput from "../../components/SearchInput.tsx";
 import { FILTERS } from "../../utils/enum.ts";
 import FilterSelector from "../../components/FilterSelector.tsx";
@@ -15,7 +34,7 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
 import { sleep } from "../../lib/utils.ts";
-import { ProgramAccount, Proposal, ProposalState, Realm, RealmConfigAccount, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
+import { Governance, ProgramAccount, Proposal, ProposalState, Realm, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
 import ExecutableProposalCard from "../../components/ProposalComponent/ExecutableProposalCard.tsx";
 import NonExecutableProposalCard from "../../components/ProposalComponent/NonExecutableProposalCard.tsx";
 import ConcludedProposal from "../../components/ProposalComponent/ConcludedProposal.tsx";
@@ -88,8 +107,8 @@ const DaoDetails: React.FC = () => {
     isMulti: false,
     options: [],
   });
-
-  const [daoConfig, setDaoConfig] = useState<ProgramAccount<RealmConfigAccount>>();
+  const [daoConfig, setDaoConfig] = useState<Governance>();
+  const [showConfigModal, setShowConfigModal] = useState<boolean>(false);
 
   const { sendTransaction } = useWallet();
 
@@ -131,9 +150,9 @@ const DaoDetails: React.FC = () => {
       if (daoInstance && pubkey) {
         try {
           const daoDetail = await daoInstance.getDaoDetails();
-          // await sleep(3000);
+          await sleep(3000);
           const members = await daoInstance.getMembers();
-          const config = await daoInstance.getConfig();
+
           await sleep(3000);
 
           const proposals = await daoInstance.getProposals();
@@ -141,7 +160,9 @@ const DaoDetails: React.FC = () => {
           setProposals(proposals);
           setMembers(members);
           setDao(daoDetail.dao);
-          setDaoConfig(config);
+          setDaoConfig(daoDetail.config);
+          console.log(daoDetail.config);
+
           setLoading(false);
         } catch (error) {
           console.log(error);
@@ -151,7 +172,7 @@ const DaoDetails: React.FC = () => {
     };
     init();
   }, [daoInstance, pubkey]);
-  console.log(daoConfig);
+
   if (loading) {
     return (
       <div
@@ -184,6 +205,88 @@ const DaoDetails: React.FC = () => {
 
     const signature = await sendTransaction(transactionProposal!, connection, { minContextSlot, signers: [] });
     await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+  };
+
+  console.log(daoConfig?.config.minCouncilTokensToCreateProposal);
+
+  const formatTimestamp = (seconds: number) => {
+    const days = Math.floor(seconds / (3600 * 24));
+    const remainingSeconds = seconds % (3600 * 24);
+    const hours = Math.floor(remainingSeconds / 3600);
+
+    if (days > 0 && hours === 0) {
+      return `${days} d`;
+    }
+
+    if (days === 0 && hours > 0) {
+      return `${hours} h`;
+    }
+
+    return `${days} d ${hours} h`;
+  };
+
+  const daoConfigModal = () => {
+    if (daoConfig) {
+      return (
+        <Modal
+          className={classes.modal}
+          open={showConfigModal}
+          onClose={() => {
+            setShowConfigModal(false);
+          }}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              borderRadius: "8px",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 500,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              maxHeight: 600,
+              height: "auto",
+              p: 1,
+              overflowY: "auto",
+            }}
+          >
+            <div className={classes.modalContent}>
+              <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
+                Dao Config Parameters
+              </Typography>
+              <Divider sx={{ marginBottom: "1rem", marginTop: "0.5rem", background: "black" }} />
+              <Box sx={{ width: "100%", color: "black" }}>
+                <List>
+                  <ListItemText>
+                    <b>Max Voting Time : </b> {formatTimestamp(daoConfig.config.baseVotingTime - daoConfig.config.votingCoolOffTime)}
+                  </ListItemText>
+                  <ListItemText>
+                    <b>Proposal Cool-off Time : </b> {formatTimestamp(daoConfig.config.votingCoolOffTime)}
+                  </ListItemText>
+                  <ListItemText>
+                    <b>Deposit Exempt Proposal Count : </b> {daoConfig.config.depositExemptProposalCount}
+                  </ListItemText>
+                  <ListItemText>
+                    <b>Community Vote Threshold Percentage : </b> %{daoConfig.config.communityVoteThreshold.value}
+                  </ListItemText>
+                  <ListItemText>
+                    <b>Min community tokens to create governance : </b> {daoConfig.config.minCommunityTokensToCreateProposal.toNumber()}
+                  </ListItemText>
+                  <ListItemText>
+                    <b>Min council tokens to create governance : </b> {daoConfig.config.minCouncilTokensToCreateProposal.toNumber()}
+                  </ListItemText>
+                </List>
+              </Box>
+              <Divider />
+            </div>
+          </Box>
+        </Modal>
+      );
+    }
   };
 
   const createProposalModal = () => {
@@ -381,7 +484,14 @@ const DaoDetails: React.FC = () => {
                         daoName={dao ? dao.account.name : "def"}
                         members={members}
                       ></MembersModal>
-                      <Stack direction={"row"} spacing={2} onClick={() => {}} className={classes.managementItems}>
+                      <Stack
+                        direction={"row"}
+                        spacing={2}
+                        onClick={() => {
+                          setShowConfigModal(true);
+                        }}
+                        className={classes.managementItems}
+                      >
                         <SettingsIcon sx={{ fontSize: "24px", color: "#A56BFA" }}></SettingsIcon>
                         <Typography variant={"subtitle2"}>Parameters</Typography>
                       </Stack>
@@ -391,11 +501,9 @@ const DaoDetails: React.FC = () => {
                     {dao && (
                       <Stack className={classes.detailItems}>
                         <Typography variant={"subtitle2"}>Details</Typography>
-                        {/* <Typography variant={"subtitle2"}>Token: {}</Typography>
-                        <Typography variant={"subtitle2"}>Website:</Typography> */}
                         <Typography variant={"subtitle2"}>Program Version: 3</Typography>
                         <Typography variant={"subtitle2"}>
-                          Program:
+                          Program : &nbsp;
                           {
                             <a target="_blank" href="https://solscan.io/account/GovER5Lthms3bLBqWub97yVrMmEogzX7xNjdXpPPCVZw?cluster=devnet">
                               {GOVERNANCE_PROGRAM_ID.toBase58().slice(0, 16) + "..." + GOVERNANCE_PROGRAM_ID.toBase58().slice(-5)}
@@ -473,6 +581,7 @@ const DaoDetails: React.FC = () => {
         </Card>
       </Grid>
       {createProposalModal()}
+      {daoConfigModal()}
     </Grid>
   );
 };
