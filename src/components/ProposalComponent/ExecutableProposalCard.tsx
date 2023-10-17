@@ -2,15 +2,15 @@ import { Card, CardContent, Typography, CardActions, Theme, Stack, Chip, Grid, B
 import { makeStyles } from "@mui/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CustomizedProgressBars from "../CustomProgressBar";
-import React, { useState } from "react";
-import { ProgramAccount, Proposal, VoteKind } from "@solana/spl-governance";
-import moment from "moment";
+import React, { useEffect, useState } from "react";
+import { Governance, ProgramAccount, Proposal, VoteKind } from "@solana/spl-governance";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumDownAltIcon from "@mui/icons-material/ThumbDown";
 
 import { DAO } from "../../lib/dao";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import toastr from "toastr";
+import { fullFormatTimestamp, getTimestamp } from "../../lib/utils";
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -38,13 +38,33 @@ const useStyles = makeStyles((theme: Theme) => ({
 type Props = {
   daoInstance: DAO;
   proposal: ProgramAccount<Proposal>;
+  config: Governance;
 };
 
-const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal }) => {
+const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config }) => {
   const classes = useStyles();
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
   const { sendTransaction } = useWallet();
   const { connection } = useConnection();
+  const [remainingTime, setRemainingTime] = useState<number>(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = getTimestamp();
+      const proposalStartTime = proposal.account.draftAt.toNumber();
+      const proposalEndTime = proposalStartTime + config.config.baseVotingTime;
+
+      const remainingTimestamp = proposalEndTime - now;
+
+      if (remainingTimestamp <= 0) setRemainingTime(0);
+
+      setRemainingTime(remainingTimestamp);
+    }, 6000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [config.config.baseVotingTime, proposal.account.draftAt]);
 
   const executeVote = async (isYes = false) => {
     const vote = isYes ? VoteKind.Approve : VoteKind.Deny;
@@ -142,7 +162,7 @@ const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal }) => {
             </Stack>
           </Stack>
           <Box sx={{ border: "1px solid black", borderRadius: "12px", maxWidth: "140px", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-            <Typography>{moment.unix(proposal.account.draftAt.toNumber()).format("LLL")}</Typography>
+            <Typography>{fullFormatTimestamp(remainingTime)}</Typography>
           </Box>
           <Divider sx={{ marginTop: "0.5rem", backgroundColor: "gray" }}></Divider>
           <Grid container>

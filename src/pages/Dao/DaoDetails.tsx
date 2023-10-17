@@ -33,7 +33,7 @@ import { useParams } from "react-router-dom";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
-import { sleep } from "../../lib/utils.ts";
+import { formatTimestamp, sleep } from "../../lib/utils.ts";
 import { Governance, ProgramAccount, Proposal, ProposalState, Realm, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
 import ExecutableProposalCard from "../../components/ProposalComponent/ExecutableProposalCard.tsx";
 import NonExecutableProposalCard from "../../components/ProposalComponent/NonExecutableProposalCard.tsx";
@@ -205,24 +205,6 @@ const DaoDetails: React.FC = () => {
 
     const signature = await sendTransaction(transactionProposal!, connection, { minContextSlot, signers: [] });
     await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
-  };
-
-  console.log(daoConfig?.config.minCouncilTokensToCreateProposal);
-
-  const formatTimestamp = (seconds: number) => {
-    const days = Math.floor(seconds / (3600 * 24));
-    const remainingSeconds = seconds % (3600 * 24);
-    const hours = Math.floor(remainingSeconds / 3600);
-
-    if (days > 0 && hours === 0) {
-      return `${days} d`;
-    }
-
-    if (days === 0 && hours > 0) {
-      return `${hours} h`;
-    }
-
-    return `${days} d ${hours} h`;
   };
 
   const daoConfigModal = () => {
@@ -551,9 +533,9 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((onGoingProposal) =>
                       onGoingProposal.account.voteType.type === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} />
+                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} />
                       )
                     )}
                 {proposals &&
@@ -566,9 +548,9 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((filteredProposal) =>
                       filteredProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} />
+                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} />
                       )
                     )}
                 {searchFlag &&
