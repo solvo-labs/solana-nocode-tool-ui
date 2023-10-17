@@ -18,7 +18,7 @@ interface ListDaosProps {
 const ListDaos: React.FC<ListDaosProps> = ({ daos, characterLimit }) => {
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
-      {daos.slice(0, 100).map((dao, index) => {
+      {daos.map((dao, index) => {
         // console.log("dao.pubkey", typeof dao.pubkey);
         if (dao.account.name) {
           return (
