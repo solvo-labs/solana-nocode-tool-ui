@@ -14,9 +14,10 @@ const useStyles = makeStyles((_theme: Theme) => ({
 
 type Props = {
   selectedMember: ProgramAccount<TokenOwnerRecord>;
+  decimals: number;
 };
 
-const MemberDetail: React.FC<Props> = ({ selectedMember }) => {
+const MemberDetail: React.FC<Props> = ({ selectedMember, decimals }) => {
   const classes = useStyles();
 
   return (
@@ -28,7 +29,7 @@ const MemberDetail: React.FC<Props> = ({ selectedMember }) => {
         <b>Pubkey :</b> {selectedMember.account.governingTokenOwner.toBase58()}
       </Typography>
       <Typography>
-        <b>Council Votes :</b> {selectedMember.account.governingTokenDepositAmount.toNumber()}
+        <b>Council Votes :</b> {selectedMember.account.governingTokenDepositAmount.toNumber() / Math.pow(10, decimals)}
       </Typography>
       <Typography>
         <b>Proposal Count :</b> {selectedMember.account.outstandingProposalCount}

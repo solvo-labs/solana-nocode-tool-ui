@@ -39,9 +39,10 @@ type Props = {
   daoInstance: DAO;
   proposal: ProgramAccount<Proposal>;
   config: Governance;
+  decimals: number;
 };
 
-const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config }) => {
+const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config, decimals }) => {
   const classes = useStyles();
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
   const { sendTransaction } = useWallet();
@@ -171,7 +172,7 @@ const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config
                 <Stack>
                   <Typography>Yes Votes</Typography>
                   <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"start"}>
-                    <Typography sx={{ fontSize: "0.8rem" }}>{proposal.account.getYesVoteCount().toNumber()}</Typography>
+                    <Typography sx={{ fontSize: "0.8rem" }}>{proposal.account.getYesVoteCount().toNumber() / Math.pow(10, decimals)}</Typography>
                     <Typography sx={{ fontSize: "0.7rem" }}>
                       %
                       {proposal.account.getYesVoteCount().toNumber() + proposal.account.getNoVoteCount().toNumber() > 0 && proposal.account.getYesVoteCount().toNumber() > 0

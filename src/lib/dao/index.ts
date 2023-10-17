@@ -80,16 +80,20 @@ export class DAO {
 
   getDaoDetails = async (): Promise<{
     dao: ProgramAccount<Realm>;
-    config: Governance;
+    config: Governance | undefined;
   }> => {
     if (this.daoPublicKey) {
       const dao = await getRealm(this.connection, this.daoPublicKey);
       const governance = dao.account.authority;
-      const config = (await getGovernance(this.connection, governance!)).account;
+      try {
+        const config = (await getGovernance(this.connection, governance!)).account;
+        console.log(config);
 
-      return { dao, config };
+        return { dao, config };
+      } catch {
+        return { dao, config: undefined };
+      }
     }
-
     throw "Something went wrong";
   };
 

@@ -3,7 +3,6 @@ import { makeStyles } from "@mui/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CustomizedProgressBars from "../CustomProgressBar";
 import { Governance, ProgramAccount, Proposal, ProposalOption, VoteKind } from "@solana/spl-governance";
-import moment from "moment";
 import { DAO } from "../../lib/dao";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useState } from "react";
@@ -43,9 +42,10 @@ type Props = {
   daoInstance: DAO;
   proposal: ProgramAccount<Proposal>;
   config: Governance;
+  decimals: number;
 };
 
-const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config }) => {
+const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config, decimals }) => {
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
   const classes = useStyles();
   const { sendTransaction } = useWallet();
@@ -193,7 +193,7 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
                   <Stack direction={"row"} width={"100%"} justifyContent={"space-between"}>
                     <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"flex-end"}>
                       <Typography sx={{ fontSize: "0.8rem" }}>{opt.label}</Typography>
-                      <Typography sx={{ fontSize: "0.7rem" }}>{opt.voteWeight.toNumber()} votes</Typography>
+                      <Typography sx={{ fontSize: "0.7rem" }}>{opt.voteWeight.toNumber() / Math.pow(10, decimals)} votes</Typography>
                     </Stack>
                     <Typography sx={{ fontSize: "0.7rem" }}>{totalVote > 0 ? (opt.voteWeight.toNumber() / totalVote) * 100 : 0}</Typography>
                   </Stack>

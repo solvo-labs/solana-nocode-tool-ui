@@ -26,9 +26,10 @@ type Props = {
   open: boolean;
   daoName: string;
   members: ProgramAccount<TokenOwnerRecord>[];
+  decimals: number;
 };
 
-const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members }) => {
+const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members, decimals }) => {
   const [selectedMember, setSelectedMember] = useState<ProgramAccount<TokenOwnerRecord>>(members[0]);
 
   return (
@@ -63,7 +64,7 @@ const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members }) 
             </Stack>
           </Grid>
           <Grid item xl={8} lg={8} md={8} xs={12} sm={12} paddingLeft={"2rem"}>
-            <MemberDetail selectedMember={selectedMember}></MemberDetail>
+            <MemberDetail selectedMember={selectedMember} decimals={decimals}></MemberDetail>
           </Grid>
         </Grid>
       </Box>

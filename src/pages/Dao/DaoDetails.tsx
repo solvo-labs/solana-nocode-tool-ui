@@ -30,7 +30,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { DAO } from "../../lib/dao";
 import toastr from "toastr";
 import { useParams } from "react-router-dom";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, RpcResponseAndContext, TokenAmount, Transaction } from "@solana/web3.js";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
 import { formatTimestamp, sleep } from "../../lib/utils.ts";
@@ -41,6 +41,7 @@ import ConcludedProposal from "../../components/ProposalComponent/ConcludedPropo
 import { CustomInput } from "../../components/CustomInput.tsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { GOVERNANCE_PROGRAM_ID } from "../../lib/dao/constants.ts";
+import { fetchUserTokens } from "../../lib/index.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
@@ -97,8 +98,6 @@ const DaoDetails: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [searchedProposal, setSearchedProposal] = useState<any[]>([]);
-  // const [filters, setFilters] = useState<string[]>([]);
-  // const [filteredProposal, setFilteredProposal] = useState([]);
   const [filtersTitle] = useState<FILTERS[]>(Object.values(FILTERS));
   const [showCreateProposalModal, setShowCreateProposalModal] = useState<boolean>(false);
   const [proposalData, setProposalData] = useState<{ name: string; description: string; isMulti: boolean; options: string[] }>({
@@ -109,8 +108,9 @@ const DaoDetails: React.FC = () => {
   });
   const [daoConfig, setDaoConfig] = useState<Governance>();
   const [showConfigModal, setShowConfigModal] = useState<boolean>(false);
+  const [token, setToken] = useState<RpcResponseAndContext<TokenAmount>>();
 
-  const { sendTransaction } = useWallet();
+  const { sendTransaction, publicKey } = useWallet();
 
   const [membersOpen, setMembersOpen] = useState(false);
   const handleOpen = (setState: any) => setState(true);
@@ -141,21 +141,35 @@ const DaoDetails: React.FC = () => {
   useEffect(() => {
     if (wallet && pubkey) {
       const dao = new DAO(connection, wallet, new PublicKey(pubkey));
+
       setDaoInstance(dao);
     }
   }, [connection, pubkey, wallet]);
 
   useEffect(() => {
     const init = async () => {
-      if (daoInstance && pubkey) {
+      if (daoInstance && pubkey && publicKey) {
         try {
           const daoDetail = await daoInstance.getDaoDetails();
           await sleep(3000);
+
+          const userTokenDetails = await fetchUserTokens(connection, publicKey, daoDetail.dao.account.communityMint);
           const members = await daoInstance.getMembers();
+
+          await sleep(3000);
+          const imAMember = members.findIndex((mm) => mm.pubkey.toBase58() === publicKey.toBase58()) > -1;
+          const tokenSupply = await connection.getTokenSupply(daoDetail.dao.account.communityMint);
+          setToken(tokenSupply);
+
+          if (!imAMember && userTokenDetails.length === 0) {
+            toastr.warning("You'r not a member for this dao");
+          }
 
           await sleep(3000);
 
           const proposals = await daoInstance.getProposals();
+
+          console.log(proposals);
 
           setProposals(proposals);
           setMembers(members);
@@ -171,7 +185,7 @@ const DaoDetails: React.FC = () => {
       }
     };
     init();
-  }, [daoInstance, pubkey]);
+  }, [connection, daoInstance, pubkey, publicKey]);
 
   if (loading) {
     return (
@@ -465,6 +479,7 @@ const DaoDetails: React.FC = () => {
                         }}
                         daoName={dao ? dao.account.name : "def"}
                         members={members}
+                        decimals={token?.value.decimals || 0}
                       ></MembersModal>
                       <Stack
                         direction={"row"}
@@ -533,9 +548,9 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((onGoingProposal) =>
                       onGoingProposal.account.voteType.type === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} />
+                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} decimals={token?.value.decimals || 0} />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} decimals={token?.value.decimals || 0} />
                       )
                     )}
                 {proposals &&
@@ -548,9 +563,9 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((filteredProposal) =>
                       filteredProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} />
+                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} decimals={token?.value.decimals || 0} />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} decimals={token?.value.decimals || 0} />
                       )
                     )}
                 {searchFlag &&
