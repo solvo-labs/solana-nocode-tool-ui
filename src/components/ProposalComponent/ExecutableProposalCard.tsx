@@ -1,6 +1,5 @@
 import { Card, CardContent, Typography, CardActions, Theme, Stack, Chip, Grid, Box, Divider, Modal, Button } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CustomizedProgressBars from "../CustomProgressBar";
 import React, { useEffect, useState } from "react";
 import { Governance, ProgramAccount, Proposal, VoteKind } from "@solana/spl-governance";
@@ -11,6 +10,7 @@ import { DAO } from "../../lib/dao";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import toastr from "toastr";
 import { fullFormatTimestamp, getTimestamp } from "../../lib/utils";
+import { getStatusData } from "../../lib/dao/utils";
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -158,8 +158,8 @@ const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config
           <Stack direction={"row"} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
             <Typography>{proposal.account.name}</Typography>
             <Stack direction={"row"} spacing={2} justifyContent={"center"} alignItems={"center"}>
-              <ThumbUpIcon sx={{ fontSize: "24px" }} color="success"></ThumbUpIcon>
-              <Chip label="success" sx={{ height: "24px", fontSize: "12px" }} color="success" />
+              {/* <ThumbUpIcon sx={{ fontSize: "24px" }} color="success"></ThumbUpIcon> */}
+              <Chip label={getStatusData(proposal.account.state).text} sx={{ height: "24px", fontSize: "12px" }} color={getStatusData(proposal.account.state).color as any} />
             </Stack>
           </Stack>
           <Box sx={{ border: "1px solid black", borderRadius: "12px", maxWidth: "140px", justifyContent: "center", alignItems: "center", textAlign: "center" }}>

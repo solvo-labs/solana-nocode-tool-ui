@@ -558,7 +558,7 @@ const DaoDetails: React.FC = () => {
                   !searchFlag &&
                   proposals
                     .filter((concludedProposal) => concludedProposal.account.state != ProposalState.Voting)
-                    .map((proposal) => <ConcludedProposal title={proposal.account.name}></ConcludedProposal>)}
+                    .map((proposal) => <ConcludedProposal proposal={proposal} title={proposal.account.name}></ConcludedProposal>)}
                 {searchFlag &&
                   searchedProposal
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
@@ -572,7 +572,7 @@ const DaoDetails: React.FC = () => {
                 {searchFlag &&
                   searchedProposal
                     .filter((concludedProposal) => concludedProposal.account.state != ProposalState.Voting)
-                    .map((filteredProposal) => <ConcludedProposal title={filteredProposal.account.name}></ConcludedProposal>)}
+                    .map((filteredProposal) => <ConcludedProposal proposal={filteredProposal} title={filteredProposal.account.name}></ConcludedProposal>)}
               </Stack>
             </div>
           </CardContent>

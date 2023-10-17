@@ -15,6 +15,7 @@ import {
   MintMaxVoteWeightSourceType,
   ProgramAccount,
   Proposal,
+  ProposalState,
   Realm,
   SetRealmAuthorityAction,
   VoteThreshold,
@@ -594,4 +595,49 @@ export const getVetoTokenMint = (proposal: ProgramAccount<Proposal>, realm: Prog
   const vetoTokenMint = governingMint.equals(communityMint) ? councilMint : communityMint;
   if (vetoTokenMint === undefined) throw new Error("There is no token that can veto this proposal");
   return vetoTokenMint;
+};
+
+export const getStatusData = (state: ProposalState) => {
+  console.log(state);
+  if (state === ProposalState.Voting) {
+    return { text: "Voting", color: "success" };
+  }
+
+  if (state === ProposalState.Vetoed) {
+    return { text: "Vetoed", color: "error" };
+  }
+
+  if (state === ProposalState.Cancelled) {
+    return { text: "Cancelled", color: "warning" };
+  }
+
+  if (state === ProposalState.Completed) {
+    return { text: "Completed", color: "success" };
+  }
+
+  if (state === ProposalState.Defeated) {
+    return { text: "Defeated", color: "error" };
+  }
+
+  if (state === ProposalState.Executing) {
+    return { text: "Executing", color: "info" };
+  }
+
+  if (state === ProposalState.Succeeded) {
+    return { text: "Succeeded", color: "success" };
+  }
+
+  if (state === ProposalState.Draft) {
+    return { text: "Draft", color: "success" };
+  }
+
+  if (state === ProposalState.ExecutingWithErrors) {
+    return { text: "ExecutingWithErrors", color: "error" };
+  }
+
+  if (state === ProposalState.SigningOff) {
+    return { text: "SigningOff", color: "info" };
+  }
+
+  return { text: "", color: "secondary" };
 };

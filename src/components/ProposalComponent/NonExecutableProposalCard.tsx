@@ -1,6 +1,5 @@
 import { Card, CardContent, Typography, CardActions, Theme, Stack, Chip, Grid, Box, Divider, Modal, Button } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CustomizedProgressBars from "../CustomProgressBar";
 import { Governance, ProgramAccount, Proposal, ProposalOption, VoteKind } from "@solana/spl-governance";
 import { DAO } from "../../lib/dao";
@@ -8,7 +7,8 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useState } from "react";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import toastr from "toastr";
-import { getTimestamp } from "../../lib/utils";
+import { fullFormatTimestamp, getTimestamp } from "../../lib/utils";
+import { getStatusData } from "../../lib/dao/utils";
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -59,7 +59,6 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
       const now = getTimestamp();
       const proposalStartTime = proposal.account.draftAt.toNumber();
       const proposalEndTime = proposalStartTime + config.config.baseVotingTime;
-
       const remainingTimestamp = proposalEndTime - now;
 
       if (remainingTimestamp <= 0) setRemainingTime(0);
@@ -178,12 +177,12 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
           <Stack direction={"row"} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
             <Typography>{proposal.account.name}</Typography>
             <Stack direction={"row"} spacing={2} justifyContent={"center"} alignItems={"center"}>
-              <ThumbUpIcon sx={{ fontSize: "24px" }} color="success"></ThumbUpIcon>
-              <Chip label="success" sx={{ height: "24px", fontSize: "12px" }} color="success" />
+              {/* <ThumbUpIcon sx={{ fontSize: "24px" }} color="success"></ThumbUpIcon> */}
+              <Chip label={getStatusData(proposal.account.state).text} sx={{ height: "24px", fontSize: "12px" }} color={getStatusData(proposal.account.state).color as any} />
             </Stack>
           </Stack>
           <Box sx={{ border: "1px solid black", borderRadius: "12px", maxWidth: "140px", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-            <Typography>{remainingTime}</Typography>
+            <Typography>{fullFormatTimestamp(remainingTime)}</Typography>
           </Box>
           <Divider sx={{ marginTop: "0.5rem", backgroundColor: "gray" }}></Divider>
           <Stack spacing={2} marginTop={"0.5rem"}>
