@@ -27,6 +27,7 @@ import {
   getGovernance,
   Governance,
   withDepositGoverningTokens,
+  withWithdrawGoverningTokens,
 } from "@solana/spl-governance";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { InstructionDataWithHoldUpTime, chunks, createCommunityDao, deduplicateObjsFilter, getVetoTokenMint, txBatchesToInstructionSetWithSigners } from "./utils";
@@ -423,14 +424,6 @@ export class DAO {
     const instructions: TransactionInstruction[] = [];
     const signers: Keypair[] = [];
 
-    // const transferAuthority = approveTokenTransfer(
-    //   instructions,
-    //   [],
-    //   userAtaPk,
-    //   wallet!.publicKey!,
-    //   amount
-    // )
-
     const transferAuthority = new Keypair();
 
     instructions.push(createApproveInstruction(userAtaPk, transferAuthority.publicKey, this.wallet.publicKey, amount, []));
@@ -454,5 +447,33 @@ export class DAO {
     transaction.add(...instructions);
 
     return { transaction, signers };
+  };
+
+  withdrawCommunityToken = async () => {
+    const tokenOwnerRecord = await this.getTokenOwnerRecord();
+
+    if (tokenOwnerRecord) {
+      const instructions: TransactionInstruction[] = [];
+      const signers: Keypair[] = [];
+
+      const ata = await getAssociatedTokenAddress(tokenOwnerRecord.account.governingTokenMint, tokenOwnerRecord.account.governingTokenOwner, true);
+
+      await withWithdrawGoverningTokens(
+        instructions,
+        new PublicKey(tokenOwnerRecord.owner),
+        3,
+        tokenOwnerRecord.account.realm,
+        ata,
+        tokenOwnerRecord.account.governingTokenMint,
+        tokenOwnerRecord.account.governingTokenOwner
+      );
+
+      const transaction = new Transaction();
+      transaction.add(...instructions);
+
+      return { transaction, signers };
+    }
+
+    throw "Something went wrong";
   };
 }

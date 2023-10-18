@@ -113,7 +113,7 @@ const DaoDetails: React.FC = () => {
   const [showConfigModal, setShowConfigModal] = useState<boolean>(false);
   const [token, setToken] = useState<RpcResponseAndContext<TokenAmount>>();
   const [depositAmount, setDepositAmount] = useState<number>(0);
-  const [showDepositModal, setShowDepositModal] = useState<boolean>(false);
+  const [showDepositModal, setShowDepositModal] = useState<{ show: boolean; isDeposit?: boolean }>({ show: false });
 
   const { sendTransaction, publicKey } = useWallet();
 
@@ -244,7 +244,25 @@ const DaoDetails: React.FC = () => {
       await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
       setLoading(false);
       toastr.success("Deposit completed successfully");
-      setShowDepositModal(false);
+      setShowDepositModal({ show: false });
+    }
+  };
+
+  const withdraw = async () => {
+    if (daoInstance && dao) {
+      setLoading(true);
+      const withdrawAction = await daoInstance.withdrawCommunityToken();
+
+      const {
+        context: { slot: minContextSlot },
+        value: { blockhash, lastValidBlockHeight },
+      } = await connection.getLatestBlockhashAndContext();
+
+      const signature = await sendTransaction(withdrawAction.transaction, connection, { minContextSlot, signers: withdrawAction.signers });
+      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+      setLoading(false);
+      toastr.success("Withdraw completed successfully");
+      setShowDepositModal({ show: false });
     }
   };
 
@@ -268,9 +286,9 @@ const DaoDetails: React.FC = () => {
     return (
       <Modal
         className={classes.modal}
-        open={showDepositModal}
+        open={showDepositModal.show}
         onClose={() => {
-          setShowDepositModal(false);
+          setShowDepositModal({ show: false });
         }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
@@ -299,6 +317,7 @@ const DaoDetails: React.FC = () => {
             <Divider sx={{ marginBottom: "1rem", marginTop: "0.5rem", background: "black" }} />
             <Box sx={{ width: "100%", color: "black" }}>
               <Grid gap={2} style={{ display: "flex", flexDirection: "column" }}>
+                (showDepositModal.isDeposit && (
                 <CustomInput
                   placeHolder="Amount"
                   label="Amount"
@@ -309,8 +328,9 @@ const DaoDetails: React.FC = () => {
                   onChange={(e: any) => setDepositAmount(e.target.value)}
                   disable={false}
                 />
-                <Button variant="outlined" onClick={deposit}>
-                  Deposit
+                ))
+                <Button variant="outlined" onClick={() => (showDepositModal.isDeposit ? deposit() : withdraw())}>
+                  {showDepositModal.isDeposit ? "Deposit" : "Withdraw All"}
                 </Button>
               </Grid>
             </Box>
@@ -626,10 +646,10 @@ const DaoDetails: React.FC = () => {
             style={classes.card}
             member={members.find((mb) => mb.account.governingTokenOwner.toBase58() === publicKey?.toBase58())}
             depositOnClick={() => {
-              setShowDepositModal(true);
+              setShowDepositModal({ show: true, isDeposit: true });
             }}
             withdrawOnClick={() => {
-              setShowDepositModal(true);
+              setShowDepositModal({ show: true });
             }}
           />
           <Card className={classes.card}>
