@@ -84,7 +84,7 @@ const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount,
               <Stack padding={"1rem"} marginTop={"1rem"}>
                 <Typography variant="subtitle2">ogicik2 Council Votes</Typography>
                 <Stack direction={"row"} justifyContent={"space-between"}>
-                  <Typography variant="h6">{member.account.governingTokenDepositAmount.toNumber() / Math.pow(10, token?.value.decimals || 0)}</Typography>
+                  <Typography variant="h6">{Math.ceil(member.account.governingTokenDepositAmount.toNumber() / Math.pow(10, token?.value.decimals || 0))}</Typography>
                   <Typography variant="h6">{Math.floor(100 / membersCount)}% of Total</Typography>
                 </Stack>
               </Stack>
