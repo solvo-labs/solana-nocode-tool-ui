@@ -392,9 +392,10 @@ const DaoDetails: React.FC = () => {
                   <ListItemText>
                     <b>Council Vote Threshold Percentage : </b> %{daoConfig.config.councilVoteThreshold.value || 0}
                   </ListItemText>
-                  {/* <ListItemText>
-                    <b>Min community tokens to create governance : </b> {daoConfig.config.minCommunityTokensToCreateProposal.toNumber()}
-                  </ListItemText> */}
+                  <ListItemText>
+                    <b>Min community tokens to create governance : </b>{" "}
+                    {parseInt(daoConfig?.config.minCommunityTokensToCreateProposal.toString("hex"), 16) / Math.pow(10, token?.value.decimals || 0)}
+                  </ListItemText>
                   {/* <ListItemText>
                     <b>Min council tokens to create governance : </b> {daoConfig.config.minCouncilTokensToCreateProposal.toNumber()}
                   </ListItemText> */}
@@ -544,11 +545,10 @@ const DaoDetails: React.FC = () => {
                   </Button>
                 </>
               )}
-              {amIMember && (
-                <Button variant="outlined" onClick={createProposal}>
-                  Create Proposal
-                </Button>
-              )}
+
+              <Button variant="outlined" onClick={createProposal}>
+                Create Proposal
+              </Button>
             </Grid>
             <Divider />
           </div>
@@ -666,7 +666,7 @@ const DaoDetails: React.FC = () => {
             <Stack direction={"row"} marginTop={"1rem"} spacing={2} display={"flex"} alignItems={"center"}>
               <SearchInput label="Search Proposal" onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSearch(event)}></SearchInput>
               <FilterSelector filters={filtersTitle} selectedFilters={selectedFilter} setSelectedFilters={setSelectedFilter}></FilterSelector>
-              <Button variant="outlined" size="small" sx={{ width: "15rem" }} onClick={() => setShowCreateProposalModal(true)}>
+              <Button disabled={!amIMember} variant="outlined" size="small" sx={{ width: "15rem" }} onClick={() => setShowCreateProposalModal(true)}>
                 + New Proposal
               </Button>
             </Stack>
