@@ -46,15 +46,12 @@ export const Dao = () => {
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.target.value;
-    console.log(inputValue);
     setSearch(inputValue);
-    console.log(filteredMyDaos);
     if (activeTab == "1") {
       const filtered = daos.filter((dao) => dao.account.name.toLowerCase().includes(inputValue.toLowerCase()));
       setFilteredDaos(filtered);
     } else if (activeTab == "2") {
       const filtered = myDaos.filter((myDao) => myDao.account.name.toLowerCase().includes(inputValue.toLowerCase()));
-      console.log(filteredMyDaos);
       setFilteredMyDaos(filtered);
     }
   };
