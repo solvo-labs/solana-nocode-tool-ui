@@ -79,9 +79,11 @@ interface PreviewDaoProps {
   threshold: number;
   minNumberToEditDao: number;
   communityThreshold: number;
+  communityToken?: string;
+  councilToken?: string;
 }
 
-const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys, threshold, minNumberToEditDao, communityThreshold }) => {
+const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys, threshold, minNumberToEditDao, communityThreshold, communityToken, councilToken }) => {
   const classes = useStyles();
 
   return (
@@ -133,7 +135,7 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
             <Typography>
               Community token
               <br />
-              (To be generated)
+              {communityToken || "(To be generated)"}
             </Typography>
           </Grid>
 
@@ -160,7 +162,7 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
             <Typography>
               Council token
               <br />
-              (To be generated)
+              {councilToken || "(To be generated)"}
             </Typography>
           </Grid>
 

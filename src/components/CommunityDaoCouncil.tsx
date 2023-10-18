@@ -83,7 +83,7 @@ const useStyles = makeStyles(() => ({
     cursor: "pointer !important",
   },
   title: {
-    fontSize: "40px !important",
+    fontSize: "2rem !important",
     fontWeight: "600 !important",
     textAlign: "center",
   },
@@ -100,58 +100,57 @@ const useStyles = makeStyles(() => ({
 
 interface CommunityDaoCouncilProps {
   daoCouncilToken: boolean;
+  councilTokenName: string;
   handleDaoCouncilToken: () => void;
   councilMembers: string[];
   removeCouncilMembers: (e: any) => void;
   handleCouncilMembers: (e: any) => void;
   onBlurHandleCouncilMembers: (e: any) => void;
+  onChangeCouncilTokenName: (e: any) => void;
 }
 
 const CommunityDaoCouncil: React.FC<CommunityDaoCouncilProps> = ({
   daoCouncilToken,
+  councilTokenName,
   handleDaoCouncilToken,
   councilMembers,
   removeCouncilMembers,
   handleCouncilMembers,
   onBlurHandleCouncilMembers,
+  onChangeCouncilTokenName,
 }) => {
   const classes = useStyles();
 
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
       <Grid item xs={8} className={classes.gridItem}>
-        <Typography className={classes.title}>Add a council to your DAO.</Typography>
+        <Typography className={classes.title}>DAO’s Couincil token</Typography>
       </Grid>
 
       <Grid item xs={8} className={`${classes.gridItem}, ${classes.card}`}>
-        <div className={classes.percentageSection}>
-          <Typography className={classes.percentageSectionText}>
-            About Councils <br /> <br />
-            Council members can supervise and moderate DAO activities. It’s recommended to always create the council for DAOs in their incubation stage to prevent governance
-            attacks or accidental losses of assets managed by the DAO.
-          </Typography>
-        </div>
-
         <div className={classes.addCouncil}>
           <Typography className={classes.note}>Do you want to add a council?</Typography>
           <Checkbox checked={daoCouncilToken} onChange={handleDaoCouncilToken} />
         </div>
 
-        <Typography>A council is required to govern the DAO until the community token is distributed to members.</Typography>
-
-        {!daoCouncilToken && (
+        {daoCouncilToken && (
           <>
-            <Typography className={classes.description}>What is the address of the community token you would like to use?</Typography>
-            <Typography>If your token is listed with Solana, you'll see a preview below.</Typography>
+            <Typography className={classes.description}>You can fill your council token address or we can create a council token for you</Typography>
 
-            <TextField className={classes.input} id="dao-name" label="e.g. TyLwwQt5..." variant="standard" onChange={() => console.log("tıklandı")} />
+            <TextField
+              className={classes.input}
+              id="dao-name"
+              label="Council Token Address (optional)"
+              variant="standard"
+              value={councilTokenName}
+              onChange={onChangeCouncilTokenName}
+            />
+            {/* <div className={classes.createCouncil}>
+              <Typography>Create a token for your DAO's council?</Typography>
+              <Checkbox checked={false} onChange={handleDaoCouncilToken} />
+            </div> */}
           </>
         )}
-
-        <div className={classes.createCouncil}>
-          <Typography>Create a token for your DAO's council?</Typography>
-          <Checkbox checked={daoCouncilToken} onChange={handleDaoCouncilToken} />
-        </div>
       </Grid>
 
       {daoCouncilToken && (
@@ -162,7 +161,7 @@ const CommunityDaoCouncil: React.FC<CommunityDaoCouncilProps> = ({
 
           <Grid item xs={8} className={`${classes.gridItem}, ${classes.card}`}>
             <Typography className={classes.description}>Invite members {councilMembers.length}</Typography>
-            <Typography>Add Solana wallet addressses, separated by a comma or line-break.</Typography>
+            <Typography>Add Solana wallet addressses</Typography>
 
             {councilMembers.map((councilMember, index) => (
               <div key={index} className={classes.memberSide}>

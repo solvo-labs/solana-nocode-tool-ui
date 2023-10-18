@@ -83,7 +83,7 @@ const MultisignDaoDetails: React.FC<MultisignDaoDetailsProps> = ({ onChange, dao
             <Grid item xs={12} className={classes.grid}>
               <Typography className={classes.title}>Next, invite members with their Solana Wallet Address.</Typography>
               <Typography className={classes.description}>Invite members {publicKeys.length}</Typography>
-              <Typography>Add Solana wallet addressses, separated by a comma or line-break.</Typography>
+              <Typography>Add Solana wallet addressses</Typography>
             </Grid>
             <Grid item xs={12} className={classes.grid}>
               {publicKeys.map((hash, index) => (

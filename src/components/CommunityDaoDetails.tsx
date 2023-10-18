@@ -22,7 +22,7 @@ const useStyles = makeStyles(() => ({
     paddingBottom: "40px !important",
   },
   title: {
-    fontSize: "40px !important",
+    fontSize: "2rem !important",
     fontWeight: "600 !important",
     textAlign: "center",
   },
@@ -46,14 +46,12 @@ const CommunityDaoDetails: React.FC<CommunityDaoDetailsProps> = ({ onChange }) =
 
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
-      <Grid item xs={8} className={classes.gridItem}>
-        <Typography className={classes.title}>Let's get started</Typography>
+      <Grid item xs={8} className={classes.gridItem} padding={"0"}>
+        <Typography className={classes.title}>Dao Informations</Typography>
       </Grid>
 
       <Grid item xs={8} className={`${classes.gridItem}, ${classes.card}`}>
         <Typography className={classes.description}>What is the name of your DAO?</Typography>
-        <Typography>It's best to choose a descriptive, memorable name for you and your members.</Typography>
-
         <TextField className={classes.textField} id="community-dao-name" label="e.g. DAO Name" variant="standard" onChange={onChange} />
       </Grid>
     </Grid>

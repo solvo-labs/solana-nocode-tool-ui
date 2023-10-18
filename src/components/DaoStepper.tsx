@@ -17,7 +17,7 @@ const DaoStepper: React.FC<DaoStepperProps> = ({ steps, activeStep }) => {
   const classes = useStyles();
 
   return (
-    <Stepper style={{ padding: "100px 0 40px 0" }} activeStep={activeStep}>
+    <Stepper style={{ padding: "100px 0 0 0" }} activeStep={activeStep}>
       {steps.map((label) => {
         const stepProps: { completed?: boolean } = {};
         return (

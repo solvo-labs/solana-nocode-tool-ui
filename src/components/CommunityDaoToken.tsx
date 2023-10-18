@@ -28,7 +28,7 @@ const useStyles = makeStyles(() => ({
     paddingBottom: "40px !important",
   },
   mainTitle: {
-    fontSize: "40px !important",
+    fontSize: "2rem !important",
     fontWeight: "600 !important",
     textAlign: "center",
   },
@@ -129,6 +129,9 @@ const useStyles = makeStyles(() => ({
   formControl: {
     margin: "16px 0 !important",
   },
+  mt: {
+    marginTop: "2rem",
+  },
 }));
 
 interface CommunityDaoTokenProps {
@@ -155,7 +158,7 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
   daoTokensForCommunity,
   choosenDaoTokenName,
   handleChoosenDaoToken,
-  createdDaoToken,
+  // createdDaoToken,
   // removeCreatedDaoTokens,
   handleCommunityThresholdRange,
   communityThreshold,
@@ -167,7 +170,7 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
       <Grid item xs={8} className={classes.mainItem}>
-        <Typography className={classes.mainTitle}>Next, determine the DAO’s community token.</Typography>
+        <Typography className={classes.mainTitle}>DAO’s community token</Typography>
       </Grid>
 
       <Grid item xs={8} className={`${classes.gridItem}, ${classes.card}`}>
@@ -176,7 +179,6 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
           <Checkbox checked={daoCommunityTokenChecked} onChange={handleUseToken} />
         </div>
         <Typography className={classes.description}>Do you have an existing token for your DAO's community?</Typography>
-        <Typography>Holders of this token will be able to vote and/or edit your DAO. You can choose your DAO's community tokens or create new one from below.</Typography>
 
         <FormControl fullWidth disabled={daoCommunityTokenChecked ? true : false} className={classes.formControl}>
           <InputLabel id="demo-simple-select-label">Tokens</InputLabel>
@@ -214,39 +216,21 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
           <Checkbox checked={transferMintAuthChecked} onChange={handleTransfer} />
         </div> */}
 
-        {(createdDaoToken.length > 0 || choosenDaoTokenName) && (
-          <>
-            <Typography className={classes.description}>What is the minimum number of community tokens needed to manage this DAO?</Typography>
-            <Typography>A user will need at least this many community token to edit the DAO</Typography>
+        <Typography className={classes.description}>Minimum number of community tokens required for overseeing this DAO?</Typography>
 
-            <TextField type="number" className={classes.textField} defaultValue={1} id="dao-name" label="e.g. 1,000,000" variant="standard" onChange={handleMinNumberToEditDao} />
-          </>
-        )}
+        <TextField type="number" className={classes.textField} defaultValue={1} id="dao-name" label="e.g. 1,000,000" variant="standard" onChange={handleMinNumberToEditDao} />
       </Grid>
 
-      <Grid item xs={8} className={classes.mainItem}>
-        <Typography className={classes.mainTitle}>Next, set your wallet's approval threshold.</Typography>
+      <Grid item xs={8} className={`${classes.gridItem}, ${classes.card} ,  ${classes.mt}`}>
+        <Typography className={classes.description}>Determine the threshold for your Community Token.</Typography>
+
+        <div className={classes.sliderSection}>
+          <div className={classes.threshold}>{communityThreshold}%</div>
+          0%
+          <Slider className={classes.slider} defaultValue={60} aria-label="Default" valueLabelDisplay="off" onChange={handleCommunityThresholdRange} />
+          100%
+        </div>
       </Grid>
-
-      {(createdDaoToken.length > 0 || choosenDaoTokenName) && (
-        <Grid item xs={8} className={`${classes.gridItem}, ${classes.card}`}>
-          <Typography className={classes.description}>Adjust the percentage to determine votes needed to pass a proposal</Typography>
-
-          <div className={classes.sliderSection}>
-            <div className={classes.threshold}>{communityThreshold}%</div>
-            0%
-            <Slider className={classes.slider} defaultValue={60} aria-label="Default" valueLabelDisplay="off" onChange={handleCommunityThresholdRange} />
-            100%
-          </div>
-
-          <div className={classes.percentageSection}>
-            <Typography className={classes.percentageSectionText}>
-              Approval Percentage <br />
-              Typically, newer DAOs start their community approval quorums around 60% of total token supply.
-            </Typography>
-          </div>
-        </Grid>
-      )}
     </Grid>
   );
 };
