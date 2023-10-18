@@ -79,12 +79,12 @@ const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount,
               </Stack>
             </div>
           )}
-          {type == DAO_TYPE.MULTI_SIGNATURE && (
+          {type == DAO_TYPE.MULTI_SIGNATURE && member && (
             <Box sx={{ backgroundColor: "#ebebeb", borderRadius: "12px" }}>
               <Stack padding={"1rem"} marginTop={"1rem"}>
                 <Typography variant="subtitle2">ogicik2 Council Votes</Typography>
                 <Stack direction={"row"} justifyContent={"space-between"}>
-                  <Typography variant="h6">1</Typography>
+                  <Typography variant="h6">{member.account.governingTokenDepositAmount.toNumber() / Math.pow(10, token?.value.decimals || 0)}</Typography>
                   <Typography variant="h6">{Math.floor(100 / membersCount)}% of Total</Typography>
                 </Stack>
               </Stack>
