@@ -21,7 +21,7 @@ import {
   Typography,
 } from "@mui/material";
 import SearchInput from "../../components/SearchInput.tsx";
-import { FILTERS } from "../../utils/enum.ts";
+import { DAO_TYPE, FILTERS } from "../../utils/enum.ts";
 import FilterSelector from "../../components/FilterSelector.tsx";
 import { makeStyles } from "@mui/styles";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
@@ -34,7 +34,7 @@ import { PublicKey, RpcResponseAndContext, TokenAmount, Transaction } from "@sol
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import MembersModal from "../../components/MembersModal.tsx";
 import { formatTimestamp, sleep } from "../../lib/utils.ts";
-import { Governance, ProgramAccount, Proposal, ProposalState, Realm, TokenOwnerRecord, VoteTypeKind } from "@solana/spl-governance";
+import { Governance, ProgramAccount, Proposal, ProposalState, Realm, TokenOwnerRecord, VoteThresholdType, VoteTypeKind } from "@solana/spl-governance";
 import ExecutableProposalCard from "../../components/ProposalComponent/ExecutableProposalCard.tsx";
 import NonExecutableProposalCard from "../../components/ProposalComponent/NonExecutableProposalCard.tsx";
 import ConcludedProposal from "../../components/ProposalComponent/ConcludedProposal.tsx";
@@ -42,6 +42,7 @@ import { CustomInput } from "../../components/CustomInput.tsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { GOVERNANCE_PROGRAM_ID } from "../../lib/dao/constants.ts";
 import { fetchUserTokens } from "../../lib/index.ts";
+import DaoGovernancePower from "../../components/DaoGovernancePower.tsx";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStyles = makeStyles((theme: Theme) => ({
@@ -94,6 +95,8 @@ const DaoDetails: React.FC = () => {
   const [dao, setDao] = useState<ProgramAccount<Realm>>();
   const [members, setMembers] = useState<ProgramAccount<TokenOwnerRecord>[]>([]);
   const [proposals, setProposals] = useState<ProgramAccount<Proposal>[]>();
+
+  const [daoType, setDaoType] = useState<DAO_TYPE>();
 
   const [selectedFilter, setSelectedFilter] = useState<any[]>([]);
   const [search, setSearch] = useState("");
@@ -170,7 +173,14 @@ const DaoDetails: React.FC = () => {
 
           const proposals = await daoInstance.getProposals();
 
-          console.log(proposals);
+          if (
+            daoDetail.config?.config.councilVoteThreshold.type == VoteThresholdType.Disabled &&
+            daoDetail.config?.config.councilVetoVoteThreshold.type == VoteThresholdType.Disabled
+          ) {
+            setDaoType(DAO_TYPE.COMMUNITY);
+          } else {
+            setDaoType(DAO_TYPE.MULTI_SIGNATURE);
+          }
 
           setProposals(proposals);
           setMembers(members);
@@ -528,11 +538,7 @@ const DaoDetails: React.FC = () => {
               </Box>
             </CardContent>
           </Card>
-          <Card className={classes.card}>
-            <CardContent>
-              <Typography variant={"h6"}>My Governance Power</Typography>
-            </CardContent>
-          </Card>
+          <DaoGovernancePower membersCount={members.length} token={token} type={daoType} style={classes.card}></DaoGovernancePower>
           <Card className={classes.card}>
             <CardContent>
               <Typography variant={"h6"}>Dao Wallets</Typography>
@@ -560,7 +566,7 @@ const DaoDetails: React.FC = () => {
                   !searchFlag &&
                   proposals
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
-                    .map((onGoingProposal) =>
+                    .map((onGoingProposal, index: number) =>
                       onGoingProposal.account.voteType.type === VoteTypeKind.SingleChoice ? (
                         <ExecutableProposalCard
                           daoInstance={daoInstance!}
@@ -569,9 +575,17 @@ const DaoDetails: React.FC = () => {
                           token={token!.value}
                           threshold={daoConfig!.config.communityVoteThreshold.value || daoConfig?.config.councilVoteThreshold.value || 0}
                           membersCount={members.length}
+                          key={index}
                         />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} token={token!.value} setLoading={setLoading} />
+                        <NonExecutableProposalCard
+                          key={index}
+                          daoInstance={daoInstance!}
+                          proposal={onGoingProposal}
+                          config={daoConfig!}
+                          token={token!.value}
+                          setLoading={setLoading}
+                        />
                       )
                     )}
                 {proposals &&
