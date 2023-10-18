@@ -428,7 +428,15 @@ export const CreateDao = () => {
 
         {activeStep === 3 && multisign === true && (
           <Grid item xs={8} className={classes.grid}>
-            <PreviewDao typeOfDao={"multisign"} daoName={daoName} publicKeys={publicKeys} threshold={threshold} minNumberToEditDao={0} communityThreshold={0} />
+            <PreviewDao
+              typeOfDao={"multisign"}
+              daoName={daoName}
+              publicKeys={publicKeys}
+              threshold={threshold}
+              minNumberToEditDao={0}
+              communityThreshold={0}
+              daoCouncilToken={true}
+            />
           </Grid>
         )}
 
