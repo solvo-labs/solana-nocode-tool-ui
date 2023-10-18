@@ -133,7 +133,7 @@ export const Dao = () => {
               <Tab value="2" style={{ outline: "none", fontWeight: "bold" }} label="My Dao's" />
             </TabList>
             <Grid item sx={{ width: "600px" }}>
-              <SearchInput onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSearch(event)}></SearchInput>
+              <SearchInput label={activeTab == "1" ? "Search Dao" : "Search Your Dao"} onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSearch(event)}></SearchInput>
             </Grid>
             <CustomButton label="create dao" disable={false} onClick={() => navigate("/create-dao")} />
           </Box>

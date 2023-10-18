@@ -532,7 +532,7 @@ const DaoDetails: React.FC = () => {
           <CardContent className={classes.cardContent}>
             <Typography variant={"h5"}>Proposals</Typography>
             <Stack direction={"row"} marginTop={"1rem"} spacing={2} display={"flex"} alignItems={"center"}>
-              <SearchInput onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSearch(event)}></SearchInput>
+              <SearchInput label="Search Proposal" onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSearch(event)}></SearchInput>
               <FilterSelector filters={filtersTitle} selectedFilters={selectedFilter} setSelectedFilters={setSelectedFilter}></FilterSelector>
               <Button variant="outlined" size="small" sx={{ width: "15rem" }} onClick={() => setShowCreateProposalModal(true)}>
                 + New Proposal
