@@ -134,7 +134,7 @@ const CommunityDaoCouncil: React.FC<CommunityDaoCouncilProps> = ({
 
         <div className={classes.addCouncil}>
           <Typography className={classes.note}>Do you want to add a council?</Typography>
-          <Checkbox checked={true} />
+          <Checkbox checked={daoCouncilToken} onChange={handleDaoCouncilToken} />
         </div>
 
         <Typography>A council is required to govern the DAO until the community token is distributed to members.</Typography>

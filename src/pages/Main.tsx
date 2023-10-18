@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Grid } from "@mui/material";
 import React, { useEffect, useState } from "react";
@@ -15,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { getVestingMyIncoming } from "../lib/vesting";
 import ActiveVesting, { VestingLoading } from "../components/ActiveVesting";
 import { MarketInfo, TokenData, ToolTips } from "../utils/types";
+
+// @ts-ignore
 import { Stream } from "@streamflow/stream/dist/solana";
 import { fetchUserTokens } from "../lib";
 import { marketInfo } from "../api/solscan";

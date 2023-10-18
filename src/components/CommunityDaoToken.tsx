@@ -2,7 +2,8 @@ import React from "react";
 import { FormControl, Grid, InputLabel, MenuItem, OutlinedInput, Select, Slider, TextField, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import Checkbox from "@mui/material/Checkbox";
-import remove from "../assets/remove.png";
+// import remove from "../assets/remove.png";
+import { TokenData } from "../utils/types";
 
 const useStyles = makeStyles(() => ({
   gridContainer: {
@@ -131,8 +132,8 @@ const useStyles = makeStyles(() => ({
 }));
 
 interface CommunityDaoTokenProps {
-  daoTokensForCommunity: string[];
-  choosenDaoTokenName: string[];
+  daoTokensForCommunity: TokenData[];
+  choosenDaoTokenName: string;
   createdDaoToken: string[];
   daoCommunityTokenChecked: boolean;
   transferMintAuthChecked: boolean;
@@ -148,18 +149,18 @@ interface CommunityDaoTokenProps {
 
 const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
   daoCommunityTokenChecked,
-  transferMintAuthChecked,
+  // transferMintAuthChecked,
   handleUseToken,
-  createNewDaoToken,
+  // createNewDaoToken,
   daoTokensForCommunity,
   choosenDaoTokenName,
   handleChoosenDaoToken,
   createdDaoToken,
-  removeCreatedDaoTokens,
+  // removeCreatedDaoTokens,
   handleCommunityThresholdRange,
   communityThreshold,
   handleMinNumberToEditDao,
-  handleTransfer,
+  // handleTransfer,
 }) => {
   const classes = useStyles();
 
@@ -170,6 +171,10 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
       </Grid>
 
       <Grid item xs={8} className={`${classes.gridItem}, ${classes.card}`}>
+        <div className={classes.generator}>
+          <Typography className={classes.note}>Would you like to create DAO's community token</Typography>
+          <Checkbox checked={daoCommunityTokenChecked} onChange={handleUseToken} />
+        </div>
         <Typography className={classes.description}>Do you have an existing token for your DAO's community?</Typography>
         <Typography>Holders of this token will be able to vote and/or edit your DAO. You can choose your DAO's community tokens or create new one from below.</Typography>
 
@@ -177,14 +182,14 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
           <InputLabel id="demo-simple-select-label">Tokens</InputLabel>
           <Select labelId="demo-simple-select-label" id="demo-simple-select" value={choosenDaoTokenName} onChange={handleChoosenDaoToken} input={<OutlinedInput label="Tokens" />}>
             {daoTokensForCommunity.map((tk, index) => (
-              <MenuItem key={index} value={tk}>
-                {tk}
+              <MenuItem key={index} value={tk.hex}>
+                {tk.metadata.name + "(" + tk.metadata.symbol + ")"}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        {!daoCommunityTokenChecked && (
+        {/* {!daoCommunityTokenChecked && (
           <>
             <Typography className={classes.address}>What is the address of the community token you would like to use?</Typography>
             <Typography>If your token is listed with Solana, you'll see a preview below.</Typography>
@@ -202,17 +207,12 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
 
             <TextField className={classes.textField} id="dao-members" label="e.g. DAO Community Token" variant="standard" onKeyDown={createNewDaoToken} />
           </>
-        )}
+        )} */}
 
-        <div className={classes.generator}>
+        {/* <div className={classes.generator}>
           <Typography className={classes.note}>Do you want to transfer mint authority of the token to the DAO?</Typography>
           <Checkbox checked={transferMintAuthChecked} onChange={handleTransfer} />
-        </div>
-
-        <div className={classes.generator}>
-          <Typography className={classes.note}>Would you like to create DAO's community token</Typography>
-          <Checkbox checked={daoCommunityTokenChecked} onChange={handleUseToken} />
-        </div>
+        </div> */}
 
         {(createdDaoToken.length > 0 || choosenDaoTokenName) && (
           <>

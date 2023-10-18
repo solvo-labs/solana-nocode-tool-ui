@@ -15,6 +15,8 @@ import CommunityDaoCouncil from "../../components/CommunityDaoCouncil";
 import DaoStepper from "../../components/DaoStepper";
 import { useNavigate } from "react-router-dom";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { fetchUserTokens } from "../../lib";
+import { TokenData } from "../../utils/types";
 
 const useStyles = makeStyles(() => ({
   gridContainer: {
@@ -49,8 +51,8 @@ export const CreateDao = () => {
   const [community, setCommunity] = useState<boolean>(false);
   const [daoName, setDaoName] = useState<string>("");
   const [communityDaoName, setCommunityDaoName] = useState<string>("");
-  const [daoTokensForCommunity] = useState(["Oliver Hansen"]);
-  const [choosenDaoTokenName, setChoosenDaoTokenName] = useState<string[]>([]);
+  const [daoTokensForCommunity, setDaoTokensForCommunity] = useState<TokenData[]>([]);
+  const [choosenDaoTokenName, setChoosenDaoTokenName] = useState<string>();
   const [createdDaoToken, setCreatedDaoToken] = useState<any[]>([]);
   const [daoCouncilToken, setDaoCouncilToken] = useState<boolean>(false);
   const [daoCommunityTokenChecked, setDaoCommunityTokenChecked] = useState<boolean>(false);
@@ -65,13 +67,14 @@ export const CreateDao = () => {
   const { publicKey } = useWallet();
   const [publicKeys, setPublicKeys] = useState<string[]>([publicKey?.toBase58() || ""]);
   const [councilMembers, setCouncilMembers] = useState<string[]>([publicKey?.toBase58() || ""]);
+  // const [loading, setLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
   const handleUseToken = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDaoCommunityTokenChecked(event.target.checked);
     if (!daoCommunityTokenChecked) {
-      setChoosenDaoTokenName([]);
+      setChoosenDaoTokenName(undefined);
     }
   };
 
@@ -92,7 +95,7 @@ export const CreateDao = () => {
     }
 
     if (activeStep === 3) {
-      createDao();
+      multisign ? createDao() : createCommunityDao();
     }
   };
 
@@ -208,7 +211,17 @@ export const CreateDao = () => {
       const dao = new DAO(connection, wallet);
       setDaoInstance(dao);
     }
-  }, [connection, wallet]);
+
+    const init = async () => {
+      if (publicKey) {
+        const data = await fetchUserTokens(connection, publicKey);
+
+        setDaoTokensForCommunity(data as any);
+      }
+    };
+
+    init();
+  }, [connection, publicKey, wallet]);
 
   const createDao = async () => {
     if (daoInstance) {
@@ -243,16 +256,56 @@ export const CreateDao = () => {
           transactionsSignatures.push(transactionSignature);
         }
 
-        // const {
-        //   context: { slot: minContextSlot },
-        //   value: { blockhash, lastValidBlockHeight },
-        // } = await connection.getLatestBlockhashAndContext();
+        navigate("/dao/" + dao.realmPk.toBase58());
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
 
-        // const signature = await sendTransaction(dao.transaction, connection, { minContextSlot, signers: dao.signers });
+  const createCommunityDao = async () => {
+    if (daoInstance) {
+      try {
+        // const publicKeyList = publicKeys.map((pk) => new PublicKey(pk));
+        console.log(communityDaoName, false, daoCouncilToken, [], communityThreshold, "disabled", false, false, new PublicKey(choosenDaoTokenName || ""));
 
-        // await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        const dao = await daoInstance.createDao(
+          communityDaoName,
+          false,
+          daoCouncilToken,
+          [],
+          communityThreshold,
+          "disabled",
+          false,
+          false,
+          new PublicKey(choosenDaoTokenName || "")
+        );
 
-        // toastr.success("Dao Created Successfully");
+        const signedTx = await wallet!.signAllTransactions(dao.transaction);
+
+        const transactionsSignatures: string[] = [];
+
+        const {
+          value: { blockhash, lastValidBlockHeight },
+        } = await connection.getLatestBlockhashAndContext();
+
+        for (const signed of signedTx) {
+          const rawTransaction = signed.serialize();
+          const transactionSignature = await sendAndConfirmRawTransaction(
+            connection,
+            rawTransaction,
+            {
+              signature: bs58.encode(signed.signature!),
+              blockhash: blockhash,
+              lastValidBlockHeight: lastValidBlockHeight,
+            },
+            {
+              commitment: "confirmed",
+            }
+          );
+
+          transactionsSignatures.push(transactionSignature);
+        }
 
         navigate("/dao/" + dao.realmPk.toBase58());
       } catch (error) {
@@ -308,7 +361,7 @@ export const CreateDao = () => {
                   handleTransfer={handleTransfer}
                   createNewDaoToken={createNewDaoToken}
                   daoTokensForCommunity={daoTokensForCommunity}
-                  choosenDaoTokenName={choosenDaoTokenName}
+                  choosenDaoTokenName={choosenDaoTokenName || ""}
                   handleChoosenDaoToken={handleChoosenDaoToken}
                   createdDaoToken={createdDaoToken}
                   removeCreatedDaoTokens={removeCreatedDaoTokens}

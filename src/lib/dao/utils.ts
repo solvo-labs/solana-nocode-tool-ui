@@ -183,6 +183,8 @@ export const createCommunityDao = async (
 
   const communityMintAccount = existingCommunityMintPk && (await tryGetMint(connection, existingCommunityMintPk));
   // const zeroCommunityTokenSupply = existingCommunityMintPk ? communityMintAccount?.account.supply.isZero() : true;
+
+  console.log(communityMintAccount?.account?.decimals);
   const communityMintDecimals = communityMintAccount?.account?.decimals || 6;
 
   const communityMaxVoteWeightSource = parseMintMaxVoteWeight(useSupplyFactor, communityMintDecimals, communityMintSupplyFactor, communityAbsoluteMaxVoteWeight);

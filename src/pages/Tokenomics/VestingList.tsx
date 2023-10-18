@@ -2,6 +2,8 @@
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useState } from "react";
 import { getVestingMyIncoming, getVestingMyOwn, unlock, withdraw } from "../../lib/vesting";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { Stream } from "@streamflow/stream/dist/solana";
 import {
   Box,
