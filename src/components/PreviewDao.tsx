@@ -85,9 +85,20 @@ interface PreviewDaoProps {
   communityThreshold: number;
   communityToken?: string;
   councilToken?: string;
+  daoCouncilToken: boolean;
 }
 
-const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys, threshold, minNumberToEditDao, communityThreshold, communityToken, councilToken }) => {
+const PreviewDao: React.FC<PreviewDaoProps> = ({
+  typeOfDao,
+  daoName,
+  publicKeys,
+  threshold,
+  minNumberToEditDao,
+  communityThreshold,
+  communityToken,
+  councilToken,
+  daoCouncilToken,
+}) => {
   const classes = useStyles();
 
   return (
@@ -157,33 +168,36 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
               </Typography>
             </div>
           </Grid>
+          {daoCouncilToken && (
+            <>
+              <Grid item xs={8}>
+                Council info
+              </Grid>
 
-          <Grid item xs={8}>
-            Council info
-          </Grid>
+              <Grid item xs={8} className={`${classes.daoPreview}, ${classes.card}`}>
+                <Typography>
+                  Council token
+                  <br />
+                  {councilToken || "(To be generated)"}
+                </Typography>
+              </Grid>
 
-          <Grid item xs={8} className={`${classes.daoPreview}, ${classes.card}`}>
-            <Typography>
-              Council token
-              <br />
-              {councilToken || "(To be generated)"}
-            </Typography>
-          </Grid>
-
-          <Grid item xs={8} className={classes.previewBottom}>
-            <div className={classes.memberPreview}>
-              <Typography>
-                Approval threshold <br />
-                {threshold}
-              </Typography>
-            </div>
-            <div className={classes.thresholdPreview}>
-              <Typography>
-                Council Members <br />
-                {publicKeys.length}
-              </Typography>
-            </div>
-          </Grid>
+              <Grid item xs={8} className={classes.previewBottom}>
+                <div className={classes.memberPreview}>
+                  <Typography>
+                    Approval threshold <br />
+                    {threshold}
+                  </Typography>
+                </div>
+                <div className={classes.thresholdPreview}>
+                  <Typography>
+                    Council Members <br />
+                    {publicKeys.length}
+                  </Typography>
+                </div>
+              </Grid>
+            </>
+          )}
         </>
       )}
     </Grid>

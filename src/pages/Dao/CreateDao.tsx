@@ -71,6 +71,7 @@ export const CreateDao = () => {
   const [publicKeys, setPublicKeys] = useState<string[]>([publicKey?.toBase58() || ""]);
   const [councilMembers, setCouncilMembers] = useState<string[]>([publicKey?.toBase58() || ""]);
   const [councilTokenName, setCouncilTokenName] = useState<string>("");
+  const [duration, setDuration] = useState<number>(3);
   // const [loading, setLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -285,7 +286,8 @@ export const CreateDao = () => {
           false,
           choosenDaoTokenName ? new PublicKey(choosenDaoTokenName) : undefined,
           councilTokenName ? new PublicKey(councilTokenName) : undefined,
-          minNumberToEditDao
+          minNumberToEditDao,
+          duration
         );
 
         const signedTx = await wallet!.signAllTransactions(dao.transaction);
@@ -376,6 +378,8 @@ export const CreateDao = () => {
                   communityThreshold={communityThreshold}
                   handleMinNumberToEditDao={handleMinNumberToEditDao}
                   transferMintAuthChecked={transferMintAuthChecked}
+                  duration={duration}
+                  handleDuration={(e) => setDuration(e)}
                 />
               </>
             )}
@@ -438,6 +442,7 @@ export const CreateDao = () => {
               communityThreshold={communityThreshold}
               minNumberToEditDao={minNumberToEditDao}
               communityToken={choosenDaoTokenName}
+              daoCouncilToken={daoCouncilToken}
             />
           </Grid>
         )}

@@ -130,7 +130,8 @@ export class DAO {
     transferCouncilMintAuthority: boolean,
     existingCommunityMintPk?: PublicKey | undefined,
     existingCouncilMintPk?: PublicKey | undefined,
-    initialCouncilTokenAmount?: number
+    initialCouncilTokenAmount?: number,
+    maxTime = 3
   ) => {
     const { realmPk, realmInstructions, realmSigners, mintsSetupInstructions, mintsSetupSigners, councilMembersInstructions } = await createCommunityDao(
       this.connection,
@@ -157,7 +158,8 @@ export class DAO {
             tokenType: GoverningTokenType.Dormant,
             voterWeightAddin: undefined,
             maxVoterWeightAddin: undefined,
-          })
+          }),
+      maxTime
     );
 
     // const instructions: TransactionInstruction[] = [...mintsSetupInstructions, ...realmInstructions, ...councilMembersInstructions];

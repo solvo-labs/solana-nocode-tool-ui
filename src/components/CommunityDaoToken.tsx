@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { FormControl, Grid, InputLabel, MenuItem, OutlinedInput, Select, Slider, TextField, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import Checkbox from "@mui/material/Checkbox";
@@ -140,6 +140,7 @@ interface CommunityDaoTokenProps {
   createdDaoToken: string[];
   daoCommunityTokenChecked: boolean;
   transferMintAuthChecked: boolean;
+  duration: number;
   handleTransfer: (e: any) => void;
   handleUseToken: (e: any) => void;
   createNewDaoToken: (e: any) => void;
@@ -148,11 +149,13 @@ interface CommunityDaoTokenProps {
   handleCommunityThresholdRange: (e: any) => void;
   handleMinNumberToEditDao: (e: any) => void;
   communityThreshold: number;
+  handleDuration: (drt: number) => void;
 }
 
 const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
   daoCommunityTokenChecked,
   // transferMintAuthChecked,
+  duration,
   handleUseToken,
   // createNewDaoToken,
   daoTokensForCommunity,
@@ -164,14 +167,10 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
   communityThreshold,
   handleMinNumberToEditDao,
   // handleTransfer,
+  handleDuration,
 }) => {
   const classes = useStyles();
-  const [duration, setDuration] = useState(1);
   const defaultValue = "DAY";
-
-  const handleDurationChange = (event: any) => {
-    setDuration(event.target.value);
-  };
 
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
@@ -235,7 +234,7 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
               labelId="duration-label"
               id="duration-select"
               value={duration}
-              onChange={handleDurationChange}
+              onChange={(e) => handleDuration(e.target.value as number)}
             >
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
                 <MenuItem key={value} value={value}>
