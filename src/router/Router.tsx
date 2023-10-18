@@ -46,7 +46,7 @@ const Router: React.FC = () => {
             <Route path="/contract" index element={<ContractPage />} />
             <Route path="/airdrop" index element={<Airdrop />} />
             <Route path="/daos" index element={<Dao />} />
-            <Route path="/dao-details/:name/:pubkey" index element={<DaoDetails />} />
+            <Route path="/dao/:pubkey" index element={<DaoDetails />} />
             <Route path="/create-dao" index element={<CreateDao />} />
           </Route>
           <Route path="/login" index element={<Login />} />

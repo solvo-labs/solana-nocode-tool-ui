@@ -29,7 +29,7 @@ const MemberDetail: React.FC<Props> = ({ selectedMember, decimals }) => {
         <b>Pubkey :</b> {selectedMember.account.governingTokenOwner.toBase58()}
       </Typography>
       <Typography>
-        <b>Council Votes :</b> {selectedMember.account.governingTokenDepositAmount.toNumber() / Math.pow(10, decimals)}
+        <b>Council Votes :</b> {Math.ceil(selectedMember.account.governingTokenDepositAmount.toNumber() / Math.pow(10, decimals))}
       </Typography>
       <Typography>
         <b>Proposal Count :</b> {selectedMember.account.outstandingProposalCount}

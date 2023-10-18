@@ -106,7 +106,7 @@ export const mintCouncilTokensToMembers = async (
   connection: Connection,
   recentBlockhash: BlockhashWithExpiryBlockHeight,
   amount = 1,
-  decimal = 8
+  decimal = 0
 ) => {
   const instructions = [];
   let walletAssociatedTokenAccountPk;

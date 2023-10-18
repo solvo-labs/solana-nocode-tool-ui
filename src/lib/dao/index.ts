@@ -128,7 +128,7 @@ export class DAO {
 
   createMultisigDao = async (multiSigWallets: PublicKey[], name: string, threshold: number) => {
     const recentBlockhash = await this.connection.getLatestBlockhash();
-    const daoMintResult = await daoMints(this.connection, this.wallet, recentBlockhash);
+    const daoMintResult = await daoMints(this.connection, this.wallet, recentBlockhash, 6);
 
     const mintResult = await mintCouncilTokensToMembers(multiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
 

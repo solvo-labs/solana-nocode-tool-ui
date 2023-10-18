@@ -23,7 +23,7 @@ const DaoCard: React.FC<DaoCardProps> = ({ name, characterLimit, pubkey }) => {
       style={{ borderRadius: "15px", cursor: "pointer" }}
       onClick={() => {
         // console.log(`/dao-details/${getInitials(name).trim()}/${pubkey.toBase58()}`);
-        navigate(`/dao-details/${getInitials(name).trim()}/${pubkey.toBase58()}`);
+        navigate(`/dao/${pubkey.toBase58()}`);
       }}
     >
       <CardContent

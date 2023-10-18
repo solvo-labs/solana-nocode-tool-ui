@@ -211,11 +211,11 @@ export const CreateDao = () => {
       try {
         const publicKeyList = publicKeys.map((pk) => new PublicKey(pk));
         console.log("publicKeyList", publicKeyList);
+        console.log("threshold", threshold);
 
-        const result = await daoInstance.createMultisigDao(publicKeyList, daoName, threshold);
-        console.log("result", result);
+        const daoPk = await daoInstance.createMultisigDao(publicKeyList, daoName, threshold);
 
-        console.log(result);
+        console.log(daoPk);
       } catch (error) {
         console.log(error);
       }
@@ -345,7 +345,7 @@ export const CreateDao = () => {
               </Grid>
               <Grid item xs={6} style={{ display: "flex", justifyContent: "flex-end" }}>
                 <CustomButton
-                  label={activeStep === steps.length - 1 && community ? "Create Community Token Dao" : activeStep === steps.length - 1 && multisign ? "CreateDao" : "Next"}
+                  label={activeStep === steps.length - 1 && community ? "Create Community Token Dao" : activeStep === steps.length - 1 && multisign ? "Create Dao" : "Next"}
                   disable={false}
                   onClick={handleNext}
                 />
