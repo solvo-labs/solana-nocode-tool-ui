@@ -138,6 +138,7 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
 
                 return (
                   <Button
+                    key={index}
                     variant={isSelected > -1 ? "contained" : "outlined"}
                     color="success"
                     onClick={() => {
@@ -188,9 +189,9 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
           </Box>
           <Divider sx={{ marginTop: "0.5rem", backgroundColor: "gray" }}></Divider>
           <Stack spacing={2} marginTop={"0.5rem"}>
-            {proposal.account.options.map((opt) => {
+            {proposal.account.options.map((opt, index: number) => {
               return (
-                <Grid container direction={"row"}>
+                <Grid container direction={"row"} key={index}>
                   <Stack direction={"row"} width={"100%"} justifyContent={"space-between"}>
                     <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"flex-end"}>
                       <Typography sx={{ fontSize: "0.8rem" }}>{opt.label}</Typography>
