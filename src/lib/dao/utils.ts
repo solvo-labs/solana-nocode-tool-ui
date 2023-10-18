@@ -478,7 +478,7 @@ export const getVetoTokenMint = (proposal: ProgramAccount<Proposal>, realm: Prog
 };
 
 export const getStatusData = (state: ProposalState) => {
-  console.log(state);
+  // console.log(state);
   if (state === ProposalState.Voting) {
     return { text: "Voting", color: "success" };
   }
