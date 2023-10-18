@@ -168,13 +168,13 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
   };
 
   return (
-    <CardActions
-      onClick={() => {
-        setShowVoteModal(true);
-      }}
-      sx={{ padding: "0" }}
-    >
-      <Card className={classes.card}>
+    <CardActions sx={{ padding: "0" }}>
+      <Card
+        className={classes.card}
+        onClick={() => {
+          setShowVoteModal(true);
+        }}
+      >
         <CardContent>
           <Stack direction={"row"} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
             <Typography>{proposal.account.name}</Typography>
