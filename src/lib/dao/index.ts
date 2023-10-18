@@ -125,7 +125,8 @@ export class DAO {
     transferCommunityMintAuthority: boolean,
     transferCouncilMintAuthority: boolean,
     existingCommunityMintPk?: PublicKey | undefined,
-    existingCouncilMintPk?: PublicKey | undefined
+    existingCouncilMintPk?: PublicKey | undefined,
+    initialCouncilTokenAmount?: number
   ) => {
     const { realmPk, realmInstructions, realmSigners, mintsSetupInstructions, mintsSetupSigners, councilMembersInstructions } = await createCommunityDao(
       this.connection,
@@ -140,6 +141,7 @@ export class DAO {
       transferCouncilMintAuthority,
       existingCommunityMintPk,
       existingCouncilMintPk,
+      initialCouncilTokenAmount,
       undefined,
       createCouncil || existingCouncilMintPk
         ? new GoverningTokenConfigAccountArgs({

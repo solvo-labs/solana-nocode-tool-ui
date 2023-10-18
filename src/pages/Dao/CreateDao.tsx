@@ -284,7 +284,8 @@ export const CreateDao = () => {
           false,
           false,
           choosenDaoTokenName ? new PublicKey(choosenDaoTokenName) : undefined,
-          councilTokenName ? new PublicKey(councilTokenName) : undefined
+          councilTokenName ? new PublicKey(councilTokenName) : undefined,
+          minNumberToEditDao
         );
 
         const signedTx = await wallet!.signAllTransactions(dao.transaction);

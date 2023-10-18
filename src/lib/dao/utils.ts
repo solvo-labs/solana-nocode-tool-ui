@@ -160,6 +160,7 @@ export const createCommunityDao = async (
   transferCouncilMintAuthority: boolean,
   existingCommunityMintPk?: PublicKey,
   existingCouncilMintPk?: PublicKey,
+  initialCouncilTokenAmount = 1,
   communityTokenConfig?: GoverningTokenConfigAccountArgs,
   councilTokenConfig?: GoverningTokenConfigAccountArgs,
   communityMintSupplyFactor?: number,
@@ -175,7 +176,6 @@ export const createCommunityDao = async (
   const councilMembersInstructions: TransactionInstruction[] = [];
 
   const mintsSetupSigners: Keypair[] = [];
-  const initialCouncilTokenAmount = 1;
 
   const programIdPk = GOVERNANCE_PROGRAM_ID;
 
