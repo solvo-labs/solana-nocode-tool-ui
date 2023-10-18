@@ -49,7 +49,7 @@ const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount,
                   </Stack>
                 </Stack>
               </Box>
-              <Stack direction={"column"} justifyContent={"space-between"}>
+              <Stack direction={"row"} spacing={2} marginTop={"1rem"}>
                 <Button
                   variant="contained"
                   sx={{
@@ -57,7 +57,6 @@ const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount,
                     bgcolor: "white",
                     color: "#1793D1",
                     border: "1px solid #1793D1",
-                    marginTop: "1rem",
                     ":hover": { backgroundColor: "#ebebeb", color: "#1793D1" },
                   }}
                   onClick={depositOnClick}
@@ -71,7 +70,6 @@ const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount,
                     bgcolor: "white",
                     color: "#1793D1",
                     border: "1px solid #1793D1",
-                    marginTop: "1rem",
                     ":hover": { backgroundColor: "#ebebeb", color: "#1793D1" },
                   }}
                   onClick={withdrawOnClick}
