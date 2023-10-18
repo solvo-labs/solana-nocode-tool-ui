@@ -212,7 +212,7 @@ const DaoDetails: React.FC = () => {
     } catch (error) {
       setLoading(false);
       setShowCreateProposalModal(false);
-      toastr.error("Proposal could not be created.");
+      toastr.error("Proposal could not be created. Error: " + error);
     }
   };
 
@@ -571,7 +571,7 @@ const DaoDetails: React.FC = () => {
                           membersCount={members.length}
                         />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} token={token!.value} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} token={token!.value} setLoading={setLoading} />
                       )
                     )}
                 {proposals &&
@@ -593,7 +593,7 @@ const DaoDetails: React.FC = () => {
                           membersCount={members.length}
                         />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} token={token!.value} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} token={token!.value} setLoading={setLoading} />
                       )
                     )}
                 {searchFlag &&

@@ -44,16 +44,19 @@ type Props = {
   proposal: ProgramAccount<Proposal>;
   config: Governance;
   token: TokenAmount;
+  setLoading: (param: boolean) => void;
 };
 
-const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config, token }) => {
-  const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
+const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config, token, setLoading }) => {
   const classes = useStyles();
+  const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
   const { sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
 
   const [remainingTime, setRemainingTime] = useState<number>(0);
+
+  const handleClose = () => setShowVoteModal(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -83,6 +86,8 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
   }, [proposal.account.options]);
 
   const executeVote = async () => {
+    setLoading(true);
+    setShowVoteModal(false);
     try {
       const tx = await daoInstance.vote(proposal, VoteKind.Approve, selectedIndexes);
 
@@ -93,22 +98,18 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
 
       const signature = await sendTransaction(tx, connection, { minContextSlot, signers: [] });
       await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature });
+      setLoading(false);
+      toastr.success("Vote executed successfully");
     } catch (error: any) {
+      setShowVoteModal(true);
+      setLoading(false);
       toastr.error(error);
     }
   };
 
   const modal = () => {
     return (
-      <Modal
-        className={classes.modal}
-        open={showVoteModal}
-        onClose={() => {
-          setShowVoteModal(false);
-        }}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+      <Modal className={classes.modal} open={showVoteModal} onClose={handleClose}>
         <Box
           sx={{
             borderRadius: "8px",
