@@ -52,6 +52,7 @@ export const CreateDao = () => {
   const [createdDaoToken, setCreatedDaoToken] = useState<any[]>([]);
   const [daoCouncilToken, setDaoCouncilToken] = useState<boolean>(false);
   const [daoCommunityTokenChecked, setDaoCommunityTokenChecked] = useState<boolean>(false);
+  const [transferMintAuthChecked, setTransferMintAuthChecked] = useState<boolean>(false);
   const [threshold, setThreshold] = useState<number>(60);
   const [minNumberToEditDao, setMinNumberToEditDao] = useState<number>(1);
   const [communityThreshold, setCommunityThreshold] = useState<number>(60);
@@ -68,6 +69,10 @@ export const CreateDao = () => {
     if (!daoCommunityTokenChecked) {
       setChoosenDaoTokenName([]);
     }
+  };
+
+  const handleTransfer = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTransferMintAuthChecked(event.target.checked);
   };
 
   const handleChoosenDaoToken = (event: any) => {
@@ -116,7 +121,7 @@ export const CreateDao = () => {
   };
 
   const handleCommunityDaoName = (e: any) => {
-    setCommunityDaoName(e.target.value);
+    setCommunityDaoName(e.target.value.trim());
   };
 
   const createNewDaoToken = (e: any) => {
@@ -195,13 +200,11 @@ export const CreateDao = () => {
   };
 
   useEffect(() => {
-    console.log("communityDaoName", communityDaoName);
-
     if (wallet) {
       const dao = new DAO(connection, wallet);
       setDaoInstance(dao);
     }
-  }, [communityDaoName, connection, wallet]);
+  }, [connection, wallet]);
 
   const createDao = async () => {
     if (daoInstance) {
@@ -258,28 +261,34 @@ export const CreateDao = () => {
           <Grid item xs={8} className={classes.daoInfosCommunity}>
             <CommunityDaoDetails onChange={handleCommunityDaoName} />
 
-            <CommunityDaoToken
-              daoCommunityTokenChecked={daoCommunityTokenChecked}
-              handleUseToken={handleUseToken}
-              createNewDaoToken={createNewDaoToken}
-              daoTokensForCommunity={daoTokensForCommunity}
-              choosenDaoTokenName={choosenDaoTokenName}
-              handleChoosenDaoToken={handleChoosenDaoToken}
-              createdDaoToken={createdDaoToken}
-              removeCreatedDaoTokens={removeCreatedDaoTokens}
-              handleCommunityThresholdRange={handleCommunityThresholdRange}
-              communityThreshold={communityThreshold}
-              handleMinNumberToEditDao={handleMinNumberToEditDao}
-            />
+            {communityDaoName.trim().length > 0 && (
+              <>
+                <CommunityDaoToken
+                  daoCommunityTokenChecked={daoCommunityTokenChecked}
+                  handleUseToken={handleUseToken}
+                  handleTransfer={handleTransfer}
+                  createNewDaoToken={createNewDaoToken}
+                  daoTokensForCommunity={daoTokensForCommunity}
+                  choosenDaoTokenName={choosenDaoTokenName}
+                  handleChoosenDaoToken={handleChoosenDaoToken}
+                  createdDaoToken={createdDaoToken}
+                  removeCreatedDaoTokens={removeCreatedDaoTokens}
+                  handleCommunityThresholdRange={handleCommunityThresholdRange}
+                  communityThreshold={communityThreshold}
+                  handleMinNumberToEditDao={handleMinNumberToEditDao}
+                  transferMintAuthChecked={transferMintAuthChecked}
+                />
 
-            <CommunityDaoCouncil
-              daoCouncilToken={daoCouncilToken}
-              handleDaoCouncilToken={handleDaoCouncilToken}
-              councilMembers={councilMembers}
-              removeCouncilMembers={removeCouncilMembers}
-              handleCouncilMembers={handleCouncilMembers}
-              onBlurHandleCouncilMembers={onBlurHandleCouncilMembers}
-            />
+                <CommunityDaoCouncil
+                  daoCouncilToken={daoCouncilToken}
+                  handleDaoCouncilToken={handleDaoCouncilToken}
+                  councilMembers={councilMembers}
+                  removeCouncilMembers={removeCouncilMembers}
+                  handleCouncilMembers={handleCouncilMembers}
+                  onBlurHandleCouncilMembers={onBlurHandleCouncilMembers}
+                />
+              </>
+            )}
           </Grid>
         )}
 
@@ -302,7 +311,7 @@ export const CreateDao = () => {
               title={"Next, set your DAO's council approval threshold."}
               description={"Adjust the percentage to determine votes needed to pass a proposal"}
               typeOfDao={"community"}
-              threshold={threshold}
+              threshold={afterCommunityThreshold}
               onChange={handleAfterCommunityThresholdRange}
               publicKeys={publicKeys}
             />
@@ -319,7 +328,7 @@ export const CreateDao = () => {
           <Grid item xs={8} className={classes.grid}>
             <PreviewDao
               typeOfDao={"community"}
-              daoName={daoName}
+              daoName={communityDaoName}
               publicKeys={councilMembers}
               threshold={afterCommunityThreshold}
               communityThreshold={communityThreshold}

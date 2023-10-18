@@ -18,10 +18,7 @@ const useStyles = makeStyles(() => ({
     background: "linear-gradient(109deg, rgba(255, 255, 255, 0.40) 2.16%, rgba(255, 255, 255, 0.10) 100%) !important",
     boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.20) !important",
     backdropFilter: "blur(20px) !important",
-    paddingRight: "20px !important",
-    paddingLeft: "20px !important",
-    paddingTop: "40px !important",
-    paddingBottom: "40px !important",
+    padding: "40px 20px !important",
   },
   title: {
     fontSize: "40px !important",
@@ -44,18 +41,26 @@ const useStyles = makeStyles(() => ({
     padding: "0 !important",
   },
   memberPreview: {
-    backgroundColor: "#3d3d3d !important",
-    borderRadius: "16px !important",
-    padding: "20px !important",
-    width: "50% !important",
+    width: "40% !important",
     marginRight: "5px !important",
+
+    borderRadius: "16px !important",
+    border: "1px solid rgba(255, 255, 255, 0.36) !important",
+    background: "linear-gradient(109deg, rgba(255, 255, 255, 0.40) 2.16%, rgba(255, 255, 255, 0.10) 100%) !important",
+    boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.20) !important",
+    backdropFilter: "blur(20px) !important",
+    padding: "40px 20px !important",
   },
   thresholdPreview: {
-    backgroundColor: "#3d3d3d !important",
-    borderRadius: "16px !important",
-    padding: "20px !important",
-    width: "50% !important",
+    width: "40% !important",
     marginLeft: "5px !important",
+
+    borderRadius: "16px !important",
+    border: "1px solid rgba(255, 255, 255, 0.36) !important",
+    background: "linear-gradient(109deg, rgba(255, 255, 255, 0.40) 2.16%, rgba(255, 255, 255, 0.10) 100%) !important",
+    boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.20) !important",
+    backdropFilter: "blur(20px) !important",
+    padding: "40px 20px !important",
   },
   mainItem: {
     padding: "32px !important",
@@ -82,7 +87,7 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
       <Grid item xs={8} className={classes.mainItem}>
-        <Typography className={classes.mainTitle}>Next, determine the DAO’s community token.</Typography>
+        <Typography className={classes.mainTitle}>Nearly done, let's check that things look right.</Typography>
       </Grid>
 
       {typeOfDao === "multisign" && (
@@ -112,8 +117,8 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
       )}
 
       {typeOfDao === "community" && (
-        <Grid container spacing={2} className={`${classes.gridContainer}, ${classes.card}`}>
-          <Grid item xs={8} className={classes.daoPreview}>
+        <>
+          <Grid item xs={8} className={`${classes.daoPreview}, ${classes.card}`}>
             <Typography>
               DAO Name <br />
               {daoName}
@@ -121,10 +126,10 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
           </Grid>
 
           <Grid item xs={8}>
-            Community Info
+            <Typography>Community Info</Typography>
           </Grid>
 
-          <Grid item xs={8} className={classes.daoPreview}>
+          <Grid item xs={8} className={`${classes.daoPreview}, ${classes.card}`}>
             <Typography>
               Community token
               <br />
@@ -132,7 +137,7 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
             </Typography>
           </Grid>
 
-          <Grid item xs={8} className={classes.previewBottom}>
+          <Grid item xs={8} className={`${classes.previewBottom}`}>
             <div className={classes.memberPreview}>
               <Typography>
                 Approval threshold <br /> <br />
@@ -151,7 +156,7 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
             Council info
           </Grid>
 
-          <Grid item xs={8} className={classes.daoPreview}>
+          <Grid item xs={8} className={`${classes.daoPreview}, ${classes.card}`}>
             <Typography>
               Council token
               <br />
@@ -173,7 +178,7 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
               </Typography>
             </div>
           </Grid>
-        </Grid>
+        </>
       )}
     </Grid>
   );

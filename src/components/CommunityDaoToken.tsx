@@ -135,6 +135,8 @@ interface CommunityDaoTokenProps {
   choosenDaoTokenName: string[];
   createdDaoToken: string[];
   daoCommunityTokenChecked: boolean;
+  transferMintAuthChecked: boolean;
+  handleTransfer: (e: any) => void;
   handleUseToken: (e: any) => void;
   createNewDaoToken: (e: any) => void;
   handleChoosenDaoToken: (e: any) => void;
@@ -146,6 +148,7 @@ interface CommunityDaoTokenProps {
 
 const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
   daoCommunityTokenChecked,
+  transferMintAuthChecked,
   handleUseToken,
   createNewDaoToken,
   daoTokensForCommunity,
@@ -156,6 +159,7 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
   handleCommunityThresholdRange,
   communityThreshold,
   handleMinNumberToEditDao,
+  handleTransfer,
 }) => {
   const classes = useStyles();
 
@@ -201,11 +205,16 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
         )}
 
         <div className={classes.generator}>
+          <Typography className={classes.note}>Do you want to transfer mint authority of the token to the DAO?</Typography>
+          <Checkbox checked={transferMintAuthChecked} onChange={handleTransfer} />
+        </div>
+
+        <div className={classes.generator}>
           <Typography className={classes.note}>Would you like to create DAO's community token</Typography>
           <Checkbox checked={daoCommunityTokenChecked} onChange={handleUseToken} />
         </div>
 
-        {(createdDaoToken.length > 0 || choosenDaoTokenName) && daoCommunityTokenChecked && (
+        {(createdDaoToken.length > 0 || choosenDaoTokenName) && (
           <>
             <Typography className={classes.description}>What is the minimum number of community tokens needed to manage this DAO?</Typography>
             <Typography>A user will need at least this many community token to edit the DAO</Typography>
