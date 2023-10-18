@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { DAO } from "../../lib/dao/index";
-import { Box, CircularProgress, Grid, Tab } from "@mui/material";
+import { CircularProgress, Grid, Tab } from "@mui/material";
 import { Realm, ProgramAccount } from "@solana/spl-governance";
 import ListDaos from "../../components/ListDaos";
 import toastr from "toastr";
