@@ -628,6 +628,9 @@ const DaoDetails: React.FC = () => {
             depositOnClick={() => {
               setShowDepositModal(true);
             }}
+            withdrawOnClick={() => {
+              setShowDepositModal(true);
+            }}
           />
           <Card className={classes.card}>
             <CardContent>

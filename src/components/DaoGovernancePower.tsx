@@ -12,9 +12,10 @@ type Props = {
   membersCount: number;
   member?: ProgramAccount<TokenOwnerRecord>;
   depositOnClick: () => void;
+  withdrawOnClick: () => void;
 };
 
-const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount, member, depositOnClick }) => {
+const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount, member, depositOnClick, withdrawOnClick }) => {
   const balance = useMemo(() => {
     if (token && member) {
       const value = member.account.governingTokenDepositAmount.toNumber() / Math.pow(10, token.value.decimals);
@@ -48,20 +49,36 @@ const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount,
                   </Stack>
                 </Stack>
               </Box>
-              <Button
-                variant="contained"
-                sx={{
-                  borderRadius: "12px",
-                  bgcolor: "white",
-                  color: "#1793D1",
-                  border: "1px solid #1793D1",
-                  marginTop: "1rem",
-                  ":hover": { backgroundColor: "#ebebeb", color: "#1793D1" },
-                }}
-                onClick={depositOnClick}
-              >
-                Deposit
-              </Button>
+              <Stack direction={"column"} justifyContent={"space-between"}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    borderRadius: "12px",
+                    bgcolor: "white",
+                    color: "#1793D1",
+                    border: "1px solid #1793D1",
+                    marginTop: "1rem",
+                    ":hover": { backgroundColor: "#ebebeb", color: "#1793D1" },
+                  }}
+                  onClick={depositOnClick}
+                >
+                  Deposit
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{
+                    borderRadius: "12px",
+                    bgcolor: "white",
+                    color: "#1793D1",
+                    border: "1px solid #1793D1",
+                    marginTop: "1rem",
+                    ":hover": { backgroundColor: "#ebebeb", color: "#1793D1" },
+                  }}
+                  onClick={withdrawOnClick}
+                >
+                  Withdraw
+                </Button>
+              </Stack>
             </div>
           )}
           {type == DAO_TYPE.MULTI_SIGNATURE && (
