@@ -317,18 +317,18 @@ const DaoDetails: React.FC = () => {
             <Divider sx={{ marginBottom: "1rem", marginTop: "0.5rem", background: "black" }} />
             <Box sx={{ width: "100%", color: "black" }}>
               <Grid gap={2} style={{ display: "flex", flexDirection: "column" }}>
-                (showDepositModal.isDeposit && (
-                <CustomInput
-                  placeHolder="Amount"
-                  label="Amount"
-                  id="amount"
-                  name="amount"
-                  type="text"
-                  value={depositAmount}
-                  onChange={(e: any) => setDepositAmount(e.target.value)}
-                  disable={false}
-                />
-                ))
+                {showDepositModal.isDeposit && (
+                  <CustomInput
+                    placeHolder="Amount"
+                    label="Amount"
+                    id="amount"
+                    name="amount"
+                    type="text"
+                    value={depositAmount}
+                    onChange={(e: any) => setDepositAmount(e.target.value)}
+                    disable={false}
+                  />
+                )}
                 <Button variant="outlined" onClick={() => (showDepositModal.isDeposit ? deposit() : withdraw())}>
                   {showDepositModal.isDeposit ? "Deposit" : "Withdraw All"}
                 </Button>
