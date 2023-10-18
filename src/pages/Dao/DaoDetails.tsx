@@ -652,11 +652,11 @@ const DaoDetails: React.FC = () => {
               setShowDepositModal({ show: true });
             }}
           />
-          <Card className={classes.card}>
+          {/* <Card className={classes.card}>
             <CardContent>
               <Typography variant={"h6"}>Dao Wallets</Typography>
             </CardContent>
-          </Card>
+          </Card> */}
         </Stack>
       </Grid>
       <Grid item xl={8} lg={8} md={8} sm={8} xs={12}>
