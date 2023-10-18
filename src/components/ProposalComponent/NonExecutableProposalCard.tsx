@@ -193,7 +193,7 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
                   <Stack direction={"row"} width={"100%"} justifyContent={"space-between"}>
                     <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"flex-end"}>
                       <Typography sx={{ fontSize: "0.8rem" }}>{opt.label}</Typography>
-                      <Typography sx={{ fontSize: "0.7rem" }}>{opt.voteWeight.toNumber() / Math.pow(10, token.decimals)} votes</Typography>
+                      <Typography sx={{ fontSize: "0.7rem" }}>{opt.voteWeight.toNumber() / (token.uiAmount! > 1 ? Math.pow(10, token.decimals) : 1)} votes</Typography>
                     </Stack>
                     <Typography sx={{ fontSize: "0.7rem" }}>{totalVote > 0 ? (opt.voteWeight.toNumber() / totalVote) * 100 : 0}</Typography>
                   </Stack>
