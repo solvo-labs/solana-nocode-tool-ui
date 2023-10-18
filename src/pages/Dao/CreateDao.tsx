@@ -237,7 +237,7 @@ export const CreateDao = () => {
       try {
         const publicKeyList = publicKeys.map((pk) => new PublicKey(pk));
 
-        const dao = await daoInstance.createDao(daoName, false, true, publicKeyList, "disabled", threshold, false, false);
+        const dao = await daoInstance.createDao(daoName, false, true, publicKeyList, "disabled", threshold, false, false, undefined, undefined, undefined, duration);
 
         const signedTx = await wallet!.signAllTransactions(dao.transaction);
 
