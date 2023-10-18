@@ -115,9 +115,11 @@ export const Dao = () => {
     <Grid container spacing={2} className={classes.gridContainer}>
       <Grid item xs={12} className={classes.gridItem}>
         <TabContext value={activeTab}>
-          <Box
+          <Grid
+            container
             style={{
               display: "flex",
+              alignItems: "center",
               flexDirection: "row",
               justifyContent: "space-between",
               padding: "20px",
@@ -136,7 +138,7 @@ export const Dao = () => {
               <SearchInput label={activeTab == "1" ? "Search Dao" : "Search Your Dao"} onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSearch(event)}></SearchInput>
             </Grid>
             <CustomButton label="create dao" disable={false} onClick={() => navigate("/create-dao")} />
-          </Box>
+          </Grid>
           <TabPanel style={{ padding: "0px" }} value="1">
             <ListDaos daos={searchFlag ? filteredDaos : daos} characterLimit={characterLimit} />
           </TabPanel>
