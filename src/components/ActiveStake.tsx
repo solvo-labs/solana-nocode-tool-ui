@@ -1,20 +1,5 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CircularProgress,
-  Grid,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Theme,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Card, CardContent, CircularProgress, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Theme, Tooltip, Typography } from "@mui/material";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { makeStyles } from "@mui/styles";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -50,12 +35,7 @@ const ActiveStake: React.FC<Props> = ({ stakes, navigate }) => {
   return (
     <Card className={classes.card}>
       <CardContent>
-        <Grid
-          container
-          direction={"column"}
-          paddingX={"1rem"}
-          paddingTop={"0.5rem"}
-        >
+        <Grid container direction={"column"} paddingX={"1rem"} paddingTop={"0.5rem"}>
           <Grid item marginBottom={"0.5rem"}>
             <Typography className={classes.title} color="text.secondary">
               My Stake's
@@ -75,25 +55,13 @@ const ActiveStake: React.FC<Props> = ({ stakes, navigate }) => {
                 <TableBody>
                   {stakes.map((e: any, index: number) => (
                     <TableRow key={index}>
-                      <TableCell align="left">
-                        {e.account.data.parsed.info.stake.delegation.stake /
-                          LAMPORTS_PER_SOL}{" "}
-                        SOL
-                      </TableCell>
-                      <TableCell align="left">
-                        {e.account.lamports / LAMPORTS_PER_SOL} SOL
-                      </TableCell>
+                      <TableCell align="left">{e.account.data.parsed.info.stake.delegation.stake / LAMPORTS_PER_SOL} SOL</TableCell>
+                      <TableCell align="left">{e.account.lamports / LAMPORTS_PER_SOL} SOL</TableCell>
                       <TableCell align="left">{e.state}</TableCell>
                       <TableCell>
                         <Tooltip title="detail">
-                          <IconButton
-                            className={classes.detailButton}
-                            sx={{ padding: "0rem" }}
-                            onClick={navigate}
-                          >
-                            <ArrowForwardIosIcon
-                              sx={{ fontSize: "0.75rem", margin: "0rem" }}
-                            ></ArrowForwardIosIcon>
+                          <IconButton className={classes.detailButton} sx={{ padding: "0rem" }} onClick={navigate}>
+                            <ArrowForwardIosIcon sx={{ fontSize: "0.75rem", margin: "0rem" }}></ArrowForwardIosIcon>
                           </IconButton>
                         </Tooltip>
                       </TableCell>

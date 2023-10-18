@@ -2,6 +2,8 @@
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
 import React, { useEffect, useState } from "react";
 import { getVestingMyIncoming, getVestingMyOwn, unlock, withdraw } from "../../lib/vesting";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { Stream } from "@streamflow/stream/dist/solana";
 import {
   Box,
@@ -274,162 +276,164 @@ export const VestingList = () => {
   }
 
   return (
-    <>
-      <TabContext value={activeTab}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%", display: "flex", justifyContent: "center" }}>
-          <TabList
-            onChange={(_event: React.SyntheticEvent, newValue: string) => {
-              setActiveTab(newValue);
-            }}
-          >
-            <Tab label="My Incoming Vesting's" value="1" />
-            <Tab label="My Outgoing Vesting's" value="2" />
-          </TabList>
-        </Box>
-        <TabPanel value="1">
-          {vestingList && (
-            <Grid container direction={"row"} className={classes.container}>
-              <Grid item className={classes.titleContainer}>
-                <Typography variant="h5">My Incoming Vesting's</Typography>
-                <Divider sx={{ marginTop: "1rem", background: "white" }} />
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <TabContext value={activeTab}>
+          <Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%", display: "flex", justifyContent: "center" }}>
+            <TabList
+              onChange={(_event: React.SyntheticEvent, newValue: string) => {
+                setActiveTab(newValue);
+              }}
+            >
+              <Tab label="My Incoming Vesting's" value="1" />
+              <Tab label="My Outgoing Vesting's" value="2" />
+            </TabList>
+          </Box>
+          <TabPanel value="1">
+            {vestingList && (
+              <Grid container direction={"row"} className={classes.container}>
+                <Grid item className={classes.titleContainer}>
+                  <Typography variant="h5">My Incoming Vesting's</Typography>
+                  <Divider sx={{ marginTop: "1rem", background: "white" }} />
+                </Grid>
+                <Grid container marginTop={"2rem"}>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Name
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Status
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Start
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            End
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Last Withdrawn At
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Mint
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Period
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Withdrawn Amount
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Deposited Amount
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Cliff
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Cliff Amount
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Automatic Withdrawal
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Claim
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>{listVesting(vestingList)}</TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+                <Grid container className={classes.paginatonContainer} sx={{}}>
+                  <TablePagination
+                    className={classes.pagination}
+                    rowsPerPageOptions={[1, 5, 10]}
+                    component="div"
+                    colSpan={4}
+                    count={vestingList.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </Grid>
               </Grid>
-              <Grid container marginTop={"2rem"}>
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Name
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Status
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Start
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          End
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Last Withdrawn At
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Mint
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Period
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Withdrawn Amount
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Deposited Amount
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Cliff
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Cliff Amount
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Automatic Withdrawal
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Claim
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>{listVesting(vestingList)}</TableBody>
-                  </Table>
-                </TableContainer>
+            )}
+          </TabPanel>
+          <TabPanel value="2">
+            {outgoingvestingList && (
+              <Grid container direction={"row"} className={classes.container}>
+                <Grid item className={classes.titleContainer}>
+                  <Typography variant="h5">My Outgoing Vesting's</Typography>
+                  <Divider sx={{ marginTop: "1rem", background: "white" }} />
+                </Grid>
+                <Grid container marginTop={"2rem"}>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Name
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Status
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Start
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            End
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Last Withdrawn At
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Mint
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Period
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Withdrawn Amount
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Deposited Amount
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Cliff
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Cliff Amount
+                          </TableCell>
+                          <TableCell align="center" className={classes.tableTitle}>
+                            Automatic Withdrawal
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>{listVesting(outgoingvestingList, true)}</TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+                <Grid container className={classes.paginatonContainer} sx={{}}>
+                  <TablePagination
+                    className={classes.pagination}
+                    rowsPerPageOptions={[1, 5, 10]}
+                    component="div"
+                    colSpan={4}
+                    count={outgoingvestingList.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </Grid>
               </Grid>
-              <Grid container className={classes.paginatonContainer} sx={{}}>
-                <TablePagination
-                  className={classes.pagination}
-                  rowsPerPageOptions={[1, 5, 10]}
-                  component="div"
-                  colSpan={4}
-                  count={vestingList.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-              </Grid>
-            </Grid>
-          )}
-        </TabPanel>
-        <TabPanel value="2">
-          {outgoingvestingList && (
-            <Grid container direction={"row"} className={classes.container}>
-              <Grid item className={classes.titleContainer}>
-                <Typography variant="h5">My Outgoing Vesting's</Typography>
-                <Divider sx={{ marginTop: "1rem", background: "white" }} />
-              </Grid>
-              <Grid container marginTop={"2rem"}>
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Name
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Status
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Start
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          End
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Last Withdrawn At
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Mint
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Period
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Withdrawn Amount
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Deposited Amount
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Cliff
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Cliff Amount
-                        </TableCell>
-                        <TableCell align="center" className={classes.tableTitle}>
-                          Automatic Withdrawal
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>{listVesting(outgoingvestingList, true)}</TableBody>
-                  </Table>
-                </TableContainer>
-              </Grid>
-              <Grid container className={classes.paginatonContainer} sx={{}}>
-                <TablePagination
-                  className={classes.pagination}
-                  rowsPerPageOptions={[1, 5, 10]}
-                  component="div"
-                  colSpan={4}
-                  count={outgoingvestingList.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-              </Grid>
-            </Grid>
-          )}
-        </TabPanel>
-      </TabContext>
-    </>
+            )}
+          </TabPanel>
+        </TabContext>
+      </Grid>
+    </Grid>
   );
 };

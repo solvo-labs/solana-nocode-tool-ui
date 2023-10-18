@@ -114,7 +114,7 @@ const TopBar: React.FC = () => {
   };
 
   return (
-    <div>
+    <>
       <AppBar className={classes.appBar}>
         <Container maxWidth="xl">
           <Toolbar disableGutters>
@@ -207,6 +207,9 @@ const TopBar: React.FC = () => {
               <Button onClick={() => navigate("/stake")}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.STAKE}</Typography>
               </Button>
+              <Button onClick={() => navigate("/daos")}>
+                <Typography className={classes.menuTitle}>{PAGES_NAME.DAO}</Typography>
+              </Button>
               <Button onClick={() => navigate("/raffle")}>
                 <Typography className={classes.menuTitle}>{PAGES_NAME.RAFFLE}</Typography>
               </Button>
@@ -267,7 +270,7 @@ const TopBar: React.FC = () => {
           </Toolbar>
         </Container>
       </AppBar>
-    </div>
+    </>
   );
 };
 

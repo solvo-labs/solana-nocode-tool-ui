@@ -8,19 +8,24 @@ import { register } from "../../lib/tokenRegister";
 import { Token } from "../../utils/types";
 import { CustomInput } from "../../components/CustomInput";
 import { makeStyles } from "@mui/styles";
-import { CircularProgress, Divider, Grid, Stack, Theme, Typography } from "@mui/material";
+import { CircularProgress, Divider, Grid, Stack, Typography } from "@mui/material";
 import { CustomButton } from "../../components/CustomButton";
 import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
 import { NFTStorage } from "nft.storage";
 import ImageUpload from "../../components/ImageUpload";
 
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    minWidth: "30vw",
-    [theme.breakpoints.down("sm")]: {
-      minWidth: "80vw",
-    },
+const useStyles = makeStyles(() => ({
+  gridContainer: {
+    display: "flex !important",
+    justifyContent: "center !important",
+    alignItems: "flex-start !important",
+    alignContent: "flex-start !important",
+    padding: "16px !important",
+    height: "100% !important",
+  },
+  gridItem: {
+    padding: "16px !important",
   },
   title: {
     textAlign: "center",
@@ -146,84 +151,82 @@ const TokenMint: React.FC = () => {
   }
 
   return (
-    <div>
-      <Grid container className={classes.container} direction={"column"}>
-        <Grid item marginBottom={"2rem"}>
-          <Typography variant="h5" className={classes.title}>
-            Token Mint
-          </Typography>
-          <Divider sx={{ marginTop: "1rem", background: "white" }} />
-        </Grid>
-        <Grid item justifyContent={"center"} marginBottom={"2rem"}>
-          <Stack direction={"column"} spacing={2} alignItems={"center"}>
-            <ImageUpload file={file} setFile={(data) => setFile(data)} />
-            <CustomInput
-              placeHolder="Name"
-              label="Name"
-              id="name"
-              name="name"
-              type="text"
-              value={tokenData.name}
-              onChange={(e: any) => setTokenData({ ...tokenData, name: e.target.value })}
-              disable={false}
-            ></CustomInput>
-            <CustomInput
-              placeHolder="Symbol"
-              label="Symbol"
-              id="symbol"
-              name="symbol"
-              type="text"
-              value={tokenData.symbol}
-              onChange={(e: any) => setTokenData({ ...tokenData, symbol: e.target.value })}
-              disable={false}
-            ></CustomInput>
-            <CustomInput
-              placeHolder="Amount"
-              label="Amount"
-              id="amount"
-              name="amount"
-              type="text"
-              value={tokenData.amount}
-              onChange={(e: any) => setTokenData({ ...tokenData, amount: e.target.value })}
-              disable={false}
-            ></CustomInput>
-            <CustomInput
-              placeHolder="Decimal"
-              label="Decimal"
-              id="decimal"
-              name="decimal"
-              type="text"
-              value={tokenData.decimal}
-              onChange={(e: any) => setTokenData({ ...tokenData, decimal: e.target.value })}
-              disable={false}
-            />
-            <CustomInput
-              placeHolder="Authority"
-              label="Authority"
-              id="authority"
-              name="authority"
-              type="text"
-              value={tokenData.authority || ""}
-              onChange={(e: any) => setTokenData({ ...tokenData, authority: e.target.value })}
-              disable={false}
-            />
-            <CustomInput
-              placeHolder="Freeze Authority"
-              label="Freeze Authority"
-              id="freezeAuthority"
-              name="freezeAuthority"
-              type="text"
-              value={tokenData.freezeAuthority || ""}
-              onChange={(e: any) => setTokenData({ ...tokenData, freezeAuthority: e.target.value })}
-              disable={false}
-            />
-          </Stack>
-        </Grid>
-        <Grid item marginBottom={8}>
-          <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
-        </Grid>
+    <Grid container spacing={2} className={classes.gridContainer}>
+      <Grid item xs={12} className={classes.gridItem}>
+        <Typography variant="h5" className={classes.title}>
+          Token Mint
+        </Typography>
+        <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
-    </div>
+      <Grid item xs={12} className={classes.gridItem}>
+        <Stack direction={"column"} spacing={2} alignItems={"center"}>
+          <ImageUpload file={file} setFile={(data) => setFile(data)} />
+          <CustomInput
+            placeHolder="Name"
+            label="Name"
+            id="name"
+            name="name"
+            type="text"
+            value={tokenData.name}
+            onChange={(e: any) => setTokenData({ ...tokenData, name: e.target.value })}
+            disable={false}
+          ></CustomInput>
+          <CustomInput
+            placeHolder="Symbol"
+            label="Symbol"
+            id="symbol"
+            name="symbol"
+            type="text"
+            value={tokenData.symbol}
+            onChange={(e: any) => setTokenData({ ...tokenData, symbol: e.target.value })}
+            disable={false}
+          ></CustomInput>
+          <CustomInput
+            placeHolder="Amount"
+            label="Amount"
+            id="amount"
+            name="amount"
+            type="text"
+            value={tokenData.amount}
+            onChange={(e: any) => setTokenData({ ...tokenData, amount: e.target.value })}
+            disable={false}
+          ></CustomInput>
+          <CustomInput
+            placeHolder="Decimal"
+            label="Decimal"
+            id="decimal"
+            name="decimal"
+            type="text"
+            value={tokenData.decimal}
+            onChange={(e: any) => setTokenData({ ...tokenData, decimal: e.target.value })}
+            disable={false}
+          />
+          <CustomInput
+            placeHolder="Authority"
+            label="Authority"
+            id="authority"
+            name="authority"
+            type="text"
+            value={tokenData.authority || ""}
+            onChange={(e: any) => setTokenData({ ...tokenData, authority: e.target.value })}
+            disable={false}
+          />
+          <CustomInput
+            placeHolder="Freeze Authority"
+            label="Freeze Authority"
+            id="freezeAuthority"
+            name="freezeAuthority"
+            type="text"
+            value={tokenData.freezeAuthority || ""}
+            onChange={(e: any) => setTokenData({ ...tokenData, freezeAuthority: e.target.value })}
+            disable={false}
+          />
+        </Stack>
+      </Grid>
+      <Grid item xs={12} className={classes.gridItem}>
+        <CustomButton label="create token" disable={disable} onClick={createTransaction}></CustomButton>
+      </Grid>
+    </Grid>
   );
 };
 

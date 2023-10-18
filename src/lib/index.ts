@@ -1,8 +1,9 @@
 import { AccountInfo, Connection, LAMPORTS_PER_SOL, ParsedAccountData, PublicKey, RpcResponseAndContext } from "@solana/web3.js";
 import { getTokensWithAccount } from "./token";
 import { getMetadataPDA } from "./tokenRegister";
+import { TokenData } from "../utils/types";
 
-export const fetchUserTokens = async (connection: Connection, payer: PublicKey, mint?: PublicKey) => {
+export const fetchUserTokens = async (connection: Connection, payer: PublicKey, mint?: PublicKey): Promise<TokenData[]> => {
   const tokensFromWallet = await getTokensWithAccount(connection, payer, mint);
 
   const getTokensMetadataPromises = tokensFromWallet.map((tf) => {
@@ -32,9 +33,12 @@ export const isAccountActive = async (connection: Connection, publicKey: PublicK
   return false;
 };
 
-export const accountState = async (connection: Connection, publicKey: PublicKey) :Promise<RpcResponseAndContext<AccountInfo<Buffer | ParsedAccountData | string> | null> | undefined> => {
+export const accountState = async (
+  connection: Connection,
+  publicKey: PublicKey
+): Promise<RpcResponseAndContext<AccountInfo<Buffer | ParsedAccountData | string> | null> | undefined> => {
   const account = await connection.getParsedAccountInfo(publicKey);
 
   if (account && account.value && !Buffer.isBuffer(account.value.data)) return account.value?.data.parsed.info.state;
   return undefined;
-}
+};

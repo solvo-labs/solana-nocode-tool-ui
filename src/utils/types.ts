@@ -53,3 +53,26 @@ export type Section = {
   percent: number;
   isOldSection: boolean;
 };
+
+export type Dao = {
+  account: {
+    accountType: number;
+    authority?: string;
+    communityMint: string;
+    config: {
+      communityMintMaxVoteWeightSource: {
+        type: number;
+        value: number;
+      };
+      councilMint: string;
+      // minCommunityTokensToCreateGovernance: number,
+      // reserved: number,
+      useCommunityVoterWeightAddin: boolean;
+      useMaxCommunityVoterWeightAddin: boolean;
+    };
+    name: string;
+    votingProposalCount: number;
+  };
+  owner: string;
+  pubkey: string;
+};
