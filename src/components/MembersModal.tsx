@@ -1,7 +1,6 @@
-import { Box, Button, Grid, Modal, Stack, Typography } from "@mui/material";
+import { Box, Grid, Modal, Stack, Typography } from "@mui/material";
 import React, { useState } from "react";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import MemberCard from "./MemberCard.tsx";
 import MemberDetail from "./MemberDetail.tsx";
 import { ProgramAccount, TokenOwnerRecord } from "@solana/spl-governance";
@@ -47,9 +46,9 @@ const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members, to
                 <PeopleAltIcon sx={{ fontSize: "24px", color: "#A56BFA" }}></PeopleAltIcon>
                 <Typography variant={"subtitle2"}>{members ? members.length : "0"} members</Typography>
               </Stack>
-              <Button component="label" size={"small"} sx={{ fontSize: "12px", color: "black", borderRadius: "12px" }} startIcon={<AddCircleOutlineIcon />}>
+              {/* <Button component="label" size={"small"} sx={{ fontSize: "12px", color: "black", borderRadius: "12px" }} startIcon={<AddCircleOutlineIcon />}>
                 New Member
-              </Button>
+              </Button> */}
             </Grid>
             <Stack spacing={2} marginTop={"1rem"}>
               {members &&

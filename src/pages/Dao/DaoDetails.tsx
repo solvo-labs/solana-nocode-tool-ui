@@ -136,6 +136,7 @@ const DaoDetails: React.FC = () => {
   };
 
   const [tabValue, setTabValue] = useState<string>("1");
+  const [amIMember, setAmIMember] = useState<boolean>(true);
 
   // @ts-ignore
   const handleChangeTabs = (event: React.SyntheticEvent, newValue: number) => {
@@ -169,6 +170,7 @@ const DaoDetails: React.FC = () => {
 
           if (!imAMember && userTokenDetails.length === 0) {
             toastr.warning("You'r not a member for this dao");
+            setAmIMember(false);
           }
 
           await sleep(3000);
@@ -522,9 +524,11 @@ const DaoDetails: React.FC = () => {
                   </Button>
                 </>
               )}
-              <Button variant="outlined" onClick={createProposal}>
-                Create Proposal
-              </Button>
+              {amIMember && (
+                <Button variant="outlined" onClick={createProposal}>
+                  Create Proposal
+                </Button>
+              )}
             </Grid>
             <Divider />
           </div>
