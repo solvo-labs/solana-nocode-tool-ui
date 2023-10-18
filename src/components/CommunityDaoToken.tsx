@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FormControl, Grid, InputLabel, MenuItem, OutlinedInput, Select, Slider, TextField, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import Checkbox from "@mui/material/Checkbox";
@@ -166,6 +166,12 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
   // handleTransfer,
 }) => {
   const classes = useStyles();
+  const [duration, setDuration] = useState(1);
+  const defaultValue = "DAY";
+
+  const handleDurationChange = (event: any) => {
+    setDuration(event.target.value);
+  };
 
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
@@ -219,6 +225,54 @@ const CommunityDaoToken: React.FC<CommunityDaoTokenProps> = ({
         <Typography className={classes.description}>Minimum number of community tokens required for overseeing this DAO?</Typography>
 
         <TextField type="number" className={classes.textField} defaultValue={1} id="dao-name" label="e.g. 1,000,000" variant="standard" onChange={handleMinNumberToEditDao} />
+        <Typography className={classes.description}>Proposal time</Typography>
+
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <FormControl style={{ width: "25%", paddingRight: "10px" }} className={classes.formControl}>
+            <InputLabel id="duration-label">Duration</InputLabel>
+            <Select
+              style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+              labelId="duration-label"
+              id="duration-select"
+              value={duration}
+              onChange={handleDurationChange}
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
+                <MenuItem key={value} value={value}>
+                  {value}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl style={{ width: "75%", paddingLeft: "10px" }} className={classes.formControl}>
+            <InputLabel id="select-label">Select a duration</InputLabel>
+            <Select labelId="select-label" id="select" value={defaultValue}>
+              <MenuItem value="DAY">DAY</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+
+        {/* <FormControl fullWidth>
+          <InputLabel id="selectLabel">Durations</InputLabel>
+          <Select
+            value={vestParams.selectedDuration.toString()}
+            label="Durations"
+            onChange={(e: SelectChangeEvent<string>) => {
+              setVestParams({ ...vestParams, selectedDuration: Number(e.target.value) });
+            }}
+            className={classes.input}
+            id={"durations"}
+          >
+            {Object.keys(Durations).map((tk) => {
+              return (
+                <MenuItem key={tk} value={Durations[tk as keyof DurationsType]}>
+                  {tk}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl> */}
       </Grid>
 
       <Grid item xs={8} className={`${classes.gridItem}, ${classes.card} ,  ${classes.mt}`}>
