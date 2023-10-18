@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { DAO } from "../../lib/dao/index";
 import { Box, CircularProgress, Grid, Tab } from "@mui/material";
@@ -9,6 +9,7 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { CustomButton } from "../../components/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
+import SearchInput from "../../components/SearchInput.tsx";
 
 const useStyles = makeStyles(() => ({
   gridContainer: {
@@ -34,11 +35,33 @@ export const Dao = () => {
   const [daoInstance, setDaoInstance] = useState<DAO>();
   const [daos, setDaos] = useState<ProgramAccount<Realm>[]>([]);
   const [myDaos, setMyDaos] = useState<ProgramAccount<Realm>[]>([]);
+  const [filteredDaos, setFilteredDaos] = useState<ProgramAccount<Realm>[]>([]);
+  const [filteredMyDaos, setFilteredMyDaos] = useState<ProgramAccount<Realm>[]>([]);
+  const [search, setSearch] = useState<string>("");
   const navigate = useNavigate();
 
   const wallet = useAnchorWallet();
 
   const { connection } = useConnection();
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+    console.log(inputValue);
+    setSearch(inputValue);
+    console.log(filteredMyDaos);
+    if (activeTab == "1") {
+      const filtered = daos.filter((dao) => dao.account.name.toLowerCase().includes(inputValue.toLowerCase()));
+      setFilteredDaos(filtered);
+    } else if (activeTab == "2") {
+      const filtered = myDaos.filter((myDao) => myDao.account.name.toLowerCase().includes(inputValue.toLowerCase()));
+      console.log(filteredMyDaos);
+      setFilteredMyDaos(filtered);
+    }
+  };
+
+  const searchFlag = useMemo(() => {
+    return search != "";
+  }, [search]);
 
   useEffect(() => {
     if (wallet) {
@@ -59,6 +82,7 @@ export const Dao = () => {
           // console.log("allDaos", typeof allDaos);
 
           setDaos(allDaos);
+          console.log(allDaos);
           setMyDaos(myDaos);
           setLoading(false);
         } catch {
@@ -94,7 +118,14 @@ export const Dao = () => {
     <Grid container spacing={2} className={classes.gridContainer}>
       <Grid item xs={12} className={classes.gridItem}>
         <TabContext value={activeTab}>
-          <Box style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", padding: "20px" }}>
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: "20px",
+            }}
+          >
             <TabList
               onChange={(_event: React.SyntheticEvent, newValue: string) => {
                 setActiveTab(newValue);
@@ -104,13 +135,16 @@ export const Dao = () => {
               <Tab value="1" style={{ outline: "none", fontWeight: "bold", marginRight: "5px" }} label="Dao's" />
               <Tab value="2" style={{ outline: "none", fontWeight: "bold" }} label="My Dao's" />
             </TabList>
+            <Grid item sx={{ width: "600px" }}>
+              <SearchInput onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleSearch(event)}></SearchInput>
+            </Grid>
             <CustomButton label="create dao" disable={false} onClick={() => navigate("/create-dao")} />
           </Box>
           <TabPanel style={{ padding: "0px" }} value="1">
-            <ListDaos daos={daos} characterLimit={characterLimit} />
+            <ListDaos daos={searchFlag ? filteredDaos : daos} characterLimit={characterLimit} />
           </TabPanel>
           <TabPanel style={{ padding: "0px" }} value="2">
-            <ListDaos daos={myDaos} characterLimit={characterLimit} />
+            <ListDaos daos={searchFlag ? filteredMyDaos : myDaos} characterLimit={characterLimit} />
           </TabPanel>
         </TabContext>
       </Grid>
