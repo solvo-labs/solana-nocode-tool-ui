@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, TextField, Typography } from "@mui/material";
+import { FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import remove from "../assets/remove.png";
 import { makeStyles } from "@mui/styles";
 
@@ -51,19 +51,25 @@ const useStyles = makeStyles(() => ({
     marginLeft: "10px !important",
     cursor: "pointer !important",
   },
+  formControl: {
+    margin: "16px 0 !important",
+  },
 }));
 
 interface MultisignDaoDetailsProps {
   daoName: string;
   publicKeys: string[];
+  duration: number;
   onChange: (e: any) => void;
   removeHash: (e: any) => void;
   handleDAOMembers: (e: any) => void;
   onBlur: (e: any) => void;
+  handleDuration: (drt: number) => void;
 }
 
-const MultisignDaoDetails: React.FC<MultisignDaoDetailsProps> = ({ onChange, daoName, publicKeys, removeHash, handleDAOMembers, onBlur }) => {
+const MultisignDaoDetails: React.FC<MultisignDaoDetailsProps> = ({ onChange, daoName, publicKeys, duration, removeHash, handleDAOMembers, onBlur, handleDuration }) => {
   const classes = useStyles();
+  const defaultValue = "DAY";
 
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
@@ -80,6 +86,31 @@ const MultisignDaoDetails: React.FC<MultisignDaoDetailsProps> = ({ onChange, dao
       {daoName && (
         <Grid item xs={8}>
           <Grid container spacing={2}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", padding: "16px" }}>
+              <FormControl style={{ width: "25%", paddingRight: "10px" }} className={classes.formControl}>
+                <InputLabel id="duration-label">Duration</InputLabel>
+                <Select
+                  style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+                  labelId="duration-label"
+                  id="duration-select"
+                  value={duration}
+                  onChange={(e) => handleDuration(e.target.value as number)}
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
+                    <MenuItem key={value} value={value}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl style={{ width: "75%", paddingLeft: "10px" }} className={classes.formControl}>
+                <InputLabel id="select-label">Select a duration</InputLabel>
+                <Select labelId="select-label" id="select" value={defaultValue}>
+                  <MenuItem value="DAY">DAY</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
             <Grid item xs={12} className={classes.grid}>
               <Typography className={classes.title}>Next, invite members with their Solana Wallet Address.</Typography>
               <Typography className={classes.description}>Invite members {publicKeys.length}</Typography>
