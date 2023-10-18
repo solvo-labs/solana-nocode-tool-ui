@@ -187,6 +187,35 @@ const DaoDetails: React.FC = () => {
     init();
   }, [connection, daoInstance, pubkey, publicKey]);
 
+  const createProposal = async () => {
+    setLoading(true);
+    try {
+      const tx = await daoInstance?.createProposal(proposalData.name, proposalData.description, proposalData.isMulti, proposalData.isMulti ? proposalData.options : undefined);
+
+      const transactionProposal = new Transaction();
+
+      transactionProposal.add(tx![0].instructionsSet[0].transactionInstruction);
+      transactionProposal.add(tx![0].instructionsSet[1].transactionInstruction);
+      transactionProposal.add(tx![1].instructionsSet[0].transactionInstruction);
+
+      const {
+        context: { slot: minContextSlot },
+        value: { blockhash, lastValidBlockHeight },
+      } = await connection.getLatestBlockhashAndContext();
+
+      const signature = await sendTransaction(transactionProposal!, connection, { minContextSlot, signers: [] });
+      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+      setLoading(false);
+      setShowCreateProposalModal(false);
+      setProposalData({ name: "", description: "", isMulti: false, options: [] });
+      toastr.success("Proposal created successfully.");
+    } catch (error) {
+      setLoading(false);
+      setShowCreateProposalModal(false);
+      toastr.error("Proposal could not be created.");
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -202,24 +231,6 @@ const DaoDetails: React.FC = () => {
       </div>
     );
   }
-
-  const createProposal = async () => {
-    const tx = await daoInstance?.createProposal(proposalData.name, proposalData.description, proposalData.isMulti, proposalData.isMulti ? proposalData.options : undefined);
-
-    const transactionProposal = new Transaction();
-
-    transactionProposal.add(tx![0].instructionsSet[0].transactionInstruction);
-    transactionProposal.add(tx![0].instructionsSet[1].transactionInstruction);
-    transactionProposal.add(tx![1].instructionsSet[0].transactionInstruction);
-
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await connection.getLatestBlockhashAndContext();
-
-    const signature = await sendTransaction(transactionProposal!, connection, { minContextSlot, signers: [] });
-    await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
-  };
 
   const daoConfigModal = () => {
     if (daoConfig) {
