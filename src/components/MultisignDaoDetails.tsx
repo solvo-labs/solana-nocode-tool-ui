@@ -86,6 +86,26 @@ const MultisignDaoDetails: React.FC<MultisignDaoDetailsProps> = ({ onChange, dao
       {daoName && (
         <Grid item xs={8}>
           <Grid container spacing={2}>
+            <Grid item xs={12} className={classes.grid}>
+              <Typography className={classes.title}>Next, invite members with their Solana Wallet Address.</Typography>
+              <Typography className={classes.description}>Invite members {publicKeys.length}</Typography>
+              <Typography>Add Solana wallet addressses</Typography>
+            </Grid>
+            <Grid item xs={12} className={classes.grid}>
+              {publicKeys.map((hash, index) => (
+                <div key={index} className={classes.memberSide}>
+                  <div className={classes.members}>
+                    <Typography>{index === 0 ? "Me:" : `${index + 1}:`}</Typography>
+                  </div>
+                  <div className={classes.memberHashs}>
+                    {hash} {index !== 0 ? <img onClick={() => removeHash(index)} className={classes.removeIcon} src={remove} alt="remove icon" /> : <></>}
+                  </div>
+                </div>
+              ))}
+            </Grid>
+            <Grid item xs={12} className={classes.grid}>
+              <TextField className={classes.daoInput} id="dao-members" label="e.g. hash" variant="standard" onKeyDown={handleDAOMembers} onBlur={onBlur} />
+            </Grid>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", padding: "16px" }}>
               <FormControl style={{ width: "25%", paddingRight: "10px" }} className={classes.formControl}>
                 <InputLabel id="duration-label">Duration</InputLabel>
@@ -111,26 +131,6 @@ const MultisignDaoDetails: React.FC<MultisignDaoDetailsProps> = ({ onChange, dao
                 </Select>
               </FormControl>
             </div>
-            <Grid item xs={12} className={classes.grid}>
-              <Typography className={classes.title}>Next, invite members with their Solana Wallet Address.</Typography>
-              <Typography className={classes.description}>Invite members {publicKeys.length}</Typography>
-              <Typography>Add Solana wallet addressses</Typography>
-            </Grid>
-            <Grid item xs={12} className={classes.grid}>
-              {publicKeys.map((hash, index) => (
-                <div key={index} className={classes.memberSide}>
-                  <div className={classes.members}>
-                    <Typography>{index === 0 ? "Me:" : `${index + 1}:`}</Typography>
-                  </div>
-                  <div className={classes.memberHashs}>
-                    {hash} {index !== 0 ? <img onClick={() => removeHash(index)} className={classes.removeIcon} src={remove} alt="remove icon" /> : <></>}
-                  </div>
-                </div>
-              ))}
-            </Grid>
-            <Grid item xs={12} className={classes.grid}>
-              <TextField className={classes.daoInput} id="dao-members" label="e.g. hash" variant="standard" onKeyDown={handleDAOMembers} onBlur={onBlur} />
-            </Grid>
           </Grid>
         </Grid>
       )}

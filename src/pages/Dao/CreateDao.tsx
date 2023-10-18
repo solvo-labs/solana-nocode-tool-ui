@@ -354,6 +354,8 @@ export const CreateDao = () => {
               removeHash={removeHash}
               handleDAOMembers={handleDAOMembers}
               onBlur={onBlurHandleDAOMembers}
+              duration={duration}
+              handleDuration={(e) => setDuration(e)}
             />
           </Grid>
         )}
