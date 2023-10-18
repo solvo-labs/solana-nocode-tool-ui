@@ -23,16 +23,14 @@ import {
   VoteTipping,
   getGovernanceProgramVersion,
   getInstructionDataFromBase64,
-  getTokenOwnerRecordAddress,
   withCreateGovernance,
-  withCreateMintGovernance,
   withCreateNativeTreasury,
   withCreateRealm,
   withCreateTokenOwnerRecord,
   withDepositGoverningTokens,
   withSetRealmAuthority,
 } from "@solana/spl-governance";
-import { DEFAULT_COMMUNITY_MINT_MAX_VOTE_WEIGHT_SOURCE, DISABLED_VOTER_WEIGHT, GOVERNANCE_PROGRAM_ID, MIN_COMMUNITY_TOKENS_TO_CREATE_WITH_ZERO_SUPPLY } from "./constants";
+import { DISABLED_VOTER_WEIGHT, GOVERNANCE_PROGRAM_ID } from "./constants";
 import BigNumber from "bignumber.js";
 import { tryGetMint, withCreateAssociatedTokenAccount, withCreateMint, withMintTo } from "./token";
 
@@ -137,126 +135,6 @@ export const mintCouncilTokensToMembers = async (
     transaction,
     walletAssociatedTokenAccountPk,
   };
-};
-
-export const createMultisigdDao = async (
-  name: string,
-  yesVoteThreshold: number,
-  walletPk: PublicKey,
-  communityMintPk: PublicKey,
-  councilMintPk: PublicKey,
-  walletAssociatedTokenAccountPk: PublicKey,
-  recentBlockhash: BlockhashWithExpiryBlockHeight
-) => {
-  const { daoPk, instructions } = await createDao(name, yesVoteThreshold, walletPk, communityMintPk, councilMintPk, walletAssociatedTokenAccountPk);
-
-  const transaction = new Transaction({
-    blockhash: recentBlockhash.blockhash,
-    lastValidBlockHeight: recentBlockhash.lastValidBlockHeight,
-    feePayer: walletPk,
-  });
-
-  instructions.forEach((instruction) => transaction.add(instruction));
-
-  return { daoPk, transaction };
-};
-
-const createDao = async (
-  name: string,
-  yesVoteThreshold: number,
-  walletPk: PublicKey,
-  communityMintPk: PublicKey,
-  councilMintPk: PublicKey,
-  walletAssociatedTokenAccountPk: PublicKey,
-  decimal = 8,
-  tokenAmount = 1
-) => {
-  const communityTokenConfig = undefined;
-  const councilTokenConfig = undefined;
-  const voterWeightRecord = undefined;
-  const instructions: never[] = [];
-
-  const minCommunityTokensToCreateAsMintValue = new BN(getMintNaturalAmountFromDecimal(MIN_COMMUNITY_TOKENS_TO_CREATE_WITH_ZERO_SUPPLY, decimal));
-
-  const realmPk = await withCreateRealm(
-    instructions,
-    GOVERNANCE_PROGRAM_ID,
-    3,
-    name,
-    walletPk,
-    communityMintPk,
-    walletPk,
-    councilMintPk,
-    DEFAULT_COMMUNITY_MINT_MAX_VOTE_WEIGHT_SOURCE,
-    minCommunityTokensToCreateAsMintValue,
-    communityTokenConfig,
-    councilTokenConfig
-  );
-
-  await withDepositGoverningTokens(
-    instructions,
-    GOVERNANCE_PROGRAM_ID,
-    3,
-    realmPk,
-    walletAssociatedTokenAccountPk,
-    councilMintPk,
-    walletPk,
-    walletPk,
-    walletPk,
-    new BN(tokenAmount)
-  );
-
-  const tokenOwnerRecordPk = await getTokenOwnerRecordAddress(GOVERNANCE_PROGRAM_ID, realmPk, councilMintPk, walletPk);
-
-  // Put community and council mints under the realm governance with default config
-  const config = new GovernanceConfig({
-    communityVoteThreshold: new VoteThreshold({
-      type: VoteThresholdType.YesVotePercentage,
-      value: yesVoteThreshold,
-    }),
-    minCommunityTokensToCreateProposal: minCommunityTokensToCreateAsMintValue,
-    // Do not use instruction hold up time
-    minInstructionHoldUpTime: 0,
-    // max voting time 3 days
-    baseVotingTime: getTimestampFromDays(3),
-    communityVoteTipping: VoteTipping.Strict,
-    minCouncilTokensToCreateProposal: new BN(1),
-    councilVoteThreshold: new VoteThreshold({
-      type: VoteThresholdType.YesVotePercentage,
-      value: 1,
-    }),
-    councilVetoVoteThreshold: new VoteThreshold({
-      type: VoteThresholdType.YesVotePercentage,
-      value: yesVoteThreshold,
-    }),
-    communityVetoVoteThreshold: new VoteThreshold({
-      type: VoteThresholdType.YesVotePercentage,
-      value: yesVoteThreshold,
-    }),
-    councilVoteTipping: VoteTipping.Strict,
-    votingCoolOffTime: 0,
-    depositExemptProposalCount: 0,
-  });
-
-  const communityMintGovPk = await withCreateMintGovernance(
-    instructions,
-    GOVERNANCE_PROGRAM_ID,
-    3,
-    realmPk,
-    communityMintPk,
-    config,
-    !!walletPk,
-    walletPk,
-    tokenOwnerRecordPk,
-    walletPk,
-    walletPk,
-    voterWeightRecord
-  );
-
-  // Set the community governance as the realm authority
-  withSetRealmAuthority(instructions, GOVERNANCE_PROGRAM_ID, 3, realmPk, walletPk, communityMintGovPk, SetRealmAuthorityAction.SetChecked);
-
-  return { daoPk: realmPk, instructions };
 };
 
 const getMintNaturalAmountFromDecimal = (decimalAmount: number, decimals: number) => {

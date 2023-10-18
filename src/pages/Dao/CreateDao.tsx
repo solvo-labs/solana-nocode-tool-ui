@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Grid } from "@mui/material";
 import { DAO } from "../../lib/dao";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, sendAndConfirmRawTransaction } from "@solana/web3.js";
 import DaoCreateCard from "../../components/DaoCreateCard";
 import MultisignDaoDetails from "../../components/MultisignDaoDetails";
 import { CustomButton } from "../../components/CustomButton";
@@ -13,6 +13,8 @@ import CommunityDaoDetails from "../../components/CommunityDaoDetails";
 import CommunityDaoToken from "../../components/CommunityDaoToken";
 import CommunityDaoCouncil from "../../components/CommunityDaoCouncil";
 import DaoStepper from "../../components/DaoStepper";
+import { useNavigate } from "react-router-dom";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
 const useStyles = makeStyles(() => ({
   gridContainer: {
@@ -63,6 +65,8 @@ export const CreateDao = () => {
   const { publicKey } = useWallet();
   const [publicKeys, setPublicKeys] = useState<string[]>([publicKey?.toBase58() || ""]);
   const [councilMembers, setCouncilMembers] = useState<string[]>([publicKey?.toBase58() || ""]);
+
+  const navigate = useNavigate();
 
   const handleUseToken = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDaoCommunityTokenChecked(event.target.checked);
@@ -210,12 +214,47 @@ export const CreateDao = () => {
     if (daoInstance) {
       try {
         const publicKeyList = publicKeys.map((pk) => new PublicKey(pk));
-        console.log("publicKeyList", publicKeyList);
-        console.log("threshold", threshold);
 
-        const daoPk = await daoInstance.createMultisigDao(publicKeyList, daoName, threshold);
+        const dao = await daoInstance.createDao(daoName, false, true, publicKeyList, "disabled", threshold, false, false);
 
-        console.log(daoPk);
+        const signedTx = await wallet!.signAllTransactions(dao.transaction);
+
+        const transactionsSignatures: string[] = [];
+
+        const {
+          value: { blockhash, lastValidBlockHeight },
+        } = await connection.getLatestBlockhashAndContext();
+
+        for (const signed of signedTx) {
+          const rawTransaction = signed.serialize();
+          const transactionSignature = await sendAndConfirmRawTransaction(
+            connection,
+            rawTransaction,
+            {
+              signature: bs58.encode(signed.signature!),
+              blockhash: blockhash,
+              lastValidBlockHeight: lastValidBlockHeight,
+            },
+            {
+              commitment: "confirmed",
+            }
+          );
+
+          transactionsSignatures.push(transactionSignature);
+        }
+
+        // const {
+        //   context: { slot: minContextSlot },
+        //   value: { blockhash, lastValidBlockHeight },
+        // } = await connection.getLatestBlockhashAndContext();
+
+        // const signature = await sendTransaction(dao.transaction, connection, { minContextSlot, signers: dao.signers });
+
+        // await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+
+        // toastr.success("Dao Created Successfully");
+
+        navigate("/dao/" + dao.realmPk.toBase58());
       } catch (error) {
         console.log(error);
       }

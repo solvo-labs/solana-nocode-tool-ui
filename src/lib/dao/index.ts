@@ -1,4 +1,4 @@
-import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, sendAndConfirmRawTransaction } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import {
   GoverningTokenConfigAccountArgs,
   GoverningTokenType,
@@ -28,19 +28,8 @@ import {
   Governance,
 } from "@solana/spl-governance";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
-import {
-  InstructionDataWithHoldUpTime,
-  chunks,
-  createCommunityDao,
-  createMultisigdDao,
-  daoMints,
-  deduplicateObjsFilter,
-  getVetoTokenMint,
-  mintCouncilTokensToMembers,
-  txBatchesToInstructionSetWithSigners,
-} from "./utils";
+import { InstructionDataWithHoldUpTime, chunks, createCommunityDao, deduplicateObjsFilter, getVetoTokenMint, txBatchesToInstructionSetWithSigners } from "./utils";
 import { GOVERNANCE_PROGRAM_ID } from "./constants";
-import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
 export class DAO {
   private connection: Connection;
@@ -126,50 +115,7 @@ export class DAO {
     throw "Something went wrong";
   };
 
-  createMultisigDao = async (multiSigWallets: PublicKey[], name: string, threshold: number) => {
-    const recentBlockhash = await this.connection.getLatestBlockhash();
-    const daoMintResult = await daoMints(this.connection, this.wallet, recentBlockhash, 6);
-
-    const mintResult = await mintCouncilTokensToMembers(multiSigWallets, daoMintResult.councilMintPk, this.wallet, this.connection, recentBlockhash);
-
-    const { daoPk, transaction: daoTransaction } = await createMultisigdDao(
-      name,
-      threshold,
-      this.wallet.publicKey,
-      daoMintResult.communityMintPk,
-      daoMintResult.councilMintPk,
-      mintResult.walletAssociatedTokenAccountPk!,
-      recentBlockhash
-    );
-
-    const transactions = [daoMintResult.transaction, mintResult.transaction, daoTransaction];
-
-    const signedTx = await this.wallet.signAllTransactions(transactions);
-
-    const transactionsSignatures: string[] = [];
-
-    for (const signed of signedTx) {
-      const rawTransaction = signed.serialize();
-      const transactionSignature = await sendAndConfirmRawTransaction(
-        this.connection,
-        rawTransaction,
-        {
-          signature: bs58.encode(signed.signature!),
-          blockhash: recentBlockhash.blockhash,
-          lastValidBlockHeight: recentBlockhash.lastValidBlockHeight,
-        },
-        {
-          commitment: "confirmed",
-        }
-      );
-
-      transactionsSignatures.push(transactionSignature);
-    }
-
-    return { daoPk };
-  };
-
-  createCommunityDao = async (
+  createDao = async (
     name: string,
     useSupplyFactor: boolean,
     createCouncil: boolean,
@@ -208,12 +154,33 @@ export class DAO {
           })
     );
 
-    const instructions: TransactionInstruction[] = [...mintsSetupInstructions, ...realmInstructions, ...councilMembersInstructions];
-    const transaction = new Transaction().add(...instructions);
+    // const instructions: TransactionInstruction[] = [...mintsSetupInstructions, ...realmInstructions, ...councilMembersInstructions];
+    const transaction = [];
 
-    const signers: Keypair[] = [...realmSigners, ...mintsSetupSigners];
+    const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash();
 
-    return { transaction, signers, realmPk };
+    if (mintsSetupInstructions.length > 0) {
+      const tx = new Transaction({ lastValidBlockHeight, blockhash, feePayer: this.wallet.publicKey }).add(...mintsSetupInstructions);
+      if (mintsSetupSigners.length > 0) tx.partialSign(...mintsSetupSigners);
+
+      transaction.push(tx);
+    }
+
+    if (realmInstructions.length > 0) {
+      const tx = new Transaction({ lastValidBlockHeight, blockhash, feePayer: this.wallet.publicKey }).add(...realmInstructions);
+      if (realmSigners.length > 0) tx.partialSign(...realmSigners);
+
+      transaction.push(tx);
+    }
+
+    if (councilMembersInstructions.length > 0) {
+      const tx = new Transaction({ lastValidBlockHeight, blockhash, feePayer: this.wallet.publicKey }).add(...councilMembersInstructions);
+      transaction.push(tx);
+    }
+
+    // const signers: Keypair[] = [...realmSigners, ...mintsSetupSigners];
+
+    return { transaction, realmPk };
   };
 
   createProposal = async (name: string, descriptionLink: string, isMulti = false, options = ["Approve"]) => {
