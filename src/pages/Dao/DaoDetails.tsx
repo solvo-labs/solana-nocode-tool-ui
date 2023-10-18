@@ -112,6 +112,8 @@ const DaoDetails: React.FC = () => {
   const [daoConfig, setDaoConfig] = useState<Governance>();
   const [showConfigModal, setShowConfigModal] = useState<boolean>(false);
   const [token, setToken] = useState<RpcResponseAndContext<TokenAmount>>();
+  const [depositAmount, setDepositAmount] = useState<number>(0);
+  const [showDepositModal, setShowDepositModal] = useState<boolean>(false);
 
   const { sendTransaction, publicKey } = useWallet();
 
@@ -226,6 +228,24 @@ const DaoDetails: React.FC = () => {
     }
   };
 
+  const deposit = async () => {
+    if (daoInstance && dao) {
+      setLoading(true);
+      const depositAction = await daoInstance.depositCommunityToken(dao, depositAmount * Math.pow(10, token?.value.decimals || 0));
+
+      const {
+        context: { slot: minContextSlot },
+        value: { blockhash, lastValidBlockHeight },
+      } = await connection.getLatestBlockhashAndContext();
+
+      const signature = await sendTransaction(depositAction.transaction, connection, { minContextSlot, signers: depositAction.signers });
+      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+      setLoading(false);
+      toastr.success("Deposit completed successfully");
+      setShowDepositModal(false);
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -241,6 +261,63 @@ const DaoDetails: React.FC = () => {
       </div>
     );
   }
+
+  const depositModal = () => {
+    return (
+      <Modal
+        className={classes.modal}
+        open={showDepositModal}
+        onClose={() => {
+          setShowDepositModal(false);
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            borderRadius: "8px",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 500,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            maxHeight: 600,
+            height: "auto",
+            p: 1,
+            overflowY: "auto",
+          }}
+        >
+          <div className={classes.modalContent}>
+            <Typography id="modal-modal-title" variant="h6" component="h2" color={"black"} align="center" marginBottom={"1rem"}>
+              Deposit / Withdraw Community Token
+            </Typography>
+            <Divider sx={{ marginBottom: "1rem", marginTop: "0.5rem", background: "black" }} />
+            <Box sx={{ width: "100%", color: "black" }}>
+              <Grid gap={2} style={{ display: "flex", flexDirection: "column" }}>
+                <CustomInput
+                  placeHolder="Amount"
+                  label="Amount"
+                  id="amount"
+                  name="amount"
+                  type="text"
+                  value={depositAmount}
+                  onChange={(e: any) => setDepositAmount(e.target.value)}
+                  disable={false}
+                />
+                <Button variant="outlined" onClick={deposit}>
+                  Deposit
+                </Button>
+              </Grid>
+            </Box>
+            <Divider />
+          </div>
+        </Box>
+      </Modal>
+    );
+  };
 
   const daoConfigModal = () => {
     if (daoConfig) {
@@ -538,7 +615,16 @@ const DaoDetails: React.FC = () => {
               </Box>
             </CardContent>
           </Card>
-          <DaoGovernancePower membersCount={members.length} token={token} type={daoType} style={classes.card}></DaoGovernancePower>
+          <DaoGovernancePower
+            membersCount={members.length}
+            token={token}
+            type={daoType!}
+            style={classes.card}
+            member={members.find((mb) => mb.account.governingTokenOwner.toBase58() === publicKey?.toBase58())}
+            depositOnClick={() => {
+              setShowDepositModal(true);
+            }}
+          />
           <Card className={classes.card}>
             <CardContent>
               <Typography variant={"h6"}>Dao Wallets</Typography>
@@ -621,6 +707,7 @@ const DaoDetails: React.FC = () => {
       </Grid>
       {createProposalModal()}
       {daoConfigModal()}
+      {depositModal()}
     </Grid>
   );
 };

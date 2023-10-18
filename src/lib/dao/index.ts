@@ -26,10 +26,13 @@ import {
   RealmConfigAccount,
   getGovernance,
   Governance,
+  withDepositGoverningTokens,
 } from "@solana/spl-governance";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { InstructionDataWithHoldUpTime, chunks, createCommunityDao, deduplicateObjsFilter, getVetoTokenMint, txBatchesToInstructionSetWithSigners } from "./utils";
 import { GOVERNANCE_PROGRAM_ID } from "./constants";
+import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, createApproveInstruction, getAssociatedTokenAddress } from "@solana/spl-token";
+import { BN } from "@project-serum/anchor";
 
 export class DAO {
   private connection: Connection;
@@ -410,5 +413,46 @@ export class DAO {
       return transaction;
     }
     throw "Something went wrong";
+  };
+
+  depositCommunityToken = async (realm: ProgramAccount<Realm>, amount: number) => {
+    const mint = realm.account.communityMint;
+
+    const userAtaPk = await getAssociatedTokenAddress(mint, this.wallet.publicKey, true, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+
+    const instructions: TransactionInstruction[] = [];
+    const signers: Keypair[] = [];
+
+    // const transferAuthority = approveTokenTransfer(
+    //   instructions,
+    //   [],
+    //   userAtaPk,
+    //   wallet!.publicKey!,
+    //   amount
+    // )
+
+    const transferAuthority = new Keypair();
+
+    instructions.push(createApproveInstruction(userAtaPk, transferAuthority.publicKey, this.wallet.publicKey, amount, []));
+
+    signers.push(transferAuthority);
+
+    await withDepositGoverningTokens(
+      instructions,
+      realm.owner,
+      3,
+      realm.pubkey,
+      userAtaPk,
+      mint,
+      this.wallet.publicKey,
+      transferAuthority.publicKey,
+      this.wallet.publicKey,
+      new BN(amount)
+    );
+
+    const transaction = new Transaction();
+    transaction.add(...instructions);
+
+    return { transaction, signers };
   };
 }

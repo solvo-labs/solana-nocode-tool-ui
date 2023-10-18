@@ -2,15 +2,29 @@ import { CardActionArea, Card, CardContent, Typography, Box, Stack, Button } fro
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { DAO_TYPE } from "../utils/enum";
 import { RpcResponseAndContext, TokenAmount } from "@solana/web3.js";
+import { ProgramAccount, TokenOwnerRecord } from "@solana/spl-governance";
+import { useMemo } from "react";
 
 type Props = {
   style: any;
   type: DAO_TYPE;
   token: RpcResponseAndContext<TokenAmount> | undefined;
   membersCount: number;
+  member?: ProgramAccount<TokenOwnerRecord>;
+  depositOnClick: () => void;
 };
 
-const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount }) => {
+const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount, member, depositOnClick }) => {
+  const balance = useMemo(() => {
+    if (token && member) {
+      const value = member.account.governingTokenDepositAmount.toNumber() / Math.pow(10, token.value.decimals);
+
+      return value;
+    }
+
+    return 0;
+  }, [member, token]);
+
   return (
     <CardActionArea>
       <Card className={style}>
@@ -21,14 +35,16 @@ const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount 
               Detail
             </Button>
           </Stack>
-          {type == DAO_TYPE.COMMUNITY && (
+          {type == DAO_TYPE.COMMUNITY && token && (
             <div>
               <Box sx={{ backgroundColor: "#ebebeb", borderRadius: "12px" }}>
                 <Stack padding={"1rem"} marginTop={"1rem"}>
                   <Typography variant="subtitle2">ogicik2 Votes</Typography>
                   <Stack direction={"row"} justifyContent={"space-between"} alignItems={"baseline"}>
-                    <Typography variant="h6">{token?.value.uiAmount ? token?.value.uiAmount / membersCount : 0}</Typography>
-                    <Typography variant="subtitle1">{token?.value.uiAmount ? ((token?.value.uiAmount / membersCount) * 100) / token?.value.uiAmount : 0}% of Total</Typography>
+                    <Typography variant="h6">{balance}</Typography>
+                    <Typography variant="subtitle1">
+                      {token.value.uiAmount && token.value.uiAmount > 0 ? ((balance / token.value.uiAmount) * 100).toFixed(2) : 0}% of Total
+                    </Typography>
                   </Stack>
                 </Stack>
               </Box>
@@ -42,6 +58,7 @@ const DaoGovernancePower: React.FC<Props> = ({ style, type, token, membersCount 
                   marginTop: "1rem",
                   ":hover": { backgroundColor: "#ebebeb", color: "#1793D1" },
                 }}
+                onClick={depositOnClick}
               >
                 Deposit
               </Button>
