@@ -270,12 +270,12 @@ const DaoDetails: React.FC = () => {
                   <ListItemText>
                     <b>Community Vote Threshold Percentage : </b> %{daoConfig.config.communityVoteThreshold.value}
                   </ListItemText>
-                  <ListItemText>
+                  {/* <ListItemText>
                     <b>Min community tokens to create governance : </b> {daoConfig.config.minCommunityTokensToCreateProposal.toNumber()}
-                  </ListItemText>
-                  <ListItemText>
+                  </ListItemText> */}
+                  {/* <ListItemText>
                     <b>Min council tokens to create governance : </b> {daoConfig.config.minCouncilTokensToCreateProposal.toNumber()}
-                  </ListItemText>
+                  </ListItemText> */}
                 </List>
               </Box>
               <Divider />
