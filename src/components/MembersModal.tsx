@@ -5,6 +5,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import MemberCard from "./MemberCard.tsx";
 import MemberDetail from "./MemberDetail.tsx";
 import { ProgramAccount, TokenOwnerRecord } from "@solana/spl-governance";
+import { TokenAmount } from "@solana/web3.js";
 
 const style = {
   position: "absolute" as const,
@@ -26,10 +27,10 @@ type Props = {
   open: boolean;
   daoName: string;
   members: ProgramAccount<TokenOwnerRecord>[];
-  decimals: number;
+  token: TokenAmount;
 };
 
-const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members, decimals }) => {
+const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members, token }) => {
   const [selectedMember, setSelectedMember] = useState<ProgramAccount<TokenOwnerRecord>>(members[0]);
 
   return (
@@ -64,7 +65,7 @@ const MembersModal: React.FC<Props> = ({ handleClose, open, daoName, members, de
             </Stack>
           </Grid>
           <Grid item xl={8} lg={8} md={8} xs={12} sm={12} paddingLeft={"2rem"}>
-            <MemberDetail selectedMember={selectedMember} decimals={decimals}></MemberDetail>
+            <MemberDetail selectedMember={selectedMember} decimals={token.decimals}></MemberDetail>
           </Grid>
         </Grid>
       </Box>

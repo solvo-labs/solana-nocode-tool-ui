@@ -11,6 +11,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import toastr from "toastr";
 import { fullFormatTimestamp, getTimestamp } from "../../lib/utils";
 import { getStatusData } from "../../lib/dao/utils";
+import { TokenAmount } from "@solana/web3.js";
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -39,10 +40,12 @@ type Props = {
   daoInstance: DAO;
   proposal: ProgramAccount<Proposal>;
   config: Governance;
-  decimals: number;
+  token: TokenAmount;
+  threshold: number;
+  membersCount: number;
 };
 
-const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config, decimals }) => {
+const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config, token, threshold, membersCount }) => {
   const classes = useStyles();
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
   const { sendTransaction } = useWallet();
@@ -172,7 +175,7 @@ const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config
                 <Stack>
                   <Typography>Yes Votes</Typography>
                   <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"start"}>
-                    <Typography sx={{ fontSize: "0.8rem" }}>{proposal.account.getYesVoteCount().toNumber() / Math.pow(10, decimals)}</Typography>
+                    <Typography sx={{ fontSize: "0.8rem" }}>{proposal.account.getYesVoteCount().toNumber() / Math.pow(10, token.decimals)}</Typography>
                     <Typography sx={{ fontSize: "0.7rem" }}>
                       %
                       {proposal.account.getYesVoteCount().toNumber() + proposal.account.getNoVoteCount().toNumber() > 0 && proposal.account.getYesVoteCount().toNumber() > 0
@@ -210,7 +213,7 @@ const ExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config
             <Grid item md display={"flex"} direction={"column"} padding={"0.5rem"} justifyContent={"space-between"}>
               <Stack>
                 <Typography>Approval Quorum</Typography>
-                <Typography sx={{ fontSize: "0.7rem" }}>2 Yes votes required</Typography>
+                <Typography sx={{ fontSize: "0.7rem" }}>{Math.ceil((token.uiAmount || membersCount) * (threshold / 100))} Yes votes required</Typography>
               </Stack>
               <Grid item width={"100%"}>
                 <CustomizedProgressBars value={0}></CustomizedProgressBars>

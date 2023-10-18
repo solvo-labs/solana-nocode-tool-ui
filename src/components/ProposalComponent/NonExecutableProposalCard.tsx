@@ -9,6 +9,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import toastr from "toastr";
 import { fullFormatTimestamp, getTimestamp } from "../../lib/utils";
 import { getStatusData } from "../../lib/dao/utils";
+import { TokenAmount } from "@solana/web3.js";
 
 const useStyles = makeStyles((theme: Theme) => ({
   card: {
@@ -42,10 +43,10 @@ type Props = {
   daoInstance: DAO;
   proposal: ProgramAccount<Proposal>;
   config: Governance;
-  decimals: number;
+  token: TokenAmount;
 };
 
-const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config, decimals }) => {
+const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, config, token }) => {
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false);
   const classes = useStyles();
   const { sendTransaction } = useWallet();
@@ -192,7 +193,7 @@ const NonExecutableProposalCard: React.FC<Props> = ({ daoInstance, proposal, con
                   <Stack direction={"row"} width={"100%"} justifyContent={"space-between"}>
                     <Stack direction={"row"} spacing={1} display={"flex"} alignItems={"baseline"} justifyContent={"flex-end"}>
                       <Typography sx={{ fontSize: "0.8rem" }}>{opt.label}</Typography>
-                      <Typography sx={{ fontSize: "0.7rem" }}>{opt.voteWeight.toNumber() / Math.pow(10, decimals)} votes</Typography>
+                      <Typography sx={{ fontSize: "0.7rem" }}>{opt.voteWeight.toNumber() / Math.pow(10, token.decimals)} votes</Typography>
                     </Stack>
                     <Typography sx={{ fontSize: "0.7rem" }}>{totalVote > 0 ? (opt.voteWeight.toNumber() / totalVote) * 100 : 0}</Typography>
                   </Stack>

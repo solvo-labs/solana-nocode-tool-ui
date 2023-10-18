@@ -176,7 +176,6 @@ const DaoDetails: React.FC = () => {
           setMembers(members);
           setDao(daoDetail.dao);
           setDaoConfig(daoDetail.config);
-          console.log(daoDetail.config);
 
           setLoading(false);
         } catch (error) {
@@ -268,7 +267,10 @@ const DaoDetails: React.FC = () => {
                     <b>Deposit Exempt Proposal Count : </b> {daoConfig.config.depositExemptProposalCount}
                   </ListItemText>
                   <ListItemText>
-                    <b>Community Vote Threshold Percentage : </b> %{daoConfig.config.communityVoteThreshold.value}
+                    <b>Community Vote Threshold Percentage : </b> %{daoConfig.config.communityVoteThreshold.value || 0}
+                  </ListItemText>
+                  <ListItemText>
+                    <b>Council Vote Threshold Percentage : </b> %{daoConfig.config.councilVoteThreshold.value || 0}
                   </ListItemText>
                   {/* <ListItemText>
                     <b>Min community tokens to create governance : </b> {daoConfig.config.minCommunityTokensToCreateProposal.toNumber()}
@@ -480,7 +482,7 @@ const DaoDetails: React.FC = () => {
                         }}
                         daoName={dao ? dao.account.name : "def"}
                         members={members}
-                        decimals={token?.value.decimals || 0}
+                        token={token!.value}
                       ></MembersModal>
                       <Stack
                         direction={"row"}
@@ -549,9 +551,16 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((onGoingProposal) =>
                       onGoingProposal.account.voteType.type === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} decimals={token?.value.decimals || 0} />
+                        <ExecutableProposalCard
+                          daoInstance={daoInstance!}
+                          proposal={onGoingProposal}
+                          config={daoConfig!}
+                          token={token!.value}
+                          threshold={daoConfig!.config.communityVoteThreshold.value || daoConfig?.config.councilVoteThreshold.value || 0}
+                          membersCount={members.length}
+                        />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} decimals={token?.value.decimals || 0} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={onGoingProposal} config={daoConfig!} token={token!.value} />
                       )
                     )}
                 {proposals &&
@@ -564,9 +573,16 @@ const DaoDetails: React.FC = () => {
                     .filter((onGoingProposal) => onGoingProposal.account.state == ProposalState.Voting)
                     .map((filteredProposal) =>
                       filteredProposal.account.voteType.vote === VoteTypeKind.SingleChoice ? (
-                        <ExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} decimals={token?.value.decimals || 0} />
+                        <ExecutableProposalCard
+                          daoInstance={daoInstance!}
+                          proposal={filteredProposal}
+                          config={daoConfig!}
+                          token={token!.value}
+                          threshold={daoConfig!.config.communityVoteThreshold.value || 0}
+                          membersCount={members.length}
+                        />
                       ) : (
-                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} decimals={token?.value.decimals || 0} />
+                        <NonExecutableProposalCard daoInstance={daoInstance!} proposal={filteredProposal} config={daoConfig!} token={token!.value} />
                       )
                     )}
                 {searchFlag &&
