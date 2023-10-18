@@ -27,9 +27,13 @@ const useStyles = makeStyles(() => ({
   daoPreview: {
     marginTop: "20px !important",
     width: "100% !important",
+
     borderRadius: "16px !important",
-    padding: "20px !important",
-    backgroundColor: "#3d3d3d !important",
+    border: "1px solid rgba(255, 255, 255, 0.36) !important",
+    background: "linear-gradient(109deg, rgba(255, 255, 255, 0.40) 2.16%, rgba(255, 255, 255, 0.10) 100%) !important",
+    boxShadow: "0px 4px 24px -1px rgba(0, 0, 0, 0.20) !important",
+    backdropFilter: "blur(20px) !important",
+    padding: "40px 20px !important",
   },
   previewBottom: {
     display: "flex !important",
@@ -89,7 +93,7 @@ const PreviewDao: React.FC<PreviewDaoProps> = ({ typeOfDao, daoName, publicKeys,
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
       <Grid item xs={8} className={classes.mainItem}>
-        <Typography className={classes.mainTitle}>Nearly done, let's check that things look right.</Typography>
+        <Typography className={classes.mainTitle}>We're almost finished; let's make sure everything appears in order</Typography>
       </Grid>
 
       {typeOfDao === "multisign" && (

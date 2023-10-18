@@ -332,7 +332,7 @@ export const CreateDao = () => {
           <Grid item xs={8} className={classes.grid} style={{ minHeight: "350px !important" }}>
             <DaoCreateCard
               title={"Multi-Signature Wallet"}
-              description={"A 'multisig' is a shared wallet, typically with two or more members authorizing transactions."}
+              description={"A 'multisig' represents a jointly managed wallet where transactions require the approval of at least two or more participants."}
               onClick={handleNextMultisign}
             />
             <DaoCreateCard
@@ -385,8 +385,8 @@ export const CreateDao = () => {
         {activeStep === 2 && multisign === true && (
           <Grid item xs={8} className={classes.grid}>
             <Threshold
-              title={"Next, set your wallet's approval threshold."}
-              description={"Adjust the percentage to determine votes needed to pass a proposal"}
+              title={"Following that, establish the approval threshold for your wallet"}
+              description={"Modify the percentage to define the required votes for proposal approval"}
               typeOfDao={"multisign"}
               threshold={threshold}
               onChange={handleThresholdRange}

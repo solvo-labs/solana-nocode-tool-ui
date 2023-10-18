@@ -68,9 +68,9 @@ const MultisignDaoDetails: React.FC<MultisignDaoDetailsProps> = ({ onChange, dao
   return (
     <Grid container spacing={2} className={classes.gridContainer}>
       <Grid item xs={8} className={classes.grid}>
-        <Typography className={classes.title}>Let's get started</Typography>
+        <Typography className={classes.title}>Let's begin, shall we?</Typography>
         <Typography className={classes.description}>What is the name of your wallet?</Typography>
-        <Typography>It's best to choose a descriptive, memorable name for you and your members.</Typography>
+        <Typography>Opting for a name that's both memorable and descriptive is the ideal choice for you and your team.</Typography>
       </Grid>
 
       <Grid item xs={8} className={classes.grid}>

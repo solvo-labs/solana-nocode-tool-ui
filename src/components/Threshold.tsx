@@ -82,9 +82,11 @@ const Threshold: React.FC<ThresholdProps> = ({ threshold, onChange, publicKeys, 
       <Grid item xs={8}>
         <div className={classes.percentageSection}>
           <Typography className={classes.percentageSectionText}>
-            Member Percentage <br />
-            With <span className={classes.percentageSectionNumber}>{publicKeys.length}</span> members added to your {typeOfDao === "multisign" ? "wallet" : "dao"} <br />
-            <span className={classes.percentageSectionNumber}>{Math.ceil(threshold / (100 / publicKeys.length))}</span> members would need to approve a proposal for it to pass.
+            Percentage of Members <br />
+            When <span className={classes.percentageSectionNumber}>{publicKeys.length}</span> members are added to your {typeOfDao === "multisign" ? "wallet" : "dao"}
+            <br />
+            For a proposal to pass, only <span className={classes.percentageSectionNumber}>{Math.ceil(threshold / (100 / publicKeys.length))}</span> member's approval would be
+            necessary.
           </Typography>
         </div>
       </Grid>
