@@ -231,20 +231,26 @@ const DaoDetails: React.FC = () => {
   };
 
   const deposit = async () => {
-    if (daoInstance && dao) {
-      setLoading(true);
-      const depositAction = await daoInstance.depositCommunityToken(dao, depositAmount * Math.pow(10, token?.value.decimals || 0));
+    setLoading(true);
+    try {
+      if (daoInstance && dao) {
+        setLoading(true);
+        const depositAction = await daoInstance.depositCommunityToken(dao, depositAmount * Math.pow(10, token?.value.decimals || 0));
 
-      const {
-        context: { slot: minContextSlot },
-        value: { blockhash, lastValidBlockHeight },
-      } = await connection.getLatestBlockhashAndContext();
+        const {
+          context: { slot: minContextSlot },
+          value: { blockhash, lastValidBlockHeight },
+        } = await connection.getLatestBlockhashAndContext();
 
-      const signature = await sendTransaction(depositAction.transaction, connection, { minContextSlot, signers: depositAction.signers });
-      await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        const signature = await sendTransaction(depositAction.transaction, connection, { minContextSlot, signers: depositAction.signers });
+        await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        setLoading(false);
+        toastr.success("Deposit completed successfully");
+        setShowDepositModal({ show: false });
+      }
+    } catch (error) {
       setLoading(false);
-      toastr.success("Deposit completed successfully");
-      setShowDepositModal({ show: false });
+      toastr.error("Deposit can not successfully. Error: " + error);
     }
   };
 
