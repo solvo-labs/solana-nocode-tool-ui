@@ -55,6 +55,7 @@ export const TokenTransfer = () => {
   }, [connection, publicKey]);
 
   const transfer = async () => {
+    setLoading(true);
     try {
       if (publicKey && selectedToken) {
         const {
@@ -91,6 +92,7 @@ export const TokenTransfer = () => {
             signature,
           });
 
+          setLoading(false);
           toastr.success("Transfer completed successfully.");
           navigate("/my-tokens");
         } else {
@@ -104,11 +106,13 @@ export const TokenTransfer = () => {
             lastValidBlockHeight,
             signature,
           });
+          setLoading(false);
           toastr.success("Transfer completed successfully.");
           navigate("/my-tokens");
         }
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   };
