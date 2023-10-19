@@ -195,7 +195,7 @@ const Main: React.FC = () => {
             {priceLoading ? <SolPriceLoading /> : <SolPrice data={solInfo ? solInfo : undefined} />}
           </Grid>
           <Grid item xl={12} lg={12} md={12} sm={12} xs={12} className={classes.gridItem}>
-            {<CurrentBlock lastBlock={lastBlockData} loading={currentBlockLoading}></CurrentBlock>}
+            {<CurrentBlock lastBlock={lastBlockData} loading={currentBlockLoading} />}
           </Grid>
         </Grid>
       </Grid>
