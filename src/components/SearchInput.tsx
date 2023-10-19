@@ -3,10 +3,8 @@ import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
-import { Theme } from "@mui/material";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   searchBar: {
     border: "1px solid gray",
     "&:hover": { color: "black !important" },
