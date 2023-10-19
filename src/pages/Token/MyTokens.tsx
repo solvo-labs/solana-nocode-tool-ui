@@ -93,8 +93,6 @@ export const MyTokens = () => {
     };
   }, [connection, publicKey]);
 
-  console.log(allToken);
-
   const listToken = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return allToken.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a: any, index: number) => (
@@ -142,7 +140,7 @@ export const MyTokens = () => {
           <Divider sx={{ marginTop: "1rem", background: "white" }} />
         </Grid>
         <Grid container marginTop={"2rem"}>
-          <TableContainer>
+          <TableContainer sx={{ borderRadius: "12px" }}>
             <Table component={Paper}>
               <TableHead>
                 <TableRow>
@@ -171,7 +169,7 @@ export const MyTokens = () => {
         <Divider sx={{ marginTop: "1rem", background: "white" }} />
       </Grid>
       <Grid container marginTop={"2rem"}>
-        <TableContainer>
+        <TableContainer sx={{ borderRadius: "12px 12px 0px 0px" }}>
           <Table component={Paper}>
             <TableHead>
               <TableRow>
