@@ -161,18 +161,17 @@ export const Vesting = () => {
 
         const data = await vestMulti(wallet as SignerWalletAdapter, queryParams.tokenid || "", params, recipientList);
 
-        toastr.success("Contract Deployed Successfully");
-
         data?.txs.forEach((tx) => {
           window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
         });
 
-        navigate("/tokenomics");
         setLoading(false);
+        toastr.success("Contract Deployed Successfully");
+        navigate("/tokenomics");
       }
     } catch {
-      toastr.error("Something went wrong");
       setLoading(false);
+      toastr.error("Something went wrong");
     }
   };
 
@@ -343,8 +342,6 @@ export const Vesting = () => {
         onClose={() => {
           setRecipientModal({ ...recipientModal, show: false });
         }}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
       >
         <Box
           sx={{
@@ -406,10 +403,10 @@ export const Vesting = () => {
               <TabPanel value="2">
                 {recipients.length > 0 ? (
                   <List dense sx={{ width: "100%", maxWidth: 800 }}>
-                    {recipients.map((value, index) => {
+                    {recipients.map((value, index: number) => {
                       const labelId = `checkbox-list-secondary-label-${value}`;
                       return (
-                        <>
+                        <div key={index}>
                           <ListItem
                             key={index}
                             secondaryAction={
@@ -434,7 +431,7 @@ export const Vesting = () => {
                             </ListItemButton>
                           </ListItem>
                           <Divider sx={{ marginTop: "0.5rem", marginBottom: "0.5rem", background: "black" }} />
-                        </>
+                        </div>
                       );
                     })}
                   </List>
