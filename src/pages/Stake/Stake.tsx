@@ -21,6 +21,7 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -29,6 +30,7 @@ import {
   TablePagination,
   TableRow,
   Theme,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import StakeClass from "../../lib/stakeClass";
@@ -38,6 +40,9 @@ import { CustomInput } from "../../components/CustomInput";
 import toastr from "toastr";
 import { Durations, DurationsType } from "../../lib/models/Vesting";
 import { getTimestamp } from "../../lib/utils";
+import DoneIcon from "@mui/icons-material/Done";
+import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 const useStyles = makeStyles((theme: Theme) => ({
   cardContainer: {
@@ -81,12 +86,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     justifyContent: "flex-end",
     overflowX: "auto",
-    border: "1px solid #2C6495",
+    border: "1px solid purple",
     borderRadius: "1rem",
   },
   table: { overflowX: "auto" },
   tableHeader: {
-    color: "#2C6495 !important",
+    color: "white !important",
     fontWeight: "bold !important",
   },
   modal: {
@@ -106,6 +111,27 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: "black",
     cursor: "pointer",
   },
+  pagination: {
+    color: "white !important",
+    "& .css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon": {
+      color: "white",
+      marginRight: "-10px",
+    },
+    "& .css-1mf6u8l-MuiSvgIcon-root-MuiSelect-icon": {
+      color: "white",
+      marginRight: "-10px",
+    },
+    "& .css-zylse7-MuiButtonBase-root-MuiIconButton-root.Mui-disabled": {
+      color: "#f5f5f566",
+    },
+  },
+  paginatonContainer: {
+    display: "flex !important",
+    justifyContent: "end",
+    borderBottomLeftRadius: "8px",
+    borderBottomRightRadius: "8px",
+    backgroundColor: "purple",
+  },
 }));
 
 export const Stake = () => {
@@ -114,6 +140,7 @@ export const Stake = () => {
   const [stakes, setStakes] = useState<any[]>([]);
   const [stakeClassInstance, setStakeClassInstance] = useState<StakeClass>();
   const [loading, setLoading] = useState<boolean>(true);
+  const [stakeLoading, setStakeLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(5);
   const [showStakeModal, setShowStakeModal] = useState<boolean>(false);
@@ -169,6 +196,7 @@ export const Stake = () => {
   }, [connection, publicKey]);
 
   const startStake = async () => {
+    setStakeLoading(false);
     try {
       if (publicKey && stakeClassInstance && selectedValidator) {
         let currentTime = 0;
@@ -198,13 +226,16 @@ export const Stake = () => {
             clearmModalState();
           }
         }
+        setStakeLoading(true);
       }
     } catch {
+      setStakeLoading(true);
       toastr.error("Something went wrong.");
     }
   };
 
   const deactivateStake = async (targetPubkey: PublicKey) => {
+    setStakeLoading(false);
     if (stakeClassInstance) {
       try {
         const transaction = stakeClassInstance.deactivateStake(targetPubkey);
@@ -215,14 +246,17 @@ export const Stake = () => {
 
         const signature = await sendTransaction(transaction, connection, { minContextSlot });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        setStakeLoading(true);
         toastr.success("Deactive stake completed successfully.");
       } catch {
+        setStakeLoading(true);
         toastr.error("Something went wrong.");
       }
     }
   };
 
   const withdrawStake = async (targetPubkey: PublicKey) => {
+    setStakeLoading(false);
     try {
       if (stakeClassInstance) {
         const transaction = await stakeClassInstance.withdrawStake(targetPubkey);
@@ -233,14 +267,32 @@ export const Stake = () => {
 
         const signature = await sendTransaction(transaction, connection, { minContextSlot });
         await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature: signature });
+        setStakeLoading(true);
         toastr.success("Withdraw stake completed successfully.");
       }
     } catch {
+      setStakeLoading(true);
       toastr.error("Something went wrong.");
     }
   };
 
-  if (loading) {
+  const statusIcon = (status: string) => {
+    return status == "active" ? (
+      <Tooltip title={status}>
+        <DoneIcon sx={{ color: "green" }}></DoneIcon>
+      </Tooltip>
+    ) : status == "activating" ? (
+      <Tooltip title={status}>
+        <AccessTimeIcon sx={{ color: "orange" }}></AccessTimeIcon>
+      </Tooltip>
+    ) : (
+      <Tooltip title={status}>
+        <DoNotDisturbIcon sx={{ color: "red" }}></DoNotDisturbIcon>
+      </Tooltip>
+    );
+  };
+
+  if (loading || !stakeLoading) {
     return (
       <div
         style={{
@@ -267,26 +319,26 @@ export const Stake = () => {
       <Grid item justifyContent={"center"} className={classes.tableItem} sx={{ flexDirection: "column !important" }}>
         {stakes.length !== 0 ? (
           <div>
-            <TableContainer component={Paper} className={classes.table}>
-              <Table aria-label="proposal table" stickyHeader style={{ minWidth: "800px" }}>
+            <TableContainer component={Paper}>
+              <Table stickyHeader style={{ minWidth: "800px" }}>
                 <TableHead>
                   <TableRow>
                     <TableCell
                       align="center"
                       style={{
                         paddingRight: "8px",
-                        borderBottom: "1px solid #2C6495",
+                        backgroundColor: "purple",
                       }}
                     >
-                      <Typography noWrap className={classes.tableHeader} variant="subtitle1">
+                      <Typography className={classes.tableHeader} noWrap variant="subtitle1">
                         Actions
                       </Typography>
                     </TableCell>
                     <TableCell
-                      align="left"
+                      align="center"
                       style={{
                         paddingRight: "8px",
-                        borderBottom: "1px solid #2C6495",
+                        backgroundColor: "purple",
                       }}
                     >
                       <Typography className={classes.tableHeader} variant="subtitle1">
@@ -294,10 +346,10 @@ export const Stake = () => {
                       </Typography>
                     </TableCell>
                     <TableCell
-                      align="left"
+                      align="center"
                       style={{
                         paddingRight: "8px",
-                        borderBottom: "1px solid #2C6495",
+                        backgroundColor: "purple",
                       }}
                     >
                       <Typography className={classes.tableHeader} variant="subtitle1">
@@ -305,10 +357,10 @@ export const Stake = () => {
                       </Typography>
                     </TableCell>
                     <TableCell
-                      align="right"
+                      align="center"
                       style={{
                         paddingRight: "8px",
-                        borderBottom: "1px solid #2C6495",
+                        backgroundColor: "purple",
                       }}
                     >
                       <Typography className={classes.tableHeader} variant="subtitle1">
@@ -316,10 +368,10 @@ export const Stake = () => {
                       </Typography>
                     </TableCell>
                     <TableCell
-                      align="right"
+                      align="center"
                       style={{
                         paddingRight: "8px",
-                        borderBottom: "1px solid #2C6495",
+                        backgroundColor: "purple",
                       }}
                     >
                       <Typography className={classes.tableHeader} variant="subtitle1">
@@ -327,10 +379,10 @@ export const Stake = () => {
                       </Typography>
                     </TableCell>
                     <TableCell
-                      align="right"
+                      align="center"
                       style={{
                         paddingRight: "8px",
-                        borderBottom: "1px solid #2C6495",
+                        backgroundColor: "purple",
                       }}
                     >
                       <Typography className={classes.tableHeader} noWrap variant="subtitle1">
@@ -338,10 +390,10 @@ export const Stake = () => {
                       </Typography>
                     </TableCell>
                     <TableCell
-                      align="right"
+                      align="center"
                       style={{
                         paddingRight: "8px",
-                        borderBottom: "1px solid #2C6495",
+                        backgroundColor: "purple",
                       }}
                     >
                       <Typography className={classes.tableHeader} noWrap variant="subtitle1">
@@ -390,21 +442,25 @@ export const Stake = () => {
                       <TableCell align="right">{stake.account.lamports / LAMPORTS_PER_SOL} SOL</TableCell>
                       <TableCell align="right">{stake.account.data.parsed.info.meta.rentExemptReserve / LAMPORTS_PER_SOL} SOL</TableCell>
                       <TableCell align="right">{stake.account.data.parsed.info.stake.delegation.stake / LAMPORTS_PER_SOL} SOL</TableCell>
-                      <TableCell align="right">{stake.state} </TableCell>
+                      <TableCell align="right">{statusIcon(stake.state)}</TableCell>
+                      {/* <TableCell align="right">{stake.state}</TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={stakes.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+            <Grid container className={classes.paginatonContainer}>
+              <TablePagination
+                className={classes.pagination}
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={stakes.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </Grid>
           </div>
         ) : (
           <Grid
@@ -484,86 +540,83 @@ export const Stake = () => {
 
             <List sx={{ width: "100%", maxWidth: 800, maxHeight: 600, color: "black", margin: 0, padding: 0, cursor: "pointer", overflowY: "auto" }} key={"list"}>
               {selectedValidator && (
-                <div key={"stakeModal"}>
+                <Stack key={"stakeModal"} spacing={2} padding={"1rem"}>
                   <span key={"validator"}>Validator : {selectedValidator.votePubkey} </span>
                   <Divider sx={{ margin: 1 }} key={"divider1"} />
                   <span key={"activeSol"}>Activated SOL : {(selectedValidator.activatedStake / LAMPORTS_PER_SOL).toFixed(2)}SOL </span>
                   <Divider sx={{ margin: 1 }} key={"divider2"} />
                   <span key={"commision"}>Commision : {selectedValidator.commission}% </span>
-                  <Divider sx={{ margin: 2 }} key={"divider3"} />
-                  <Grid container gap={1}>
-                    <Grid item xs={4}>
-                      <FormControl fullWidth>
-                        <CustomInput
-                          placeHolder="Time Period"
-                          label="Time Period"
-                          id="period"
-                          name="period"
-                          type="text"
-                          value={timeParams.period}
-                          onChange={(e: any) => {
-                            setTimeParams({ ...timeParams, period: e.target.value });
-                          }}
-                          disable={false}
-                        ></CustomInput>
-                      </FormControl>
+                  <Divider sx={{ margin: 1 }} key={"divider3"} />
+                  <Stack spacing={4}>
+                    <Grid container gap={2}>
+                      <Grid item xs={4}>
+                        <FormControl fullWidth>
+                          <CustomInput
+                            placeHolder="Time Period"
+                            label="Time Period"
+                            id="period"
+                            name="period"
+                            type="text"
+                            value={timeParams.period}
+                            onChange={(e: any) => {
+                              setTimeParams({ ...timeParams, period: e.target.value });
+                            }}
+                            disable={false}
+                          ></CustomInput>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <FormControl fullWidth>
+                          <InputLabel id="selectLabel">Period</InputLabel>
+                          <Select
+                            value={timeParams.selectedDuration.toString()}
+                            label="Period"
+                            onChange={(e: SelectChangeEvent<string>) => {
+                              setTimeParams({ ...timeParams, selectedDuration: Number(e.target.value) });
+                            }}
+                            id={"durations"}
+                          >
+                            {Object.keys(Durations).map((tk) => {
+                              return (
+                                <MenuItem key={tk} value={Durations[tk as keyof DurationsType]}>
+                                  {tk}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                      <FormControl fullWidth>
-                        <InputLabel id="selectLabel">Period</InputLabel>
-                        <Select
-                          value={timeParams.selectedDuration.toString()}
-                          label="Period"
-                          onChange={(e: SelectChangeEvent<string>) => {
-                            setTimeParams({ ...timeParams, selectedDuration: Number(e.target.value) });
-                          }}
-                          id={"durations"}
-                        >
-                          {Object.keys(Durations).map((tk) => {
-                            return (
-                              <MenuItem key={tk} value={Durations[tk as keyof DurationsType]}>
-                                {tk}
-                              </MenuItem>
-                            );
-                          })}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                  <Divider sx={{ margin: 3 }} key={"divider3"} />
-
-                  <CustomInput
-                    placeHolder="Epoch (Optional)"
-                    label="Epoch (Optional)"
-                    id="epoch"
-                    name="epoch"
-                    type="text"
-                    value={timeParams.epoch}
-                    onChange={(e: any) => setTimeParams({ ...timeParams, epoch: e.target.value })}
-                    disable={false}
-                    required={false}
-                    key={"stakeAmount"}
-                  />
-                  <Divider sx={{ margin: 3 }} key={"divider3"} />
-
-                  <CustomInput
-                    placeHolder="Sol Amount"
-                    label="Sol Amount"
-                    id="amount"
-                    name="amount"
-                    type="text"
-                    value={stakeAmount}
-                    onChange={(e: any) => setStakeAmount(e.target.value)}
-                    disable={false}
-                    key={"stakeAmount"}
-                  />
-                  <Divider sx={{ margin: 1 }} key={"divider4"} />
-                  <div style={{ textAlign: "center" }} key={"buttonDiv"}>
+                    <CustomInput
+                      placeHolder="Epoch (Optional)"
+                      label="Epoch (Optional)"
+                      id="epoch"
+                      name="epoch"
+                      type="text"
+                      value={timeParams.epoch}
+                      onChange={(e: any) => setTimeParams({ ...timeParams, epoch: e.target.value })}
+                      disable={false}
+                      required={false}
+                      key={"epoch"}
+                    />
+                    <CustomInput
+                      placeHolder="Sol Amount"
+                      label="Sol Amount"
+                      id="amount"
+                      name="amount"
+                      type="text"
+                      value={stakeAmount}
+                      onChange={(e: any) => setStakeAmount(e.target.value)}
+                      disable={false}
+                      key={"solAmount"}
+                    />
+                  </Stack>
+                  <Grid item style={{ textAlign: "center" }} marginTop={"2rem !important"} key={"buttonDiv"}>
                     <Button disabled={stakeAmount <= 0} variant="contained" color="primary" size="small" onClick={() => startStake()} key={"stakeButton"}>
                       STAKE SOL
                     </Button>
-                  </div>
-                </div>
+                  </Grid>
+                </Stack>
               )}
 
               {selectedValidator === undefined &&
@@ -576,7 +629,6 @@ export const Stake = () => {
                         </ListItemAvatar>
                         <ListItemText key={index} primary={vl.votePubkey} secondary={"Balance : " + (vl.activatedStake / LAMPORTS_PER_SOL).toFixed(0) + " SOL"} />
                       </ListItem>
-                      <Divider key={"divider5"} />
                     </div>
                   );
                 })}
