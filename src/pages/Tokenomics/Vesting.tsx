@@ -108,6 +108,7 @@ export const Vesting = () => {
   const [recipients, setRecipients] = useState<RecipientFormInput[]>([]);
   const [recipient, setRecipient] = useState<RecipientFormInput>(recipientDefaultState);
   const [loading, setLoading] = useState<boolean>(true);
+  const [vestingLoading, setVestingLoading] = useState<boolean>(false);
   const { connection } = useConnection();
   const [decimal, setDecimal] = useState<number>(0);
 
@@ -137,7 +138,7 @@ export const Vesting = () => {
   }, [connection, queryParams.tokenid]);
 
   const startVesting = async () => {
-    setLoading(true);
+    setVestingLoading(true);
     try {
       if (wallet && recipients.length > 0 && queryParams) {
         const amountPer = (vestParams.period * vestParams.selectedDuration) / vestParams.selectedUnlockSchedule;
@@ -165,17 +166,17 @@ export const Vesting = () => {
           window.open("https://explorer.solana.com/tx/" + tx + "?cluster=devnet", "_blank");
         });
 
-        setLoading(false);
+        setVestingLoading(false);
         toastr.success("Contract Deployed Successfully");
         navigate("/tokenomics");
       }
     } catch {
-      setLoading(false);
+      setVestingLoading(false);
       toastr.error("Something went wrong");
     }
   };
 
-  if (loading) {
+  if (loading || vestingLoading) {
     return (
       <div
         style={{
